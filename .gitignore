@@ -1,0 +1,37 @@
+
+venv/*
+
+*.pyc
+
+# Django #
+*.log
+*.pot
+__pycache__
+.DS_Store
+
+frontend/yarn.lock
+frontend/node_modules/
+frontend/tsconfig.json
+
+venv/*
+.env
+
+**/*.pyc
+
+**/.DS_Store
+data/*.json
+data/*.csv
+data/*.pdf
+data/*.sql
+data/old_files
+data/*.rdb
+
+server.log
+data/*
+!data/*.py
+!data/lib
+
+server.log
+app/settings.py
+# static/*
+app/__pycache__/*

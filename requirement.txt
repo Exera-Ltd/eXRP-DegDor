@@ -1,0 +1,12 @@
+Django
+sqlparse
+gunicorn
+requests
+nested_lookup
+redis
+python-decouple
+psycopg2==2.8.6
+python-dateutil
+xlsxwriter
+django-cors-headers
+whitenoise
