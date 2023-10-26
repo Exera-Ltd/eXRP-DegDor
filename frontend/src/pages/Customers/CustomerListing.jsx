@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Row, Col, Card, Pagination, Input } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 const { Meta } = Card;
@@ -109,7 +109,10 @@ function CustomerListing() {
     return (
         <div>
 
-            <Title level={3}>Customer Listing</Title>
+            <Row style={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
+                <Title level={3}>Customer Listing </Title>
+                <PlusCircleOutlined style={{ fontSize: 20 }} />
+            </Row>
             <Input
                 placeholder="Search by First Name, Last Name, or Mobile"
                 value={searchTerm}
