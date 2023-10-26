@@ -1,14 +1,112 @@
-import logo from './logo.svg';
+import React from 'react';
+import { Route, Link, Routes } from 'react-router-dom';
+import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, FileOutlined } from '@ant-design/icons';
+import { Layout, Menu, Typography, theme } from 'antd';
+import NewCustomer from './pages/Customers/NewCustomer';
 import './App.css';
+import CustomerListing from './pages/Customers/CustomerListing';
 
-function App() {
+const { Header, Content, Sider, Footer } = Layout;
+const { Title } = Typography;
+
+const d = new Date();
+
+const menu = [
+  {
+    key: 'customer', label: 'Customers', icon: React.createElement(UserOutlined), path: '', items: [
+      { key: 'new-customer', label: 'Add New Customer', icon: React.createElement(UserOutlined), path: '/new-customer' },
+      { key: 'customer-listing', label: 'Customer Listing', icon: React.createElement(UserOutlined), path: '/customer-listing' }
+    ]
+  },
+  {
+    key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', items: [
+      { key: 'prescription-listing', label: 'Listing', icon: React.createElement(MedicineBoxOutlined), path: '/prescription-listing' }
+    ]
+  },
+  { key: 'appointment', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [] },
+  { key: 'report', label: 'Reports', icon: React.createElement(FileOutlined), path: '/reports', items: [] }
+]
+
+const App = () => {
+
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
-    </div>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <div className="demo-logo" >Optical Zone Ltd</div>
+      </Header>
+      <Layout>
+        <Sider
+          width={200}
+          style={{
+            background: colorBgContainer,
+          }}
+        >
+          <Title level={4} style={{textAlign: 'center'}}>Welcome User</Title>
+          <Menu mode="inline" defaultSelectedKeys={['1']} style={{ borderRight: 0 }}>
+            {menu.map(item => {
+              if (item.items && item.items.length > 0) {
+                return (
+                  <Menu.SubMenu key={item.key} icon={item.icon} title={item.label}>
+                    {item.items.map(subItem => (
+                      <Menu.Item key={subItem.key}>
+                        <Link to={subItem.path}>
+                          {subItem.icon} {subItem.label}
+                        </Link>
+                      </Menu.Item>
+                    ))}
+                  </Menu.SubMenu>
+                );
+              } else {
+                return (
+                  <Menu.Item key={item.key} icon={item.icon}>
+                    <Link to={item.path}>{item.label}</Link>
+                  </Menu.Item>
+                );
+              }
+            })}
+          </Menu>
+        </Sider>
+        <Layout
+          style={{
+            padding: '0 24px',
+          }}
+        >
+          <Content
+            style={{
+              padding: 24,
+              margin: '24px 0px 0px 0px',
+              minHeight: '70vh',
+              borderRadius: 10,
+              background: colorBgContainer,
+              boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px',
+              zIndex: 1
+            }}
+          >
+            <Routes>
+              <Route path="/new-customer" element={<NewCustomer />} />
+              <Route path="/customer-listing" element={<CustomerListing />} />
+            </Routes>
+          </Content>
+          <Footer
+            style={{
+              textAlign: 'right',
+              padding: '10px 0px'
+            }}
+          >
+            Optical Zone © {d.getFullYear()} - Solution Design by <a href='https://exera.mu?utm_source=optical-zone' target='_blank' rel="noreferrer">Exera</a>
+          </Footer>
+        </Layout>
+      </Layout>
+    </Layout>
   );
-}
-
+};
 export default App;
