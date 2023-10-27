@@ -152,10 +152,10 @@ function PrescriptionListing() {
             />
             <Row gutter={[16, 16]}> {/* This provides a gap between the cards */}
                 {paginatedData.map((item, index) => (
-                    <Col key={index} span={4}>
+                    <Col key={index} span={6}>
                         <Card
                             key={index}
-                            style={{ width: 200, boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
+                            style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
                             actions={[
                                 <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
                                 <MedicineBoxOutlined key="ellipsis" />,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Link, Routes } from 'react-router-dom';
-import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, FileOutlined, AreaChartOutlined } from '@ant-design/icons';
+import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, AccountBookOutlined, PlusOutlined, AreaChartOutlined, ContainerOutlined, DollarCircleOutlined, DashboardOutlined } from '@ant-design/icons';
 import { Layout, Menu, Typography, theme } from 'antd';
 import NewCustomer from './pages/Customers/NewCustomer';
 import './App.css';
@@ -21,16 +21,19 @@ const menu = [
       { key: 'customer-listing', label: 'Customer Listing', icon: React.createElement(UserOutlined), path: '/customer-listing' }
     ]
   }, */
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(AreaChartOutlined), path: '/dashboard' },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard' },
   { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers' },
   {
     key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', items: [
-      { key: 'new-prescription', label: 'New', icon: React.createElement(MedicineBoxOutlined), path: '/new-prescription' },
-      { key: 'prescription-listing', label: 'Listing', icon: React.createElement(MedicineBoxOutlined), path: '/prescription-listing' }
+      { key: 'new-prescription', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-prescription' },
+      { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions' }
     ]
   },
-  { key: 'appointment', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [] },
-  { key: 'report', label: 'Reports', icon: React.createElement(FileOutlined), path: '/reports', items: [] }
+  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [] },
+  { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [] },
+  { key: 'invoices', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '/invoices', items: [] },
+  { key: 'purchase-orders', label: 'Purchase Orders', icon: React.createElement(DollarCircleOutlined), path: '/purchase-orders', items: [] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [] }
 ]
 
 const App = () => {
@@ -104,7 +107,7 @@ const App = () => {
               <Route path="/new-customer" element={<NewCustomer />} />
               <Route path="/customers" element={<CustomerListing />} />
               <Route path="/new-prescription" element={<NewPrescription />} />
-              <Route path="/prescription-listing" element={<PrescriptionListing />} />
+              <Route path="/prescriptions" element={<PrescriptionListing />} />
             </Routes>
           </Content>
           <Footer

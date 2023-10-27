@@ -241,7 +241,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     name="care-system"
                     hasFeedback
                 >
-                    <Select placeholder="care">
+                    <Select placeholder="Care">
                         <Option value="permanent">Permanent</Option>
                         <Option value="one-off">One Off</Option>
                     </Select>
@@ -253,7 +253,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     name="next-checkup"
                     hasFeedback
                 >
-                    <Select placeholder="next-checkup">
+                    <Select placeholder="Next Checkup">
                         <Option value="6">6 Months</Option>
                         <Option value="12">1 Year</Option>
                         <Option value="24">2 Years</Option>
@@ -282,6 +282,12 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
         </Row>
 
         <Row style={{ justifyContent: 'center' }}>
+            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => handleSave(prescriptionData.id)}>
+                Add Job Card
+            </Button>
+            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => handleSave(prescriptionData.id)}>
+                Print
+            </Button>
             <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} onClick={() => handleSave(prescriptionData.id)}>
                 Save
             </Button>

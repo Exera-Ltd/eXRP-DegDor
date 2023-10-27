@@ -152,10 +152,10 @@ function CustomerListing() {
             />
             <Row gutter={[16, 16]}> {/* This provides a gap between the cards */}
                 {paginatedData.map((item, index) => (
-                    <Col key={index} span={4}>
+                    <Col key={index} span={6}>
                         <Card
                             key={index}
-                            style={{ width: 200, boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
+                            style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
                             actions={[
                                 <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
                                 <MedicineBoxOutlined key="ellipsis" />,
@@ -163,8 +163,12 @@ function CustomerListing() {
                         >
                             <Meta
                                 title={item.first_name + ' ' + item.last_name}
-                                description="This is the description"
+                                description={item.nic}
                             />
+                            <div>
+                                <p>Address: {item.city}</p>
+                                <span>Phone: {item.mobile_1}</span>
+                            </div>
                         </Card>
                     </Col>
                 ))}
@@ -177,7 +181,7 @@ function CustomerListing() {
                 width={1000}
                 footer={null}
             >
-                <NewCustomerForm customerData={selectedCustomerData}/>
+                <NewCustomerForm customerData={selectedCustomerData} />
             </Modal>
             <Pagination
                 current={currentPage}
