@@ -13,7 +13,15 @@ const onChange = (date, dateString) => {
     console.log(date, dateString);
 };
 
-const NewCustomerForm = ({customerData}) => {
+const handleSave = (customer_id) => {
+    if (customer_id) {
+        //Todo: Update
+        return;
+    }
+    //Todo: Add New
+}
+
+const NewCustomerForm = ({ customerData }) => {
     return <Form
         layout="horizontal"
         name="new-customer"
@@ -34,7 +42,7 @@ const NewCustomerForm = ({customerData}) => {
             email: customerData?.email || null,
             profession: customerData?.profession || null,
             insurance: customerData?.insurance || null
-          }}
+        }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
@@ -164,7 +172,7 @@ const NewCustomerForm = ({customerData}) => {
         </Row>
 
         <Row gutter={24}>
-        <Col span={8}>
+            <Col span={8}>
                 <Form.Item
                     label="NIC Number"
                     name="nic"
@@ -194,7 +202,7 @@ const NewCustomerForm = ({customerData}) => {
             </Col>
         </Row>
         <Row style={{ justifyContent: 'center' }}>
-            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }}>
+            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} onClick={() => handleSave(customerData.id)}>
                 Save
             </Button>
         </Row>

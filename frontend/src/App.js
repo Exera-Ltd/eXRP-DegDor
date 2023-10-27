@@ -5,6 +5,8 @@ import { Layout, Menu, Typography, theme } from 'antd';
 import NewCustomer from './pages/Customers/NewCustomer';
 import './App.css';
 import CustomerListing from './pages/Customers/CustomerListing';
+import PrescriptionListing from './pages/Prescriptions/PrescriptionListing';
+import NewPrescription from './pages/Prescriptions/NewPrescription';
 
 const { Header, Content, Sider, Footer } = Layout;
 const { Title } = Typography;
@@ -12,14 +14,16 @@ const { Title } = Typography;
 const d = new Date();
 
 const menu = [
-  {
+  /* {
     key: 'customer', label: 'Customers', icon: React.createElement(UserOutlined), path: '', items: [
       { key: 'new-customer', label: 'Add New Customer', icon: React.createElement(UserOutlined), path: '/new-customer' },
       { key: 'customer-listing', label: 'Customer Listing', icon: React.createElement(UserOutlined), path: '/customer-listing' }
     ]
-  },
+  }, */
+  { key: 'customer-listing', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customer-listing' },
   {
     key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', items: [
+      { key: 'new-prescription', label: 'New', icon: React.createElement(MedicineBoxOutlined), path: '/new-prescription' },
       { key: 'prescription-listing', label: 'Listing', icon: React.createElement(MedicineBoxOutlined), path: '/prescription-listing' }
     ]
   },
@@ -50,7 +54,7 @@ const App = () => {
             background: colorBgContainer,
           }}
         >
-          <Title level={4} style={{textAlign: 'center'}}>Welcome User</Title>
+          <Title level={4} style={{ textAlign: 'center' }}>Welcome User</Title>
           <Menu mode="inline" defaultSelectedKeys={['1']} style={{ borderRight: 0 }}>
             {menu.map(item => {
               if (item.items && item.items.length > 0) {
@@ -94,6 +98,8 @@ const App = () => {
             <Routes>
               <Route path="/new-customer" element={<NewCustomer />} />
               <Route path="/customer-listing" element={<CustomerListing />} />
+              <Route path="/new-prescription" element={<NewPrescription />} />
+              <Route path="/prescription-listing" element={<PrescriptionListing />} />
             </Routes>
           </Content>
           <Footer

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Row, Col, Card, Pagination, Input } from 'antd';
-import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Typography, Row, Col, Card, Pagination, Input, Modal } from 'antd';
+import { EditOutlined, PlusCircleOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import NewCustomerForm from './NewCustomerForm';
 
 const { Title } = Typography;
 const { Meta } = Card;
 
 const customerList = [
     {
+        "id": 1,
         "title": "Mr.",
         "first_name": "John",
         "last_name": "Doe",
@@ -16,6 +18,7 @@ const customerList = [
         "nic": "A2131233423"
     },
     {
+        "id": 2,
         "title": "Ms.",
         "first_name": "Jane",
         "last_name": "Smith",
@@ -25,6 +28,7 @@ const customerList = [
         "nic": "A2131332423"
     },
     {
+        "id": 3,
         "title": "Dr.",
         "first_name": "Alan",
         "last_name": "Walker",
@@ -34,6 +38,7 @@ const customerList = [
         "nic": "A2132332423"
     },
     {
+        "id": 4,
         "title": "Mrs.",
         "first_name": "Emily",
         "last_name": "White",
@@ -43,6 +48,7 @@ const customerList = [
         "nic": "A2131232423"
     },
     {
+        "id": 5,
         "title": "Mr.",
         "first_name": "Michael",
         "last_name": "Brown",
@@ -52,6 +58,7 @@ const customerList = [
         "nic": "A213123323"
     },
     {
+        "id": 6,
         "title": "Mr.",
         "first_name": "Michael",
         "last_name": "Brown",
@@ -61,6 +68,7 @@ const customerList = [
         "nic": "A213423"
     },
     {
+        "id": 7,
         "title": "Mr.",
         "first_name": "Michael",
         "last_name": "Brown",
@@ -70,6 +78,7 @@ const customerList = [
         "nic": "A22332423"
     },
     {
+        "id": 8,
         "title": "Mr.",
         "first_name": "Michael",
         "last_name": "Brown",
@@ -102,6 +111,28 @@ function CustomerListing() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+    const [selectedCustomerData, setSelectedCustomerData] = useState({});
+
+    const showModal = (id) => {
+        if (id != null) {
+            //setSelectedCustomerId(id);
+            let customer = customerList.find(item => item.id === id);
+            setSelectedCustomerData(customer);
+            console.log(selectedCustomerData);
+        }
+        setIsModalVisible(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleOk = () => {
+        setIsModalVisible(false);
+    };
+
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
@@ -111,10 +142,10 @@ function CustomerListing() {
 
             <Row style={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
                 <Title level={3}>Customer Listing </Title>
-                <PlusCircleOutlined style={{ fontSize: 20 }} />
+                <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal()} />
             </Row>
             <Input
-                placeholder="Search by First Name, Last Name, or Mobile"
+                placeholder="Search by First Name, Last Name, Mobile or NIC"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 style={{ marginBottom: '20px' }}
@@ -124,9 +155,10 @@ function CustomerListing() {
                     <Col key={index} span={4}>
                         <Card
                             key={index}
-                            style={{ width: 200 }}
+                            style={{ width: 200, boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
                             actions={[
-                                <EditOutlined key="edit" />,
+                                <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
+                                <MedicineBoxOutlined key="ellipsis" />,
                             ]}
                         >
                             <Meta
@@ -137,6 +169,16 @@ function CustomerListing() {
                     </Col>
                 ))}
             </Row>
+            <Modal
+                title="New/ Edit Customer"
+                open={isModalVisible}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                width={1000}
+                footer={null}
+            >
+                <NewCustomerForm customerData={selectedCustomerData}/>
+            </Modal>
             <Pagination
                 current={currentPage}
                 total={filteredData.length}
