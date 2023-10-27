@@ -3,6 +3,7 @@ import { Button, Row, Col, Form, Input, Select, Typography, Divider } from 'antd
 import moment from 'moment';
 
 const { Paragraph } = Typography;
+const { Option } = Select;
 
 const onFinish = (values) => {
     console.log('Success:', values);

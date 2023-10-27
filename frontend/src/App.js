@@ -1,12 +1,13 @@
 import React from 'react';
 import { Route, Link, Routes } from 'react-router-dom';
-import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, FileOutlined } from '@ant-design/icons';
+import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, FileOutlined, AreaChartOutlined } from '@ant-design/icons';
 import { Layout, Menu, Typography, theme } from 'antd';
 import NewCustomer from './pages/Customers/NewCustomer';
 import './App.css';
 import CustomerListing from './pages/Customers/CustomerListing';
 import PrescriptionListing from './pages/Prescriptions/PrescriptionListing';
 import NewPrescription from './pages/Prescriptions/NewPrescription';
+import Dashboard from './pages/Dashboard/Dashboard';
 
 const { Header, Content, Sider, Footer } = Layout;
 const { Title } = Typography;
@@ -20,7 +21,8 @@ const menu = [
       { key: 'customer-listing', label: 'Customer Listing', icon: React.createElement(UserOutlined), path: '/customer-listing' }
     ]
   }, */
-  { key: 'customer-listing', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customer-listing' },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(AreaChartOutlined), path: '/dashboard' },
+  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers' },
   {
     key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', items: [
       { key: 'new-prescription', label: 'New', icon: React.createElement(MedicineBoxOutlined), path: '/new-prescription' },
@@ -88,16 +90,19 @@ const App = () => {
             style={{
               padding: 24,
               margin: '24px 0px 0px 0px',
-              minHeight: '70vh',
+              height: '70vh',
               borderRadius: 10,
               background: colorBgContainer,
               boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px',
-              zIndex: 1
+              overflowY: 'auto',
+              zIndex: 1,
             }}
+            className="scrollable-content"
           >
             <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/new-customer" element={<NewCustomer />} />
-              <Route path="/customer-listing" element={<CustomerListing />} />
+              <Route path="/customers" element={<CustomerListing />} />
               <Route path="/new-prescription" element={<NewPrescription />} />
               <Route path="/prescription-listing" element={<PrescriptionListing />} />
             </Routes>
@@ -112,7 +117,7 @@ const App = () => {
           </Footer>
         </Layout>
       </Layout>
-    </Layout>
+    </Layout >
   );
 };
 export default App;

@@ -2,6 +2,8 @@ import React from 'react';
 import { Button, Row, Col, Form, Input, Select, DatePicker } from 'antd';
 import moment from 'moment';
 
+const { Option } = Select;
+
 const onFinish = (values) => {
     console.log('Success:', values);
 };
