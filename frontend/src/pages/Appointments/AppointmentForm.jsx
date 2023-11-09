@@ -3,24 +3,12 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Row, Col, Form, Input, DatePicker, TimePicker, Select, Modal } from 'antd';
 import moment from 'moment';
 import NewCustomerForm from '../Customers/NewCustomerForm';
+import CustomerSelect from '../../components/CustomerSelect';
+import DoctorSelect from '../../components/DoctorSelect';
 
 const { Option } = Select;
 
 const AppointmentForm = ({ onSubmit, slotInfo }) => {
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCustomerData, setSelectedCustomerData] = useState(null);
-
-    const showCustomerModal = () => {
-        setIsModalVisible(true);
-    };
-
-    const handleCustomerModalOk = () => {
-        // Implement functionality for when OK is clicked
-    };
-
-    const handleCustomerModalCancel = () => {
-        setIsModalVisible(false);
-    };
 
     const onFinish = (values) => {
         onSubmit(values); // Pass the form values up to the parent component
@@ -56,15 +44,7 @@ const AppointmentForm = ({ onSubmit, slotInfo }) => {
                             name="customerName"
                             label="Customer Name"
                         >
-                            <Input
-                                addonAfter={
-                                    <Button
-                                        icon={<PlusOutlined />} // Replace with your plus icon
-                                        size="small"
-                                        onClick={showCustomerModal}
-                                    />
-                                }
-                            />
+                            <CustomerSelect />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -130,7 +110,7 @@ const AppointmentForm = ({ onSubmit, slotInfo }) => {
                             name="doctor"
                             label="Doctor"
                         >
-                            <Input />
+                            <DoctorSelect />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -160,17 +140,6 @@ const AppointmentForm = ({ onSubmit, slotInfo }) => {
                     </Button>
                 </Row>
             </Form>
-
-            <Modal
-                title="New/ Edit Customer"
-                open={isModalVisible}
-                onOk={handleCustomerModalOk}
-                onCancel={handleCustomerModalCancel}
-                width={1000}
-                footer={null} // Assuming you handle the form submission within the NewCustomerForm
-            >
-                <NewCustomerForm customerData={selectedCustomerData} />
-            </Modal>
         </>
     );
 };

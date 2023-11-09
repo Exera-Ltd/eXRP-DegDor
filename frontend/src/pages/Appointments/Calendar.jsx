@@ -4,6 +4,7 @@ import interactionPlugin from '@fullcalendar/interaction'
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { Modal } from 'antd';
 import AppointmentForm from './AppointmentForm'; // Your previously created form component
+import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
 
 const Calendar = () => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -36,10 +37,16 @@ const Calendar = () => {
         setModalVisible(false);
     };
 
+    const resources = [
+        { id: 'room1', title: 'Conference Room A' },
+        { id: 'room2', title: 'Conference Room B' },
+        // Add more rooms as needed
+    ];
+
     return (
         <>
             <FullCalendar
-                plugins={[interactionPlugin, timeGridPlugin]}
+                plugins={[interactionPlugin, timeGridPlugin, resourceTimelinePlugin]}
                 initialView="timeGridWeek"
                 headerToolbar={{
                     left: 'prev,next today',
@@ -50,6 +57,7 @@ const Calendar = () => {
                 selectable={true}
                 editable={true}
                 select={handleSlotClick}
+                resources={resources}
             />
             {modalVisible &&
                 <Modal

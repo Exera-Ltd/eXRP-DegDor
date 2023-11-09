@@ -31,3 +31,7 @@
   transform: translateY(0);
   transition: opacity 300ms, transform 300ms;
 }
+
+.custom-exera-selector .ant-select-selector {
+  border-radius: 10px 0 0 10px;
+}
