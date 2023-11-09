@@ -2,32 +2,32 @@
   color: #fff;
 }
 
-/* This will style the container that has the scrollbar */
 .scrollable-content {
   height: 300px;
   width: 100%;
   overflow-y: scroll;
 }
 
-/* This is for Webkit browsers like Chrome, Safari */
 .scrollable-content::-webkit-scrollbar {
   width: 10px;
-  /* Width of the scrollbar */
-}
-
-.scrollable-content::-webkit-scrollbar-track {
-  /* background-color: #097993; */
-  /* Color of the track */
 }
 
 .scrollable-content::-webkit-scrollbar-thumb {
   background-color: #034157;
-  /* Color of the scroll thumb */
   border-radius: 10px;
-  /* Rounded edge of the thumb */
 }
 
 .scrollable-content::-webkit-scrollbar-thumb:hover {
   background-color: #097993;
-  /* Color of the scroll thumb on hover */
+}
+
+.card-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.card-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
 }

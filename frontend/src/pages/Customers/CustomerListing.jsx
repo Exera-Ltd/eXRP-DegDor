@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Typography, Row, Col, Card, Pagination, Input, Modal } from 'antd';
-import { EditOutlined, PlusCircleOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import { EditOutlined, MedicineBoxOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { Card, Col, Input, Modal, Pagination, Row, Typography } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import NewCustomerForm from './NewCustomerForm';
 
 const { Title } = Typography;
@@ -112,7 +113,6 @@ function CustomerListing() {
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCustomerId, setSelectedCustomerId] = useState(null);
     const [selectedCustomerData, setSelectedCustomerData] = useState({});
 
     const showModal = (id) => {
@@ -150,29 +150,37 @@ function CustomerListing() {
                 onChange={e => setSearchTerm(e.target.value)}
                 style={{ marginBottom: '20px' }}
             />
-            <Row gutter={[16, 16]}> {/* This provides a gap between the cards */}
-                {paginatedData.map((item, index) => (
-                    <Col key={index} span={6}>
-                        <Card
-                            key={index}
-                            style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
-                            actions={[
-                                <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
-                                <MedicineBoxOutlined key="ellipsis" />,
-                            ]}
+            <Row gutter={[16, 16]}>
+                <TransitionGroup component={null}>
+                    {paginatedData.map((item) => (
+                        <CSSTransition
+                            key={item.id}
+                            timeout={300}
+                            classNames="card"
                         >
-                            <Meta
-                                title={item.first_name + ' ' + item.last_name}
-                                description={item.nic}
-                            />
-                            <div>
-                                <p>Address: {item.city}</p>
-                                <span>Phone: {item.mobile_1}</span>
-                            </div>
-                        </Card>
-                    </Col>
-                ))}
+                            <Col span={6}>
+                                <Card
+                                    style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
+                                    actions={[
+                                        <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
+                                        <MedicineBoxOutlined key="ellipsis" />,
+                                    ]}
+                                >
+                                    <Meta
+                                        title={item.first_name + ' ' + item.last_name}
+                                        description={item.nic}
+                                    />
+                                    <div>
+                                        <p>Address: {item.city}</p>
+                                        <span>Phone: {item.mobile_1}</span>
+                                    </div>
+                                </Card>
+                            </Col>
+                        </CSSTransition>
+                    ))}
+                </TransitionGroup>
             </Row>
+
             <Modal
                 title="New/ Edit Customer"
                 open={isModalVisible}

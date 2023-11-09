@@ -8,6 +8,9 @@ import CustomerListing from './pages/Customers/CustomerListing';
 import PrescriptionListing from './pages/Prescriptions/PrescriptionListing';
 import NewPrescription from './pages/Prescriptions/NewPrescription';
 import Dashboard from './pages/Dashboard/Dashboard';
+import Particles from "react-tsparticles";
+import AppointmentForm from './pages/Appointments/AppointmentForm';
+import Calendar from './pages/Appointments/Calendar';
 
 const { Header, Content, Sider, Footer } = Layout;
 const { Title } = Typography;
@@ -89,6 +92,29 @@ const App = () => {
             padding: '0 24px',
           }}
         >
+          <Particles
+            style={{ position: "absolute" }}
+            height="95%"
+            width="95%"
+            params={{
+              particles: {
+                color: {
+                  value: "#000000"
+                },
+                line_linked: {
+                  color: {
+                    value: "#000000"
+                  }
+                },
+                number: {
+                  value: 50
+                },
+                size: {
+                  value: 3
+                }
+              }
+            }}
+          />
           <Content
             style={{
               padding: 24,
@@ -108,6 +134,7 @@ const App = () => {
               <Route path="/customers" element={<CustomerListing />} />
               <Route path="/new-prescription" element={<NewPrescription />} />
               <Route path="/prescriptions" element={<PrescriptionListing />} />
+              <Route path="/appointment" element={<Calendar />} />
             </Routes>
           </Content>
           <Footer

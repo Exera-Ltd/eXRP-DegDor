@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Typography } from 'antd';
 import NewPrescriptionForm from './NewPrescriptionForm';
+import { Button, Row, Modal, Form, Input, Select, Typography, Divider } from 'antd';
+import JobCardForm from '../JobCards/JobCardForm';
 
 const { Title } = Typography;
 
@@ -21,12 +22,60 @@ function NewPrescription() {
 
     const [customerData, setCustomerData] = useState({});
 
+    const handleSave = (customer_id) => {
+        if (customer_id) {
+            //Todo: Update
+            return;
+        }
+        //Todo: Add New
+    }
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const showModal = (id) => {
+        if (id != null) {
+            //setSelectedCustomerId(id);
+        }
+        setIsModalVisible(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleOk = () => {
+        setIsModalVisible(false);
+    };
+
     return (
         <div>
 
             <Title level={3}>New Prescription</Title>
 
             <NewPrescriptionForm prescriptionData={customerData} />
+
+            <Modal
+                title="Job Card"
+                open={isModalVisible}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                width={1000}
+                footer={null}
+            >
+                <JobCardForm jobCardData={{}} />
+            </Modal>
+
+            <Row style={{ justifyContent: 'center' }}>
+                <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => showModal()}>
+                    Add Job Card
+                </Button>
+                <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => handleSave()}>
+                    Print
+                </Button>
+                <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} onClick={() => handleSave()}>
+                    Save
+                </Button>
+            </Row>
         </div>
     );
 }

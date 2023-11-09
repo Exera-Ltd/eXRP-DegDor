@@ -16,14 +16,6 @@ const onChange = (date, dateString) => {
     console.log(date, dateString);
 };
 
-const handleSave = (customer_id) => {
-    if (customer_id) {
-        //Todo: Update
-        return;
-    }
-    //Todo: Add New
-}
-
 const NewPrescriptionForm = ({ prescriptionData }) => {
     return <Form
         layout="horizontal"
@@ -281,17 +273,6 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
             </Col>
         </Row>
 
-        <Row style={{ justifyContent: 'center' }}>
-            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => handleSave(prescriptionData.id)}>
-                Add Job Card
-            </Button>
-            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => handleSave(prescriptionData.id)}>
-                Print
-            </Button>
-            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} onClick={() => handleSave(prescriptionData.id)}>
-                Save
-            </Button>
-        </Row>
     </Form>
 }
 
