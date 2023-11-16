@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Template</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .invoice-details {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invoice-details th,
+        .invoice-details td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .footer-section {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .footer-section table {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-section">
+        <h2>EYE BY RIDWAAN HOSSEN</h2>
+        <h3>YOUROPTICS LTD</h3>
+        <p>Shop 99, Bagatelle-Mall of Mauritius</p>
+        <p>Tel: 468 8176</p>
+    </div>
+
+    <div class="body-section">
+        <table class="invoice-details">
+            <tr>
+                <th>BRN: C10095831</th>
+                <th>V.A.T Reg. No.: VAT27045514</th>
+                <th>CLAIM FORM</th>
+                <th>No 19591</th>
+            </tr>
+            <tr>
+                <td colspan="2">For the attention of _______</td>
+                <td>Date</td>
+                <td>Reference</td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td colspan="2">Price</td>
+            </tr>
+            <!-- Repeat the row below for each line item in the invoice -->
+            <tr>
+                <td>Item Name</td>
+                <td colspan="2">Item Price</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer-section">
+        <table>
+            <tr>
+                <td>Sub Total</td>
+                <td>VAT</td>
+                <td>Total Rs.</td>
+            </tr>
+            <tr>
+                <td>_______</td>
+                <td>_______</td>
+                <td>_______</td>
+            </tr>
+        </table>
+        <p>For EYE _________</p>
+    </div>
+
+</body>
+
+</html>
