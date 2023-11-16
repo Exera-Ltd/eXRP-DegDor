@@ -75,7 +75,7 @@ const App = () => {
         }}
       >
         <div className="demo-logo" >Kler Vision</div>
-        <div style={{ display: 'flex', margin: '0 24px'}}>
+        <div style={{ display: 'flex', margin: '0 24px', flexGrow: 1}}>
           <div>This is some other texts</div>
           <div>This is some other logos</div>
         </div>
