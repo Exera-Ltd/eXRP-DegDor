@@ -1,30 +1,81 @@
-import React from 'react';
-import { Button, Row, Col, Form, Input, Select, DatePicker } from 'antd';
+import React, { useForm } from 'react';
+import { Button, Row, Col, Form, Input, Select, DatePicker, notification } from 'antd';
 import moment from 'moment';
+import { appUrl } from '../../constants';
 
 const { Option } = Select;
 
-const onFinish = (values) => {
-    console.log('Success:', values);
-};
-const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
-};
-
-const onChange = (date, dateString) => {
-    console.log(date, dateString);
-};
-
-const handleSave = (customer_id) => {
-    if (customer_id) {
-        //Todo: Update
-        return;
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
     }
-    //Todo: Add New
+    return cookieValue;
 }
 
 const NewCustomerForm = ({ customerData }) => {
+    const [customerForm] = Form.useForm();
+
+    const onFinish = async (values) => {
+        try {
+            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(appUrl + 'dashboard/add_customers', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(values),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                customerForm.resetFields();
+                notification.success({
+                    message: 'Success',
+                    description: result['message'],
+                });
+            } else {
+                const result = await response.json();
+                notification.error({
+                    message: 'Error ',
+                    description: result['message']
+                })
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Error ',
+                description: error
+            })
+        }
+    };
+    const onFinishFailed = (errorInfo) => {
+        console.log('Failed:', errorInfo);
+    };
+
+    const onChange = (date, dateString) => {
+        const localDate = date ? moment(date).format('YYYY-MM-DD') : null;
+        console.log(localDate);
+    };
+
+    const handleSave = (customer_id) => {
+        if (customer_id) {
+            //Todo: Update
+            return;
+        }
+        //Todo: Add New
+    }
+
     return <Form
+        form={customerForm}
         layout="horizontal"
         name="new-customer"
         labelAlign="left"
@@ -58,16 +109,16 @@ const NewCustomerForm = ({ customerData }) => {
                     rules={[{ required: true, message: 'Please select title!' }]}
                 >
                     <Select placeholder="Title">
-                        <Option value="mr">Mr</Option>
-                        <Option value="mrs">Mrs</Option>
-                        <Option value="miss">Miss</Option>
+                        <Option value="Mr">Mr</Option>
+                        <Option value="Mrs">Mrs</Option>
+                        <Option value="Miss">Miss</Option>
                     </Select>
                 </Form.Item>
             </Col>
             <Col span={8}>
                 <Form.Item
                     label="First Name"
-                    name="firstname"
+                    name="first_name"
                     rules={[
                         {
                             required: true,
@@ -81,7 +132,7 @@ const NewCustomerForm = ({ customerData }) => {
             <Col span={8}>
                 <Form.Item
                     label="Last Name"
-                    name="lastname"
+                    name="last_name"
                     rules={[
                         {
                             required: true,
@@ -98,7 +149,7 @@ const NewCustomerForm = ({ customerData }) => {
             <Col span={8}>
                 <Form.Item
                     label="Date of Birth"
-                    name="dob"
+                    name="date_of_birth"
                     hasFeedback
                     rules={[
                         {
@@ -177,7 +228,7 @@ const NewCustomerForm = ({ customerData }) => {
             <Col span={8}>
                 <Form.Item
                     label="NIC Number"
-                    name="nic"
+                    name="nic_number"
                 >
                     <Input />
                 </Form.Item>
@@ -197,8 +248,8 @@ const NewCustomerForm = ({ customerData }) => {
                     hasFeedback
                 >
                     <Select placeholder="Insurance">
-                        <Option value="swan">Swan</Option>
-                        <Option value="mauritius-union">Mauritius Union</Option>
+                        <Option value="Swan">Swan</Option>
+                        <Option value="Mauritius Union">Mauritius Union</Option>
                     </Select>
                 </Form.Item>
             </Col>

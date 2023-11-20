@@ -1,9 +1,19 @@
-.demo-logo {
+/*HEADER*/
+.header-logo {
   width: 200px;
   color: #fff;
   text-align: center;
+  height: 100%;
 }
 
+.header-content {
+  display: flex;
+  margin: 0 24px;
+  flex-grow: 1;
+  justify-content: right;
+}
+
+/*BODY*/
 .scrollable-content {
   height: 300px;
   width: 100%;
@@ -34,6 +44,7 @@
   transition: opacity 300ms, transform 300ms;
 }
 
+/*EXERA*/
 .custom-exera-selector .ant-select-selector {
   border-radius: 10px 0 0 10px;
 }

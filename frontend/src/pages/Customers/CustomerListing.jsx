@@ -3,103 +3,23 @@ import { Card, Col, Input, Modal, Pagination, Row, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import NewCustomerForm from './NewCustomerForm';
+import { appUrl } from '../../constants';
 
 const { Title } = Typography;
 const { Meta } = Card;
-
-const customerList = [
-    {
-        "id": 1,
-        "title": "Mr.",
-        "first_name": "John",
-        "last_name": "Doe",
-        "mobile_1": "123-456-7890",
-        "city": "Springfield",
-        "email": "john.doe@example.com",
-        "nic": "A2131233423"
-    },
-    {
-        "id": 2,
-        "title": "Ms.",
-        "first_name": "Jane",
-        "last_name": "Smith",
-        "mobile_1": "555-789-1234",
-        "city": "Shelbyville",
-        "email": "jane.smith@example.com",
-        "nic": "A2131332423"
-    },
-    {
-        "id": 3,
-        "title": "Dr.",
-        "first_name": "Alan",
-        "last_name": "Walker",
-        "mobile_1": "777-888-9999",
-        "city": "Capital City",
-        "email": "alan.walker@example.com",
-        "nic": "A2132332423"
-    },
-    {
-        "id": 4,
-        "title": "Mrs.",
-        "first_name": "Emily",
-        "last_name": "White",
-        "mobile_1": "444-555-6666",
-        "city": "West Springfield",
-        "email": "emily.white@example.com",
-        "nic": "A2131232423"
-    },
-    {
-        "id": 5,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A213123323"
-    },
-    {
-        "id": 6,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A213423"
-    },
-    {
-        "id": 7,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A22332423"
-    },
-    {
-        "id": 8,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A213123"
-    }
-];
+const itemsPerPage = 8;
 
 function CustomerListing() {
-    const itemsPerPage = 24;
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [customerList, setCustomerList] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const filteredData = customerList.filter(item => {
         const firstName = item.first_name || "";
         const lastName = item.last_name || "";
         const mobilePhone = item.mobile_1 || "";
-        const nic = item.nic || "";
+        const nic = item.nic_number || "";
 
         return (
             firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -127,6 +47,7 @@ function CustomerListing() {
 
     const handleCancel = () => {
         setIsModalVisible(false);
+        setSelectedCustomerData({});
     };
 
     const handleOk = () => {
@@ -136,6 +57,23 @@ function CustomerListing() {
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
+
+    useEffect(() => {
+        fetch(appUrl  + 'dashboard/get_all_customers')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                setCustomerList(data.values);
+                setIsLoading(false);
+            })
+            .catch(error => {
+                setIsLoading(false);
+            });
+    }, []);
 
     return (
         <div>
@@ -168,11 +106,11 @@ function CustomerListing() {
                                 >
                                     <Meta
                                         title={item.first_name + ' ' + item.last_name}
-                                        description={item.nic}
+                                        description={item.nic_number}
                                     />
                                     <div>
                                         <p>Address: {item.city}</p>
-                                        <span>Phone: {item.mobile_1}</span>
+                                        <span>Phone: {item.mobile1}</span>
                                     </div>
                                 </Card>
                             </Col>

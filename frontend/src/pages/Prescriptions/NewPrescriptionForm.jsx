@@ -42,6 +42,24 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
         onFinishFailed={onFinishFailed}
         autoComplete="off"
     >
+        <Divider orientation="left" orientationMargin="0">Customer</Divider>
+        <Row gutter={24}>
+            <Col span={12}>
+                <Form.Item
+                    label="Customer Name"
+                    name="customer_name"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input customer name!',
+                        },
+                    ]}
+                >
+                    <Input />
+                </Form.Item>
+            </Col>
+        </Row>
+
         <Divider orientation="left" orientationMargin="0">Glass Prescriptions</Divider>
         <Row gutter={24}>
             <Col span={12}>

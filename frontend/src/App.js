@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Route, Link, Routes, Navigate } from 'react-router-dom';
-import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, AccountBookOutlined, PlusOutlined, AreaChartOutlined, ContainerOutlined, DollarCircleOutlined, DashboardOutlined } from '@ant-design/icons';
+import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, AccountBookOutlined, PlusOutlined, AreaChartOutlined, ContainerOutlined, DollarCircleOutlined, DashboardOutlined, BellOutlined } from '@ant-design/icons';
 import { Layout, Menu, Typography, theme, ConfigProvider } from 'antd';
 import { loadFull } from "tsparticles";
 
@@ -42,8 +42,9 @@ const App = () => {
     theme={{
       token: {
         // Seed Token
-        colorPrimary: '#00b96b',
-        borderRadius: 2,
+        colorPrimary: "#044254",
+        colorInfo: "#044254",
+        borderRadius: 5,
 
         // Alias Token
         colorBgContainer: '#000',
@@ -63,21 +64,26 @@ const App = () => {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const renderNotificationIcon = () => {
+    const icon = React.createElement(BellOutlined);
+    return (
+      <div style={{ fontSize: 22, color: '#fff' }}>{icon}</div>
+    );
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
         style={{
-          zIndex: 1,
           backgroundImage: 'linear-gradient(to right, #024550, #4ca1af)',
           padding: 0,
           margin: 0,
           display: 'flex',
         }}
       >
-        <div className="demo-logo" >Kler Vision</div>
-        <div style={{ display: 'flex', margin: '0 24px', flexGrow: 1}}>
-          <div>This is some other texts</div>
-          <div>This is some other logos</div>
+        <div className="header-logo" style={{ fontSize: 24 }}>Kler Vision</div>
+        <div className="header-content">
+          {/* {renderNotificationIcon()} */}
         </div>
       </Header>
       <Layout>
@@ -127,11 +133,11 @@ const App = () => {
               interactivity: {
                 events: {
                   onClick: {
-                    enable: true,
+                    enable: false,
                     mode: "push",
                   },
                   onHover: {
-                    enable: true,
+                    enable: false,
                     mode: "repulse",
                   },
                   resize: true,
