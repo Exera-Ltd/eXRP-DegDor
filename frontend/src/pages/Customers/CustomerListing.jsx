@@ -1,4 +1,4 @@
-import { EditOutlined, MedicineBoxOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Card, Col, Input, Modal, Pagination, Row, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -35,12 +35,14 @@ function CustomerListing() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedCustomerData, setSelectedCustomerData] = useState({});
 
-    const showModal = (id) => {
-        if (id != null) {
-            //setSelectedCustomerId(id);
-            let customer = customerList.find(item => item.id === id);
+    const showModal = (customerId) => {
+        console.log(customerId);
+        if (customerId != null) {
+            const customer = customerList.find(item => item.id === customerId);
+            console.log(customer);
             setSelectedCustomerData(customer);
-            console.log(selectedCustomerData);
+        } else {
+            setSelectedCustomerData({});
         }
         setIsModalVisible(true);
     };
@@ -58,8 +60,9 @@ function CustomerListing() {
         setCurrentPage(1);
     }, [searchTerm]);
 
-    useEffect(() => {
-        fetch(appUrl  + 'dashboard/get_all_customers')
+    const fetchCustomers = () => {
+        setIsLoading(true);
+        fetch(appUrl + 'dashboard/get_all_customers')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -71,16 +74,26 @@ function CustomerListing() {
                 setIsLoading(false);
             })
             .catch(error => {
+                console.error('Failed to fetch:', error);
                 setIsLoading(false);
             });
+    };
+
+    useEffect(() => {
+        fetchCustomers();
     }, []);
+
+    const closeModal = () => {
+        setIsModalVisible(false);
+    };
+
 
     return (
         <div>
 
             <Row style={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
                 <Title level={3}>Customer Listing </Title>
-                <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal()} />
+                <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal(null)} />
             </Row>
             <Input
                 placeholder="Search by First Name, Last Name, Mobile or NIC"
@@ -100,8 +113,7 @@ function CustomerListing() {
                                 <Card
                                     style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
                                     actions={[
-                                        <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
-                                        <MedicineBoxOutlined key="ellipsis" />,
+                                        <EditOutlined key="edit" onClick={() => showModal(item.id)} />
                                     ]}
                                 >
                                     <Meta
@@ -110,7 +122,7 @@ function CustomerListing() {
                                     />
                                     <div>
                                         <p>Address: {item.city}</p>
-                                        <span>Phone: {item.mobile1}</span>
+                                        <span>Phone: {item.mobile_1}</span>
                                     </div>
                                 </Card>
                             </Col>
@@ -127,7 +139,7 @@ function CustomerListing() {
                 width={1000}
                 footer={null}
             >
-                <NewCustomerForm customerData={selectedCustomerData} />
+                <NewCustomerForm customerData={selectedCustomerData} onCustomerAdded={fetchCustomers} closeModal={closeModal} />
             </Modal>
             <Pagination
                 current={currentPage}

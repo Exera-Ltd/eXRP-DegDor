@@ -26,7 +26,7 @@
 
 .scrollable-content::-webkit-scrollbar-thumb {
   background-color: #034157;
-  border-radius: 10px;
+  border-radius: 0px 10px 10px 0px;
 }
 
 .scrollable-content::-webkit-scrollbar-thumb:hover {
@@ -44,7 +44,23 @@
   transition: opacity 300ms, transform 300ms;
 }
 
+.custom-ribbon .ant-ribbon {
+  background-color: #034157;
+}
+
+.custom-ribbon .ant-ribbon-content {
+  border-color: #034157;
+}
+
 /*EXERA*/
 .custom-exera-selector .ant-select-selector {
   border-radius: 10px 0 0 10px;
+}
+
+.centered-title-div {
+  font-size: 1.25em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 30px;
+  text-align: center;
 }

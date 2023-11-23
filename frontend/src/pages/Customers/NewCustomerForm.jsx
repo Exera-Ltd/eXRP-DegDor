@@ -2,32 +2,21 @@ import React, { useForm } from 'react';
 import { Button, Row, Col, Form, Input, Select, DatePicker, notification } from 'antd';
 import moment from 'moment';
 import { appUrl } from '../../constants';
+import { getCookie } from '../../commons/cookie';
 
 const { Option } = Select;
 
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-const NewCustomerForm = ({ customerData }) => {
+const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
     const [customerForm] = Form.useForm();
 
     const onFinish = async (values) => {
+        const endpoint = customerData.id ? `update_customer/${customerData.id}/` : 'create_customer';
+        const method = customerData.id ? 'PUT' : 'POST';
+
         try {
             const csrftoken = getCookie('csrftoken');
-            const response = await fetch(appUrl + 'dashboard/add_customers', {
-                method: 'POST',
+            const response = await fetch(appUrl + `dashboard/${endpoint}`, {
+                method: method,
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,6 +32,8 @@ const NewCustomerForm = ({ customerData }) => {
                     message: 'Success',
                     description: result['message'],
                 });
+                onCustomerAdded();
+                closeModal();
             } else {
                 const result = await response.json();
                 notification.error({
@@ -66,14 +57,6 @@ const NewCustomerForm = ({ customerData }) => {
         console.log(localDate);
     };
 
-    const handleSave = (customer_id) => {
-        if (customer_id) {
-            //Todo: Update
-            return;
-        }
-        //Todo: Add New
-    }
-
     return <Form
         form={customerForm}
         layout="horizontal"
@@ -83,16 +66,27 @@ const NewCustomerForm = ({ customerData }) => {
         wrapperCol={{ span: 16 }}
         style={{
         }}
+        /*
+        {
+    id: 1,
+    first_name: 'test',
+    last_name: 'testt',
+    mobile1: '59440110',
+    city: 'Rose Hill',
+    nic_number: 'A5241365214452'
+  }
+        */
         initialValues={{
             title: customerData?.title || null,
-            firstname: customerData?.first_name || null,
-            lastname: customerData?.last_name || null,
-            dob: customerData?.date_of_birth ? moment(customerData.date_of_birth) : null,
-            mobile1: customerData?.mobile_1 || null,
-            mobile2: customerData?.mobile_2 || null,
+            first_name: customerData?.first_name || null,
+            last_name: customerData?.last_name || null,
+            date_of_birth: customerData?.date_of_birth ? moment(customerData.date_of_birth) : null,
+            mobile_1: customerData?.mobile_1 || null,
+            mobile_2: customerData?.mobile_2 || null,
             address: customerData?.address || null,
             city: customerData?.city || null,
             email: customerData?.email || null,
+            nic_number: customerData?.nic_number || null,
             profession: customerData?.profession || null,
             insurance: customerData?.insurance || null
         }}
@@ -164,7 +158,7 @@ const NewCustomerForm = ({ customerData }) => {
             <Col span={8}>
                 <Form.Item
                     label="Mobile 1"
-                    name="mobile1"
+                    name="mobile_1"
                     rules={[
                         {
                             required: true,
@@ -178,7 +172,7 @@ const NewCustomerForm = ({ customerData }) => {
             <Col span={8}>
                 <Form.Item
                     label="Mobile 2"
-                    name="mobile2"
+                    name="mobile_2"
                 >
                     <Input />
                 </Form.Item>
@@ -255,7 +249,7 @@ const NewCustomerForm = ({ customerData }) => {
             </Col>
         </Row>
         <Row style={{ justifyContent: 'center' }}>
-            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} onClick={() => handleSave(customerData.id)}>
+            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
                 Save
             </Button>
         </Row>

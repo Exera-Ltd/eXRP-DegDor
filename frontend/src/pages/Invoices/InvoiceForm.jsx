@@ -78,7 +78,7 @@ const InvoiceForm = () => {
                     </Form.Item></Col>
             </Row>
 
-            <Form.Item name="customerName" label="Customer Name" rules={[{ required: true }]}>
+            <Form.Item label="Customer Name" rules={[{ required: true }]}>
                 <Input placeholder="Enter Customer Name" />
             </Form.Item>
 
@@ -94,7 +94,7 @@ const InvoiceForm = () => {
                                         rules={[{ required: true, message: 'Missing item' }]}
                                     >
                                         <Select placeholder="Select an item">
-                                            {/* Add product options here */}
+
                                             <Option value="product">Product from Inventory</Option>
                                             <Option value="consultation">Consultation Fee</Option>
                                         </Select>
@@ -137,11 +137,13 @@ const InvoiceForm = () => {
 
                         <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.items !== curValues.items}>
                             {() => {
-                                const itemValues = form.getFieldValue(['items', name]);
+                                const itemName = form.getFieldValue(['items', 'name']);
+                                const itemValues = form.getFieldValue(['items', itemName]);
                                 const lineTotal = calculateLineTotal(itemValues?.quantity, itemValues?.unitPrice);
                                 return <Text>{lineTotal.toFixed(2)}</Text>;
                             }}
                         </Form.Item>
+
                     </>
                 )}
             </Form.List>

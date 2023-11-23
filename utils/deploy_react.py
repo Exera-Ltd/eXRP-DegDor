@@ -15,7 +15,7 @@ content = fh.read()
 # content = content.replace(re.findall("/favicon.ico",content)[0],"{% static '/static/assets/img/favicon.ico'%}")
 
 content = content.replace("<head>","<head>{% load static %}")
-content = content.replace("<title>React App</title>","<title>PleoAI</title>")
+content = content.replace("<title>React App</title>","<title>Kler Vision</title>")
 content = content.replace("/static/","{% static '/reactstatic/")
 content = content.replace(".chunk.css",".chunk.css'%}")
 content = content.replace(".chunk.js",".chunk.js'%}")

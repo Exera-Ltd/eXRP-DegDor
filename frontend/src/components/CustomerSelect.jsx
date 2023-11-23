@@ -9,7 +9,7 @@ const { Option } = Select;
 const CustomerSelect = () => {
     const [options, setOptions] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCustomerData, setSelectedCustomerData] = useState(null);
+    const [selectedCustomerData] = useState(null);
 
     const showCustomerModal = () => {
         setIsModalVisible(true);
@@ -23,25 +23,10 @@ const CustomerSelect = () => {
         setIsModalVisible(false);
     };
 
-    const showModal = () => {
-        setIsModalVisible(true);
-    };
-
-    const handleOk = () => {
-        // Handle the submission of new customer data here
-        setIsModalVisible(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-    };
-
     const handleSearch = value => {
         if (value) {
-            // Replace with your actual AJAX call
             axios.get(`your-api-endpoint/customers?name=${value}`)
                 .then((response) => {
-                    // Map your response data to Option components
                     const newOptions = response.data.map(customer => (
                         <Option key={customer.id} value={customer.name}>
                             {customer.name}
@@ -50,7 +35,6 @@ const CustomerSelect = () => {
                     setOptions(newOptions);
                 })
                 .catch((error) => {
-                    // Handle error
                     console.error('Error fetching the customers:', error);
                 });
         } else {

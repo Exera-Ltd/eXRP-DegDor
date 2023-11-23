@@ -1,8 +1,6 @@
-import { useState, React } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Row, Col, Form, Input, DatePicker, TimePicker, Select, Modal } from 'antd';
+import { React } from 'react';
+import { Button, Row, Col, Form, Input, DatePicker, TimePicker, Select } from 'antd';
 import moment from 'moment';
-import NewCustomerForm from '../Customers/NewCustomerForm';
 import CustomerSelect from '../../components/CustomerSelect';
 import DoctorSelect from '../../components/DoctorSelect';
 

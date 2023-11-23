@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Kler Vision">
+    <meta name="author" content="Exera">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
+    <title>Kler Vision | Sign In</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+
+<body oncontextmenu="return false">
+    <div id="particles-js"></div>
+    <div class="login-wrapper">
+        <h1 class="login-title">KLER VISION</h1>
+        <div class="login-container">
+            <form method="post" action="{% url 'login' %}" class="login-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">Username:</label>
+                    <input type="text" name="username" id="id_username" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_password">Password:</label>
+                    <input type="password" name="password" id="id_password" required>
+                </div>
+                <button type="submit" class="login-button">Login</button>
+            </form>
+        </div>
+    </div>
+    <footer class="footer">
+        <span>Kler Vision &copy; <script>document.write(new Date().getFullYear());</script> - Solution Designed by
+             <a href="https://exera.mu?utm_source=kler_vision" target="_blank"> Exera</a>
+        </span>
+    </footer>
+</body>
+<script src="{% static 'js/particles.js' %}"></script>
+<script>
+    particlesJS.load('particles-js', "{% static 'js/particlesjs-config.json' %}", function () {
+        console.log('callback - particles.js config loaded');
+    });
+</script>
+
+</html>

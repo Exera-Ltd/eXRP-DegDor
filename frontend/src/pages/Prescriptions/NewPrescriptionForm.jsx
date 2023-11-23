@@ -1,23 +1,89 @@
-import React from 'react';
-import { Button, Row, Col, Form, Input, Select, Typography, Divider } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Form, Input, Select, Typography, Divider, Button, notification, InputNumber } from 'antd';
 import moment from 'moment';
+import { useUser } from '../../contexts/UserContext';
+import { appUrl } from '../../constants';
+import { getCookie } from '../../commons/cookie';
 
 const { Paragraph } = Typography;
 const { Option } = Select;
 
-const onFinish = (values) => {
-    console.log('Success:', values);
-};
 const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
 };
 
-const onChange = (date, dateString) => {
-    console.log(date, dateString);
-};
+
 
 const NewPrescriptionForm = ({ prescriptionData }) => {
+    const { user } = useUser();
+    const [customers, setCustomers] = useState([]);
+    const [prescriptionForm] = Form.useForm();
+
+    const fetchCustomers = () => {
+        fetch(appUrl + `dashboard/get_all_customers`)
+            .then(response => response.json())
+            .then(data => {
+                setCustomers(data.values);
+            })
+            .catch(error => console.error('Error fetching customers:', error));
+    };
+
+    const onFinish = async (values) => {
+        console.log('Success:', values);
+
+        try {
+            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(appUrl + `dashboard/create_prescription/`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(values),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                prescriptionForm.resetFields();
+                notification.success({
+                    message: 'Success',
+                    description: result['message'],
+                });
+            } else {
+                const result = await response.json();
+                notification.error({
+                    message: 'Error ',
+                    description: result['message']
+                })
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Error ',
+                description: error
+            })
+        }
+    };
+
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
+
+    const [checkupInterval, setCheckupInterval] = useState();
+
+    useEffect(() => {
+        if (checkupInterval) {
+            const nextCheckupDate = moment().add(checkupInterval, 'months').format('YYYY-MM-DD');
+            prescriptionForm.setFieldsValue({ 'next-checkup-date': nextCheckupDate });
+        }
+    }, [checkupInterval, prescriptionForm]);
+
+    const handleCheckupChange = (value) => {
+        setCheckupInterval(value);
+    };
+
     return <Form
+        form={prescriptionForm}
         layout="horizontal"
         name="new-customer"
         labelAlign="left"
@@ -42,50 +108,62 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
         onFinishFailed={onFinishFailed}
         autoComplete="off"
     >
-        <Divider orientation="left" orientationMargin="0">Customer</Divider>
-        <Row gutter={24}>
-            <Col span={12}>
-                <Form.Item
-                    label="Customer Name"
-                    name="customer_name"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input customer name!',
-                        },
-                    ]}
-                >
-                    <Input />
-                </Form.Item>
-            </Col>
-        </Row>
-
-        <Divider orientation="left" orientationMargin="0">Glass Prescriptions</Divider>
+        <Divider orientation="left" orientationMargin="0">Details</Divider>
         <Row gutter={24}>
             <Col span={12}>
                 <Form.Item
                     label="Doctor Name"
-                    name="doctorname"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Please input doctor name!',
-                        },
-                    ]}
                 >
-                    <Input />
+                    <Input
+                        value={user.first_name + ' ' + user.last_name}
+                        disabled
+                    />
                 </Form.Item>
-            </Col>
-            <Col span={12}>
+
                 <Form.Item
-                    label="Last Eye Test"
-                    name="lasteyetest"
+                    name="doctor"
+                    initialValue={user.id}
+                    hidden
                 >
                     <Input />
                 </Form.Item>
             </Col>
         </Row>
 
+        <Row gutter={24}>
+            <Col span={12}>
+                <Form.Item
+                    label="Customer"
+                    name="customer"
+                    rules={[{ required: true, message: 'Please input customer name!' }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Select a customer"
+                        optionFilterProp="label"
+                        filterOption={(input, option) =>
+                            option.label.toLowerCase().includes(input.toLowerCase())
+                        }
+                    >
+                        {customers.map(customer => (
+                            <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name}`}>
+                                {customer.first_name} {customer.last_name}
+                            </Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
+            </Col>
+
+            <Col span={12}>
+                <Form.Item
+                    label="Last Eye Test"
+                    name="last-eye-test"
+                >
+                    <Input />
+                </Form.Item>
+            </Col>
+        </Row>
         <Row gutter={24}>
             <Col span={12}>
                 <Form.Item
@@ -96,6 +174,9 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                 </Form.Item>
             </Col>
         </Row>
+
+        <Divider orientation="left" orientationMargin="0">Glass Prescriptions</Divider>
+
         <Row gutter={24}>
             <Col span={3}>
                 <Paragraph strong>Right</Paragraph>
@@ -103,25 +184,25 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
             <Col span={7}>
                 <Form.Item
                     label="SPH"
-                    name="right-sph"
+                    name="glass-right-sph"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="CYL"
-                    name="right-cyl"
+                    name="glass-right-cyl"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="Axis"
-                    name="right-axis"
+                    name="glass-right-axis"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
         </Row>
@@ -132,25 +213,25 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
             <Col span={7}>
                 <Form.Item
                     label="SPH"
-                    name="left-sph"
+                    name="glass-left-sph"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="CYL"
-                    name="left-cyl"
+                    name="glass-left-cyl"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="Axis"
-                    name="left-axis"
+                    name="glass-left-axis"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
         </Row>
@@ -160,7 +241,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -168,18 +249,18 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={8}>
                 <Form.Item
                     label="Type of Lenses"
-                    name="lenses"
+                    name="type-of-lenses"
                     hasFeedback
                 >
                     <Select placeholder="Lenses">
-                        <Option value="single">Single</Option>
-                        <Option value="doublie">Double</Option>
+                        <Option value="Single">Single</Option>
+                        <Option value="Double">Double</Option>
                     </Select>
                 </Form.Item>
             </Col>
@@ -192,25 +273,25 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
             <Col span={7}>
                 <Form.Item
                     label="SPH"
-                    name="right-sph"
+                    name="lens-right-sph"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="CYL"
-                    name="right-cyl"
+                    name="lens-right-cyl"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="Axis"
-                    name="right-axis"
+                    name="lens-right-axis"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
         </Row>
@@ -221,25 +302,25 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
             <Col span={7}>
                 <Form.Item
                     label="SPH"
-                    name="left-sph"
+                    name="lens-left-sph"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="CYL"
-                    name="left-cyl"
+                    name="lens-left-cyl"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
             <Col span={7}>
                 <Form.Item
                     label="Axis"
-                    name="left-axis"
+                    name="lens-left-axis"
                 >
-                    <Input />
+                    <InputNumber />
                 </Form.Item>
             </Col>
         </Row>
@@ -252,8 +333,8 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     hasFeedback
                 >
                     <Select placeholder="Care">
-                        <Option value="permanent">Permanent</Option>
-                        <Option value="one-off">One Off</Option>
+                        <Option value="Permanent">Permanent</Option>
+                        <Option value="One Off">One Off</Option>
                     </Select>
                 </Form.Item>
             </Col>
@@ -263,7 +344,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     name="next-checkup"
                     hasFeedback
                 >
-                    <Select placeholder="Next Checkup">
+                    <Select placeholder="Next Checkup" onChange={handleCheckupChange}>
                         <Option value="6">6 Months</Option>
                         <Option value="12">1 Year</Option>
                         <Option value="24">2 Years</Option>
@@ -290,7 +371,11 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                 </Form.Item>
             </Col>
         </Row>
-
+        <Row style={{ justifyContent: 'center' }}>
+            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
+                Save
+            </Button>
+        </Row>
     </Form>
 }
 

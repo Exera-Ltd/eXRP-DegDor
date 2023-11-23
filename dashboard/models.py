@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from django.contrib.auth.models import User
 
 # Validators
 phone_regex = RegexValidator(
@@ -24,8 +25,8 @@ class Customer(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     date_of_birth = models.DateTimeField()
-    mobile1 = models.CharField(validators=[phone_regex], max_length=17, blank=False)
-    mobile2 = models.CharField(validators=[phone_regex], max_length=17, blank=True, null=True)
+    mobile_1 = models.CharField(validators=[phone_regex], max_length=17, blank=False)
+    mobile_2 = models.CharField(validators=[phone_regex], max_length=17, blank=True, null=True)
     address = models.TextField()
     city = models.CharField(max_length=100)
     email = models.EmailField()
@@ -34,25 +35,34 @@ class Customer(models.Model):
     insurance = models.CharField(max_length=50, choices=INSURANCE_CHOICES)
 
 class Prescription(models.Model):
+    CARE_SYSTEM_CHOICES = [
+        ('Permanent', 'Permanent'),
+        ('Temporary', 'Temporary'),
+    ]
+    
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE)
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    doctor_name = models.CharField(max_length=255)
-    last_eye_test = models.DateField(null=True, blank=True)
-    next_checkup = models.DateField(null=True, blank=True)
-    care_system = models.CharField(max_length=255, blank=True)
+    last_eye_test = models.CharField(max_length=255, blank=True)
+    care_system = models.CharField(max_length=255, choices=CARE_SYSTEM_CHOICES, blank=True)
     recommendation = models.TextField(blank=True)
+    next_checkup = models.DateField(null=True, blank=True)
+    vision = models.CharField(max_length=255, blank=True)
 
-class Vision(models.Model):
-    prescription = models.ForeignKey(Prescription, related_name='visions', on_delete=models.CASCADE)
-    type = models.CharField(max_length=255, choices=(('Right', 'Right'), ('Left', 'Left')))
+class LensDetails(models.Model):
+    side = models.CharField(max_length=5, choices=(('Right', 'Right'), ('Left', 'Left')))
     sph = models.DecimalField(max_digits=10, decimal_places=2)
     cyl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     axis = models.IntegerField(blank=True, null=True)
-    pdl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # Pupil Distance Left
 
-class LensPrescription(models.Model):
-    prescription = models.ForeignKey(Prescription, related_name='lens_prescriptions', on_delete=models.CASCADE)
-    side = models.CharField(max_length=255, choices=(('Right', 'Right'), ('Left', 'Left')))
-    sph = models.DecimalField(max_digits=10, decimal_places=2)
-    cyl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    axis = models.IntegerField(blank=True, null=True)
-    type_of_lenses = models.CharField(max_length=255, blank=True)  # This can be a ForeignKey if lens types are predefined
+class GlassPrescription(models.Model):
+    prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='glass_prescription')
+    lens_detail_right = models.OneToOneField(LensDetails, related_name='right_glass_prescription', on_delete=models.CASCADE)
+    lens_detail_left = models.OneToOneField(LensDetails, related_name='left_glass_prescription', on_delete=models.CASCADE)
+    type_of_lenses = models.CharField(max_length=255, blank=True)
+    pdr = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    pdl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+class ContactLensPrescription(models.Model):
+    prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='contact_lens_prescription')
+    lens_detail_right = models.OneToOneField(LensDetails, related_name='right_contact_prescription', on_delete=models.CASCADE)
+    lens_detail_left = models.OneToOneField(LensDetails, related_name='left_contact_prescription', on_delete=models.CASCADE)

@@ -1,7 +1,7 @@
-import React, { useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Route, Link, Routes, Navigate } from 'react-router-dom';
-import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, AccountBookOutlined, PlusOutlined, AreaChartOutlined, ContainerOutlined, DollarCircleOutlined, DashboardOutlined, BellOutlined } from '@ant-design/icons';
-import { Layout, Menu, Typography, theme, ConfigProvider } from 'antd';
+import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, AccountBookOutlined, PlusOutlined, AreaChartOutlined, ContainerOutlined, DollarCircleOutlined, DashboardOutlined, LogoutOutlined, FileExcelOutlined } from '@ant-design/icons';
+import { Layout, Menu, theme, ConfigProvider, Badge } from 'antd';
 import { loadFull } from "tsparticles";
 
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -13,40 +13,42 @@ import Particles from "react-tsparticles";
 import Calendar from './pages/Appointments/Calendar';
 import NewProduct from './pages/Inventory/NewProduct';
 import NewInvoice from './pages/Invoices/NewInvoice';
+import Log from './pages/Logs/Log';
 
 import './App.css';
+import { appUrl } from './constants';
+import { useUser } from './contexts/UserContext';
+import Quotation from './pages/Quotations/Quotation';
+import Report from './pages/Reports/Report';
 
 const { Header, Content, Sider, Footer } = Layout;
-const { Title } = Typography;
 
 const d = new Date();
 
 const menu = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard' },
-  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers' },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Administrator', 'Manager', 'Staff'] },
   {
-    key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', items: [
-      { key: 'new-prescription', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-prescription' },
-      { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions' }
+    key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
+      { key: 'new-prescription', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-prescription', roles: ['Administrator', 'Manager', 'Staff'] },
+      { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions', roles: ['Administrator', 'Manager', 'Staff'] }
     ]
   },
-  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [] },
-  { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [] },
-  { key: 'invoices', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '/invoices', items: [] },
-  { key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [] },
-  { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [] }
+  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'invoices', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '/invoices', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'logs', label: 'Logs', icon: React.createElement(FileExcelOutlined), path: '/logs', items: [], roles: ['Administrator'] }
 ]
 
 const App = () => {
   <ConfigProvider
     theme={{
       token: {
-        // Seed Token
         colorPrimary: "#044254",
         colorInfo: "#044254",
         borderRadius: 5,
-
-        // Alias Token
         colorBgContainer: '#000',
       },
     }}
@@ -57,7 +59,6 @@ const App = () => {
   }, []);
 
   const particlesLoaded = useCallback(async container => {
-    //await console.log(container);
   }, []);
 
   const {
@@ -65,11 +66,32 @@ const App = () => {
   } = theme.useToken();
 
   const renderNotificationIcon = () => {
-    const icon = React.createElement(BellOutlined);
+    const icon = React.createElement(LogoutOutlined);
     return (
-      <div style={{ fontSize: 22, color: '#fff' }}>{icon}</div>
+      <a href="/users/logout" style={{ fontSize: 22, color: '#fff', textDecoration: 'none' }}>
+        {icon}
+      </a>
     );
   }
+
+  const { user, setUser } = useUser();
+
+  useEffect(() => {
+    fetch(appUrl + 'users/get_user')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        setUser(data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [setUser]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -83,7 +105,7 @@ const App = () => {
       >
         <div className="header-logo" style={{ fontSize: 24 }}>Kler Vision</div>
         <div className="header-content">
-          {/* {renderNotificationIcon()} */}
+          {renderNotificationIcon()}
         </div>
       </Header>
       <Layout>
@@ -94,9 +116,16 @@ const App = () => {
             zIndex: 1
           }}
         >
-          <Title level={4} style={{ textAlign: 'center' }}>Welcome User</Title>
+          {
+            user?.profile && user?.first_name !== "" &&
+            <Badge.Ribbon text={user.profile.role} color="#024550">
+              <div className="centered-title-div">
+                Welcome<br />{user.first_name}
+              </div>
+            </Badge.Ribbon>
+          }
           <Menu mode="inline" defaultSelectedKeys={['1']} style={{ borderRight: 0 }}>
-            {menu.map(item => {
+            {menu.filter(item => !item.roles || item.roles.includes(user?.profile?.role)).map(item => {
               if (item.items && item.items.length > 0) {
                 return (
                   <Menu.SubMenu key={item.key} icon={item.icon} title={item.label}>
@@ -219,6 +248,13 @@ const App = () => {
               <Route path="/appointment" element={<Calendar />} />
               <Route path="/inventory" element={<NewProduct />} />
               <Route path="/invoices" element={<NewInvoice />} />
+              <Route path="/quotations" element={<Quotation />} />
+              <Route path="/reports" element={<Report />} />
+              {user?.profile?.role === 'Administrator' && (
+                <>
+                  <Route path="/logs" element={<Log />} />
+                </>
+              )}
             </Routes>
           </Content>
           <Footer
