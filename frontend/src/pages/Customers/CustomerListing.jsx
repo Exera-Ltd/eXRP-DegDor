@@ -38,27 +38,45 @@ function CustomerListing() {
     const showModal = (customerId) => {
         console.log(customerId);
         if (customerId != null) {
-            const customer = customerList.find(item => item.id === customerId);
-            console.log(customer);
-            setSelectedCustomerData(customer);
-        } else {
-            setSelectedCustomerData({});
-        }
-        setIsModalVisible(true);
+            fetchCustomer(customerId);
+        }  
     };
 
     const handleCancel = () => {
+        console.log('handleCancel')
         setIsModalVisible(false);
         setSelectedCustomerData({});
     };
 
     const handleOk = () => {
+        console.log('handleOk')
         setIsModalVisible(false);
     };
 
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm]);
+
+    const fetchCustomer = (id) => {
+        setIsLoading(true);
+        fetch(appUrl + `dashboard/get_customer/${id}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                setSelectedCustomerData(data.values);
+                setIsLoading(false);
+                setIsModalVisible(true);
+            })
+            .catch(error => {
+                console.error('Failed to fetch:', error);
+                setIsLoading(false);
+            });
+    };
 
     const fetchCustomers = () => {
         setIsLoading(true);
@@ -85,6 +103,7 @@ function CustomerListing() {
 
     const closeModal = () => {
         setIsModalVisible(false);
+        setSelectedCustomerData({});
     };
 
 
@@ -117,7 +136,7 @@ function CustomerListing() {
                                     ]}
                                 >
                                     <Meta
-                                        title={item.first_name + ' ' + item.last_name}
+                                        title={item.title + ' ' + item.first_name + ' ' + item.last_name}
                                         description={item.nic_number}
                                     />
                                     <div>

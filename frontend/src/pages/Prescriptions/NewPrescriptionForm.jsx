@@ -14,7 +14,7 @@ const onFinishFailed = (errorInfo) => {
 
 
 
-const NewPrescriptionForm = ({ prescriptionData }) => {
+const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
     const { user } = useUser();
     const [customers, setCustomers] = useState([]);
     const [prescriptionForm] = Form.useForm();
@@ -64,7 +64,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
             })
         }
     };
-
+    
     useEffect(() => {
         fetchCustomers();
     }, []);
@@ -144,6 +144,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                         filterOption={(input, option) =>
                             option.label.toLowerCase().includes(input.toLowerCase())
                         }
+                        disabled={readOnly}
                     >
                         {customers.map(customer => (
                             <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name}`}>
@@ -160,7 +161,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Last Eye Test"
                     name="last-eye-test"
                 >
-                    <Input />
+                    <Input readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -170,7 +171,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Vision"
                     name="vision"
                 >
-                    <Input.TextArea />
+                    <Input.TextArea readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -186,7 +187,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="SPH"
                     name="glass-right-sph"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -194,7 +195,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="CYL"
                     name="glass-right-cyl"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -202,7 +203,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Axis"
                     name="glass-right-axis"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -215,7 +216,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="SPH"
                     name="glass-left-sph"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -223,7 +224,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="CYL"
                     name="glass-left-cyl"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -231,7 +232,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Axis"
                     name="glass-left-axis"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -241,7 +242,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -249,7 +250,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -258,7 +259,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     name="type-of-lenses"
                     hasFeedback
                 >
-                    <Select placeholder="Lenses">
+                    <Select placeholder="Lenses" disabled={readOnly}>
                         <Option value="Single">Single</Option>
                         <Option value="Double">Double</Option>
                     </Select>
@@ -275,7 +276,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="SPH"
                     name="lens-right-sph"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -283,7 +284,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="CYL"
                     name="lens-right-cyl"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -291,7 +292,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Axis"
                     name="lens-right-axis"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -304,7 +305,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="SPH"
                     name="lens-left-sph"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -312,7 +313,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="CYL"
                     name="lens-left-cyl"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -320,7 +321,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Axis"
                     name="lens-left-axis"
                 >
-                    <InputNumber />
+                    <InputNumber readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -332,7 +333,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     name="care-system"
                     hasFeedback
                 >
-                    <Select placeholder="Care">
+                    <Select placeholder="Care" disabled={readOnly}>
                         <Option value="Permanent">Permanent</Option>
                         <Option value="One Off">One Off</Option>
                     </Select>
@@ -344,7 +345,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     name="next-checkup"
                     hasFeedback
                 >
-                    <Select placeholder="Next Checkup" onChange={handleCheckupChange}>
+                    <Select placeholder="Next Checkup" onChange={handleCheckupChange} disabled={readOnly}>
                         <Option value="6">6 Months</Option>
                         <Option value="12">1 Year</Option>
                         <Option value="24">2 Years</Option>
@@ -367,7 +368,7 @@ const NewPrescriptionForm = ({ prescriptionData }) => {
                     label="Recommendation"
                     name="recommendation"
                 >
-                    <Input.TextArea />
+                    <Input.TextArea readOnly={readOnly}/>
                 </Form.Item>
             </Col>
         </Row>

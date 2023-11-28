@@ -85,7 +85,6 @@ const App = () => {
         return response.json();
       })
       .then(data => {
-        console.log(data);
         setUser(data);
       })
       .catch(error => {

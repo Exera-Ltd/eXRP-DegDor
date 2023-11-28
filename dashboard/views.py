@@ -5,8 +5,10 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from log.models import LogEntry
 from .models import Prescription, GlassPrescription, ContactLensPrescription, LensDetails, Customer
-from datetime import datetime
+from datetime import datetime, date
 
+today_date = date.today()
+today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
 
 def not_found_view(request):
     return render(request, 'notfound.html', status=404)
@@ -21,7 +23,7 @@ def dashboard_render (request):
 
 #@login_required(login_url='/accounts/login/')
 @require_http_methods(["POST"])
-def add_customer(request):
+def add_customer(request):    
     try:
         data = json.loads(request.body)
         
@@ -39,6 +41,8 @@ def add_customer(request):
             )
             
             return JsonResponse({"message": "Duplicate customer found."}, status=400)
+        
+        
 
         customer = Customer(
             title=data.get('title'),
@@ -52,7 +56,9 @@ def add_customer(request):
             email=data.get('email'),
             nic_number=data.get('nic_number', ''),
             profession=data.get('profession', ''),
-            insurance=data.get('insurance')
+            insurance=data.get('insurance'),
+            created_date=today_date_str,
+            last_modified_date=today_date_str
         )
         
         customer.save()
@@ -71,9 +77,14 @@ def add_customer(request):
 #@login_required(login_url='/accounts/login/')
 def get_all_customers(request):
 	entries = (
-		Customer.objects.values("id", "title", "first_name", "last_name", "date_of_birth", "mobile_1", "mobile_2", "address", "city", "email", "nic_number", "profession", "insurance")
+		Customer.objects.values("id", "title", "first_name", "last_name", "mobile_1", "city", "nic_number")
 	)
 	return JsonResponse({"values": list(entries)})
+
+#@login_required(login_url='/accounts/login/')
+def get_customer(request, customer_id):
+	customer = Customer.objects.get(id=customer_id)
+	return JsonResponse({"values": customer.to_dict()})
 
 @login_required(login_url='/accounts/login/')
 @require_http_methods(["PUT"])
@@ -94,6 +105,7 @@ def update_customer(request, customer_id):
         customer.nic_number=data.get('nic_number', customer.nic_number)
         customer.profession=data.get('profession', customer.profession)
         customer.insurance=data.get('insurance', customer.insurance)
+        customer.last_modified_date=today_date_str
 
         customer.save()
         
@@ -133,7 +145,9 @@ def create_prescription(request):
             next_checkup=datetime.strptime(data['next-checkup-date'], '%Y-%m-%d').date() if data['next-checkup-date'] else None,
             care_system=data.get('care-system', ''),
             recommendation=data.get('recommendation', ''),
-            vision=data.get('vision', '')
+            vision=data.get('vision', ''),
+            created_date=today_date_str,
+            last_modified_date=today_date_str            
         )
 
         glass_lens_detail_right = LensDetails.objects.create(
@@ -200,6 +214,7 @@ def create_prescription(request):
     
 def get_all_prescriptions(request):
 	entries = (
-		Prescription.objects.select_related("").values("id", "title", "first_name", "last_name", "date_of_birth", "mobile_1", "mobile_2", "address", "city", "email", "nic_number", "profession", "insurance")
+		Prescription.objects.select_related("")
+            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date")
 	)
 	return JsonResponse({"values": list(entries)})

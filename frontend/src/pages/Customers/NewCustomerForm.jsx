@@ -1,4 +1,4 @@
-import React, { useForm } from 'react';
+import React, { useEffect } from 'react';
 import { Button, Row, Col, Form, Input, Select, DatePicker, notification } from 'antd';
 import moment from 'moment';
 import { appUrl } from '../../constants';
@@ -50,12 +50,34 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
     };
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
+        notification.error({
+            message: 'Error ',
+            description: errorInfo
+        })
     };
 
     const onChange = (date, dateString) => {
         const localDate = date ? moment(date).format('YYYY-MM-DD') : null;
         console.log(localDate);
     };
+
+    useEffect(() => {
+        customerForm.resetFields();
+        customerForm.setFieldsValue({
+            title: customerData?.title,
+            first_name: customerData?.first_name,
+            last_name: customerData?.last_name,
+            date_of_birth: moment(customerData.date_of_birth),
+            mobile_1: customerData?.mobile_1,
+            mobile_2: customerData?.mobile_2,
+            address: customerData?.address,
+            city: customerData?.city,
+            email: customerData?.email,
+            nic_number: customerData?.nic_number,
+            profession: customerData?.profession,
+            insurance: customerData?.insurance
+        });
+    }, [customerData, customerForm]);
 
     return <Form
         form={customerForm}
@@ -65,30 +87,6 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
         style={{
-        }}
-        /*
-        {
-    id: 1,
-    first_name: 'test',
-    last_name: 'testt',
-    mobile1: '59440110',
-    city: 'Rose Hill',
-    nic_number: 'A5241365214452'
-  }
-        */
-        initialValues={{
-            title: customerData?.title || null,
-            first_name: customerData?.first_name || null,
-            last_name: customerData?.last_name || null,
-            date_of_birth: customerData?.date_of_birth ? moment(customerData.date_of_birth) : null,
-            mobile_1: customerData?.mobile_1 || null,
-            mobile_2: customerData?.mobile_2 || null,
-            address: customerData?.address || null,
-            city: customerData?.city || null,
-            email: customerData?.email || null,
-            nic_number: customerData?.nic_number || null,
-            profession: customerData?.profession || null,
-            insurance: customerData?.insurance || null
         }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}

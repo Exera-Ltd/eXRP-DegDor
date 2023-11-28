@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+from datetime import datetime, date
+from django.forms.models import model_to_dict
 
 # Validators
 phone_regex = RegexValidator(
@@ -33,6 +35,14 @@ class Customer(models.Model):
     nic_number = models.CharField(max_length=20, blank=True, null=True)
     profession = models.CharField(max_length=100, blank=True, null=True)
     insurance = models.CharField(max_length=50, choices=INSURANCE_CHOICES)
+    created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    
+    def to_dict(self):
+        """
+        Returns a dictionary representation of this Customer instance.
+        """
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
 
 class Prescription(models.Model):
     CARE_SYSTEM_CHOICES = [
@@ -47,6 +57,8 @@ class Prescription(models.Model):
     recommendation = models.TextField(blank=True)
     next_checkup = models.DateField(null=True, blank=True)
     vision = models.CharField(max_length=255, blank=True)
+    created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
 
 class LensDetails(models.Model):
     side = models.CharField(max_length=5, choices=(('Right', 'Right'), ('Left', 'Left')))

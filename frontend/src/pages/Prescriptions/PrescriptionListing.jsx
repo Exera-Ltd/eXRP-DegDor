@@ -1,110 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Row, Col, Card, Pagination, Input, Modal } from 'antd';
-import { EditOutlined, PlusCircleOutlined, MedicineBoxOutlined } from '@ant-design/icons';
-import NewCustomerForm from './NewPrescriptionForm';
+import { EyeOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import NewPrescriptionForm from './NewPrescriptionForm';
+import { appUrl } from '../../constants';
 
 const { Title } = Typography;
 const { Meta } = Card;
-
-const customerList = [
-    {
-        "id": 1,
-        "title": "Mr.",
-        "first_name": "John",
-        "last_name": "Doe",
-        "mobile_1": "123-456-7890",
-        "city": "Springfield",
-        "email": "john.doe@example.com",
-        "nic": "A2131233423"
-    },
-    {
-        "id": 2,
-        "title": "Ms.",
-        "first_name": "Jane",
-        "last_name": "Smith",
-        "mobile_1": "555-789-1234",
-        "city": "Shelbyville",
-        "email": "jane.smith@example.com",
-        "nic": "A2131332423"
-    },
-    {
-        "id": 3,
-        "title": "Dr.",
-        "first_name": "Alan",
-        "last_name": "Walker",
-        "mobile_1": "777-888-9999",
-        "city": "Capital City",
-        "email": "alan.walker@example.com",
-        "nic": "A2132332423"
-    },
-    {
-        "id": 4,
-        "title": "Mrs.",
-        "first_name": "Emily",
-        "last_name": "White",
-        "mobile_1": "444-555-6666",
-        "city": "West Springfield",
-        "email": "emily.white@example.com",
-        "nic": "A2131232423"
-    },
-    {
-        "id": 5,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A213123323"
-    },
-    {
-        "id": 6,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A213423"
-    },
-    {
-        "id": 7,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A22332423"
-    },
-    {
-        "id": 8,
-        "title": "Mr.",
-        "first_name": "Michael",
-        "last_name": "Brown",
-        "mobile_1": "222-333-4444",
-        "city": "East Springfield",
-        "email": "michael.brown@example.com",
-        "nic": "A213123"
-    }
-];
 
 function PrescriptionListing() {
     const itemsPerPage = 24;
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
-
-    const filteredData = customerList.filter(item => {
-        const firstName = item.first_name || "";
-        const lastName = item.last_name || "";
-        const mobilePhone = item.mobile_1 || "";
-        const nic = item.nic || "";
+    const [prescriptionList, setPrescriptionList] = useState([]);
+    const filteredData = prescriptionList.filter(item => {
+        const doctorFirstName = item.doctor__first_name || "";
+        const doctorLastName = item.doctor__last_name || "";
+        const customerFirstName = item.customer__first_name || "";
+        const customerLastName = item.customer__last_name || "";
+        const createdDate = item.created_date || "";
 
         return (
-            firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            mobilePhone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            nic.toLowerCase().includes(searchTerm.toLowerCase())
+            doctorFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            doctorLastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            customerFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            customerLastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            createdDate.toLowerCase().includes(searchTerm.toLowerCase())
         );
     });
 
@@ -112,15 +32,15 @@ function PrescriptionListing() {
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-    const [selectedCustomerData, setSelectedCustomerData] = useState({});
+    const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
+    const [selectedPrescriptionData, setSelectedPrescriptionData] = useState({});
 
     const showModal = (id) => {
         if (id != null) {
-            //setSelectedCustomerId(id);
-            let customer = customerList.find(item => item.id === id);
-            setSelectedCustomerData(customer);
-            console.log(selectedCustomerData);
+            //setSelectedPrescriptionId(id);
+            let prescription = prescriptionList.find(item => item.id === id);
+            setSelectedPrescriptionData(prescription);
+            console.log(selectedPrescriptionData);
         }
         setIsModalVisible(true);
     };
@@ -137,6 +57,30 @@ function PrescriptionListing() {
         setCurrentPage(1);
     }, [searchTerm]);
 
+    const fetchPrescriptions = () => {
+        //setIsLoading(true);
+        fetch(appUrl + 'dashboard/get_all_prescriptions')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                setPrescriptionList(data.values);
+                console.log(data.values);
+                //setIsLoading(false);
+            })
+            .catch(error => {
+                console.error('Failed to fetch:', error);
+                //setIsLoading(false);
+            });
+    };
+
+    useEffect(() => {
+        fetchPrescriptions();
+    }, []);
+
     return (
         <div>
 
@@ -145,7 +89,7 @@ function PrescriptionListing() {
                 <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal()} />
             </Row>
             <Input
-                placeholder="Search by First Name, Last Name, Mobile or NIC"
+                placeholder="Search by Customer or Doctor Name or Date"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 style={{ marginBottom: '20px' }}
@@ -157,27 +101,30 @@ function PrescriptionListing() {
                             key={index}
                             style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
                             actions={[
-                                <EditOutlined key="edit" onClick={() => showModal(item.id)} />,
-                                <MedicineBoxOutlined key="ellipsis" />,
+                                <EyeOutlined key="edit" onClick={() => showModal(item.id)} />
                             ]}
                         >
                             <Meta
-                                title={item.first_name + ' ' + item.last_name}
-                                description="This is the description"
+                                title={item.customer__first_name + ' ' + item.customer__last_name}
+                                description={"Consulted by Dr. " + item.doctor__first_name + " on " + item.created_date}
                             />
                         </Card>
                     </Col>
                 ))}
             </Row>
             <Modal
-                title="New/ Edit Customer"
+                title="New/ Edit Prescription"
                 open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
-                width={1000}
+                width={1500}
                 footer={null}
+                style={{
+                    top: 20,
+                }}
+
             >
-                <NewCustomerForm customerData={selectedCustomerData}/>
+                <NewPrescriptionForm prescriptionData={selectedPrescriptionData} readOnly={true} />
             </Modal>
             <Pagination
                 current={currentPage}
