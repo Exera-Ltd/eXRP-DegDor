@@ -34,12 +34,34 @@ function PrescriptionListing() {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedPrescriptionId, setSelectedPrescriptionId] = useState(null);
     const [selectedPrescriptionData, setSelectedPrescriptionData] = useState({});
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchPrescription = (id) => {
+        setIsLoading(true);
+        fetch(appUrl + `dashboard/get_prescription/${id}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                setSelectedPrescriptionData(data);
+                setIsLoading(false);
+                setIsModalVisible(true);
+            })
+            .catch(error => {
+                console.error('Failed to fetch:', error);
+                setIsLoading(false);
+            });
+    };
 
     const showModal = (id) => {
         if (id != null) {
             //setSelectedPrescriptionId(id);
-            let prescription = prescriptionList.find(item => item.id === id);
-            setSelectedPrescriptionData(prescription);
+            //let prescription = prescriptionList.find(item => item.id === id);
+            fetchPrescription(id);
             console.log(selectedPrescriptionData);
         }
         setIsModalVisible(true);

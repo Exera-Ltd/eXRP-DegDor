@@ -59,6 +59,9 @@ class Prescription(models.Model):
     vision = models.CharField(max_length=255, blank=True)
     created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
     last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
 
 class LensDetails(models.Model):
     side = models.CharField(max_length=5, choices=(('Right', 'Right'), ('Left', 'Left')))
@@ -73,8 +76,14 @@ class GlassPrescription(models.Model):
     type_of_lenses = models.CharField(max_length=255, blank=True)
     pdr = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     pdl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
 
 class ContactLensPrescription(models.Model):
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='contact_lens_prescription')
     lens_detail_right = models.OneToOneField(LensDetails, related_name='right_contact_prescription', on_delete=models.CASCADE)
     lens_detail_left = models.OneToOneField(LensDetails, related_name='left_contact_prescription', on_delete=models.CASCADE)
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])

@@ -10,6 +10,7 @@ app_urls = [
     
     path('create_prescription/', views.create_prescription, name='create_prescription'),
     path("get_all_prescriptions", views.get_all_prescriptions),
+    path("get_prescription/<int:prescription_id>/", views.get_prescription),
 ]
 
 urlpatterns = [

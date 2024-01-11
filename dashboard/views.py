@@ -5,6 +5,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from log.models import LogEntry
 from .models import Prescription, GlassPrescription, ContactLensPrescription, LensDetails, Customer
+from django.core.exceptions import ObjectDoesNotExist
+from django.forms.models import model_to_dict
 from datetime import datetime, date
 
 today_date = date.today()
@@ -218,3 +220,40 @@ def get_all_prescriptions(request):
             .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date")
 	)
 	return JsonResponse({"values": list(entries)})
+
+def get_prescription(request, prescription_id):
+    try:
+        prescription = Prescription.objects.get(id=prescription_id)
+
+        prescription_dict = model_to_dict(prescription, exclude=["doctor", "customer"])
+        prescription_dict['doctor_name'] = f"{prescription.doctor.first_name} {prescription.doctor.last_name}"
+        prescription_dict['customer_name'] = f"{prescription.customer.first_name} {prescription.customer.last_name}"
+
+        # Initialize the response dictionary with the Prescription data
+        response = {"prescription": prescription_dict}
+
+        try:
+            glass_prescription = prescription.glass_prescription
+            response['glass_prescription'] = {
+                "lens_detail_right": model_to_dict(glass_prescription.lens_detail_right),
+                "lens_detail_left": model_to_dict(glass_prescription.lens_detail_left),
+                "type_of_lenses": glass_prescription.type_of_lenses,
+                "pdr": glass_prescription.pdr,
+                "pdl": glass_prescription.pdl,
+            }
+        except ObjectDoesNotExist:
+            response['glass_prescription'] = None
+
+        try:
+            contact_lens_prescription = prescription.contact_lens_prescription
+            response['contact_lens_prescription'] = {
+                "lens_detail_right": model_to_dict(contact_lens_prescription.lens_detail_right),
+                "lens_detail_left": model_to_dict(contact_lens_prescription.lens_detail_left),
+            }
+        except ObjectDoesNotExist:
+            response['contact_lens_prescription'] = None
+
+        return JsonResponse(response)
+
+    except Prescription.DoesNotExist:
+        return JsonResponse({"error": "Prescription not found"}, status=404)

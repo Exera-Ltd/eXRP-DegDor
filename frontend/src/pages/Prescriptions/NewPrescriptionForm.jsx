@@ -64,10 +64,13 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             })
         }
     };
-    
+
     useEffect(() => {
         fetchCustomers();
-    }, []);
+        prescriptionForm.setFieldsValue({
+            doctor: user.id,
+        });
+    }, [user]);
 
     const [checkupInterval, setCheckupInterval] = useState();
 
@@ -82,6 +85,36 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
         setCheckupInterval(value);
     };
 
+    useEffect(() => {
+        prescriptionForm.resetFields();
+        prescriptionForm.setFieldsValue({
+            doctor_name: prescriptionData.prescription?.doctor_name,
+            customer: prescriptionData.prescription?.customer_name,
+            "last-eye-test": prescriptionData.prescription?.last_eye_test,
+            vision: prescriptionData.prescription?.vision,
+            "care-system": prescriptionData.prescription?.care_system,
+            recommendation: prescriptionData.prescription?.recommendation,
+            "next-checkup-date": prescriptionData.prescription?.next_checkup,
+
+            "glass-right-sph": prescriptionData.glass_prescription?.lens_detail_right.sph,
+            "glass-right-cyl": prescriptionData.glass_prescription?.lens_detail_right.cyl,
+            "glass-right-axis": prescriptionData.glass_prescription?.lens_detail_right.axis,
+            "glass-left-sph": prescriptionData.glass_prescription?.lens_detail_left.sph,
+            "glass-left-cyl": prescriptionData.glass_prescription?.lens_detail_left.cyl,
+            "glass-left-axis": prescriptionData.glass_prescription?.lens_detail_left.axis,
+            pdr: prescriptionData.glass_prescription?.pdr,
+            pdl: prescriptionData.glass_prescription?.pdl,
+            "type-of-lenses": prescriptionData.glass_prescription?.type_of_lenses,
+
+            "lens-right-sph": prescriptionData.contact_lens_prescription?.lens_detail_right.sph,
+            "lens-right-cyl": prescriptionData.contact_lens_prescription?.lens_detail_right.cyl,
+            "lens-right-axis": prescriptionData.contact_lens_prescription?.lens_detail_right.axis,
+            "lens-left-sph": prescriptionData.contact_lens_prescription?.lens_detail_left.sph,
+            "lens-left-cyl": prescriptionData.contact_lens_prescription?.lens_detail_left.cyl,
+            "lens-left-axis": prescriptionData.contact_lens_prescription?.lens_detail_left.axis,
+        });
+    }, [prescriptionData, prescriptionForm]);
+
     return <Form
         form={prescriptionForm}
         layout="horizontal"
@@ -90,19 +123,6 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
         style={{
-        }}
-        initialValues={{
-            title: prescriptionData?.title || null,
-            firstname: prescriptionData?.first_name || null,
-            lastname: prescriptionData?.last_name || null,
-            dob: prescriptionData?.date_of_birth ? moment(prescriptionData.date_of_birth) : null,
-            mobile1: prescriptionData?.mobile_1 || null,
-            mobile2: prescriptionData?.mobile_2 || null,
-            address: prescriptionData?.address || null,
-            city: prescriptionData?.city || null,
-            email: prescriptionData?.email || null,
-            profession: prescriptionData?.profession || null,
-            insurance: prescriptionData?.insurance || null
         }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
@@ -161,7 +181,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Last Eye Test"
                     name="last-eye-test"
                 >
-                    <Input readOnly={readOnly}/>
+                    <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -171,7 +191,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Vision"
                     name="vision"
                 >
-                    <Input.TextArea readOnly={readOnly}/>
+                    <Input.TextArea readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -187,7 +207,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-right-sph"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -195,7 +215,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -203,7 +223,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-right-axis"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -216,7 +236,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-left-sph"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -224,7 +244,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -232,7 +252,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-left-axis"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -242,7 +262,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -250,7 +270,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -276,7 +296,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-right-sph"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -284,7 +304,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -292,7 +312,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-right-axis"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -305,7 +325,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-left-sph"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -313,7 +333,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -321,7 +341,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-left-axis"
                 >
-                    <InputNumber readOnly={readOnly}/>
+                    <InputNumber readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -368,15 +388,17 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Recommendation"
                     name="recommendation"
                 >
-                    <Input.TextArea readOnly={readOnly}/>
+                    <Input.TextArea readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
-        <Row style={{ justifyContent: 'center' }}>
-            <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
-                Save
-            </Button>
-        </Row>
+        {!readOnly &&
+            <Row style={{ justifyContent: 'center' }}>
+                <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
+                    Save
+                </Button>
+            </Row>
+        }
     </Form>
 }
 
