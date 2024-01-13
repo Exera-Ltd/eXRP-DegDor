@@ -28,6 +28,49 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             .catch(error => console.error('Error fetching customers:', error));
     };
 
+    // Function to call the server and get the PDF
+    const generatePdf = async (formData) => {
+        try {
+            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(appUrl + `dashboard/generate_prescription_pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                    // Include authorization headers if necessary
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok.');
+
+            // Get the PDF Blob from the response
+            const blob = await response.blob();
+
+            // Create a link element, use it to download the PDF
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            downloadLink.setAttribute('download', 'form-data.pdf'); // Any filename you like
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+        } catch (error) {
+            console.error('Error:', error);
+            notification.error({
+                message: 'Error',
+                description: 'There was a problem generating the PDF.'
+            });
+        }
+    };
+
+    // Function to handle Print button click
+    const handlePrint = () => {
+        const values = prescriptionForm.getFieldsValue();
+        generatePdf(values);
+    };
+
     const onFinish = async (values) => {
         console.log('Success:', values);
 
@@ -54,7 +97,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                 const result = await response.json();
                 notification.error({
                     message: 'Error ',
-                    description: result['message']
+                    description: result['error']
                 })
             }
         } catch (error) {
@@ -207,7 +250,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-right-sph"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -215,7 +258,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -223,7 +266,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
         </Row>
@@ -236,7 +279,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-left-sph"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -244,7 +287,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -252,7 +295,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
         </Row>
@@ -262,7 +305,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -270,7 +313,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -296,7 +339,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-right-sph"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -304,7 +347,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -312,7 +355,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
         </Row>
@@ -325,7 +368,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-left-sph"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -333,7 +376,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -341,7 +384,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
                 </Form.Item>
             </Col>
         </Row>
@@ -396,6 +439,13 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             <Row style={{ justifyContent: 'center' }}>
                 <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
                     Save
+                </Button>
+            </Row>
+        }
+        {readOnly &&
+            <Row style={{ justifyContent: 'center' }}>
+                <Button type="primary" htmlType="button" style={{ width: 200, height: 40 }} onClick={handlePrint} >
+                    Print
                 </Button>
             </Row>
         }

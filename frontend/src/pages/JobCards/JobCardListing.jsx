@@ -1,21 +1,21 @@
-import { EditOutlined, PlusCircleOutlined } from '@ant-design/icons';
+import { EyeOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { Card, Col, Input, Modal, Pagination, Row, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import NewCustomerForm from './NewCustomerForm';
+import JobCardForm from './JobCardForm';
 import { appUrl } from '../../constants';
 
 const { Title } = Typography;
 const { Meta } = Card;
 const itemsPerPage = 8;
 
-function CustomerListing() {
+function JobCardListing() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
-    const [customerList, setCustomerList] = useState([]);
+    const [jobCardList, setJobCardList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const filteredData = customerList.filter(item => {
+    const filteredData = jobCardList.filter(item => {
         const firstName = item.first_name || "";
         const lastName = item.last_name || "";
         const mobilePhone = item.mobile_1 || "";
@@ -33,21 +33,19 @@ function CustomerListing() {
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [selectedCustomerData, setSelectedCustomerData] = useState({});
+    const [selectedJobCardData, setSelectedJobCardData] = useState({});
 
     const showModal = (customerId) => {
         console.log(customerId);
         if (customerId != null) {
-            fetchCustomer(customerId);
-        }  else {
-            setIsModalVisible(true);
-        }
+            fetchJobCard(customerId);
+        }  
     };
 
     const handleCancel = () => {
         console.log('handleCancel')
         setIsModalVisible(false);
-        setSelectedCustomerData({});
+        setSelectedJobCardData({});
     };
 
     const handleOk = () => {
@@ -59,9 +57,9 @@ function CustomerListing() {
         setCurrentPage(1);
     }, [searchTerm]);
 
-    const fetchCustomer = (id) => {
+    const fetchJobCard = (id) => {
         setIsLoading(true);
-        fetch(appUrl + `dashboard/get_customer/${id}/`)
+        fetch(appUrl + `dashboard/get_job_card/${id}/`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -70,7 +68,7 @@ function CustomerListing() {
             })
             .then(data => {
                 console.log(data);
-                setSelectedCustomerData(data.values);
+                setSelectedJobCardData(data.values);
                 setIsLoading(false);
                 setIsModalVisible(true);
             })
@@ -80,9 +78,9 @@ function CustomerListing() {
             });
     };
 
-    const fetchCustomers = () => {
+    const fetchJobCards = () => {
         setIsLoading(true);
-        fetch(appUrl + 'dashboard/get_all_customers')
+        fetch(appUrl + 'dashboard/get_all_job_cards')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -90,7 +88,7 @@ function CustomerListing() {
                 return response.json();
             })
             .then(data => {
-                setCustomerList(data.values);
+                setJobCardList(data.values);
                 setIsLoading(false);
             })
             .catch(error => {
@@ -100,12 +98,12 @@ function CustomerListing() {
     };
 
     useEffect(() => {
-        fetchCustomers();
+        fetchJobCards();
     }, []);
 
     const closeModal = () => {
         setIsModalVisible(false);
-        setSelectedCustomerData({});
+        setSelectedJobCardData({});
     };
 
 
@@ -113,7 +111,7 @@ function CustomerListing() {
         <div>
 
             <Row style={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
-                <Title level={3}>Customer Listing </Title>
+                <Title level={3}>Job Card Listing </Title>
                 <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal(null)} />
             </Row>
             <Input
@@ -134,16 +132,16 @@ function CustomerListing() {
                                 <Card
                                     style={{ boxShadow: 'rgba(0, 0, 0, 0.15) 0px 2px 8px' }}
                                     actions={[
-                                        <EditOutlined key="edit" onClick={() => showModal(item.id)} />
+                                        <EyeOutlined key="edit" onClick={() => showModal(item.id)} />
                                     ]}
                                 >
                                     <Meta
-                                        title={item.title + ' ' + item.first_name + ' ' + item.last_name}
+                                        title={item.customer__first_name + ' ' + item.customer__last_name}
                                         description={item.nic_number}
                                     />
                                     <div>
-                                        <p>Address: {item.city}</p>
-                                        <span>Phone: {item.mobile_1}</span>
+                                        <p>Delivery Date: {item.estimated_delivery_date}</p>
+                                        <span>Status: {item.status}</span>
                                     </div>
                                 </Card>
                             </Col>
@@ -153,14 +151,14 @@ function CustomerListing() {
             </Row>
 
             <Modal
-                title="New/ Edit Customer"
+                title="New/ Edit Job Card"
                 open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
                 width={1000}
                 footer={null}
             >
-                <NewCustomerForm customerData={selectedCustomerData} onCustomerAdded={fetchCustomers} closeModal={closeModal} />
+                <JobCardForm jobCardData={selectedJobCardData} onJobCardAdded={fetchJobCards} closeModal={closeModal} readOnly={true}/>
             </Modal>
             <Pagination
                 current={currentPage}
@@ -173,4 +171,4 @@ function CustomerListing() {
     );
 }
 
-export default CustomerListing;
+export default JobCardListing;

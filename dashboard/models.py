@@ -87,3 +87,55 @@ class ContactLensPrescription(models.Model):
     
     def to_dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+    
+class JobCard(models.Model):
+    TYPE_CHOICES = (
+        ('contact_lenses', 'Contact Lenses'),
+        ('lenses', 'Lenses'),
+    )
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, blank=True, null=True)
+    job_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    supplier = models.CharField(max_length=100, blank=True, null=True)
+    salesman = models.CharField(max_length=100, blank=True, null=True)
+    number_of_boxes = models.IntegerField(blank=True, null=True)
+    contact_lens = models.CharField(max_length=100, blank=True, null=True)
+    lens = models.CharField(max_length=100, blank=True, null=True)
+    base_curve = models.CharField(max_length=100, blank=True, null=True)
+    diameter = models.CharField(max_length=100, blank=True, null=True)
+    ht = models.CharField(max_length=100, blank=True, null=True)
+    frame = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(max_length=100, blank=True, null=True)
+    supplier_reference = models.CharField(max_length=100, blank=True, null=True)
+    estimated_delivery_date = models.DateField(null=True, blank=True)
+    no_of_boxes = models.IntegerField(null=True, blank=True)
+
+    prescription = models.ForeignKey(Prescription,on_delete=models.SET_NULL,null=True,blank=True,related_name='job_cards')
+
+    def __str__(self):
+        return f"{self.get_job_type_display()} - {self.supplier or 'No Supplier'}"
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+    
+class Appointment(models.Model):
+    STATUS_CHOICES = (
+        ('scheduled', 'Scheduled'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        # Add more status choices as needed
+    )
+
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='appointments')
+    appointment_date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE)
+    number_of_patients = models.PositiveIntegerField(default=1)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Appointment on {self.appointment_date} with {self.doctor}"
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
