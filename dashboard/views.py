@@ -460,53 +460,175 @@ def update_appointment(request, appointment_id):
     
 def generate_prescription_pdf(request):
     try:
-        # Parse the form data from the POST request
         form_data = json.loads(request.body)
         print(form_data)
-        # Create an HTTP response with PDF headers
+        
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="prescription.pdf"'
 
-        # Set up the ReportLab PDF canvas in landscape A5
         c = canvas.Canvas(response, pagesize=landscape(A5))
         width, height = landscape(A5)
 
-        # Define the positions for the elements
         left_margin = 20
-        top_margin = height - 40  # Adjusted to align with the first item of patient information
+        top_margin = height - 60
 
-        # Title
         c.setFont("Helvetica-Bold", 16)
-        c.drawString(left_margin, height - 20, "KLER VISION")
+        c.drawString(left_margin, height - 30, "KLER VISION")
 
         # Patient Information and Prescription Grid
         c.setFont("Helvetica", 12)
         patient_info_start_height = top_margin
-        grid_left_column = 280  # This is the X position where your grid starts
+        grid_left_column = width - left_margin - 245  # This is the X position where your grid starts
 
-        # Patient information
-        c.drawString(left_margin, patient_info_start_height, "Name:")
-        c.drawString(left_margin, patient_info_start_height - 20, "Surname:")
-        c.drawString(left_margin, patient_info_start_height - 40, "Care:")
-        c.drawString(left_margin, patient_info_start_height - 60, "Next:")
+        name_label_x = left_margin
+        name_value_x = left_margin + 70  # You might need to adjust the 70 points to align it as you wish
+        name_y = patient_info_start_height
 
-        # Prescription Grid aligned with patient information
-        c.drawString(grid_left_column, patient_info_start_height, "SPHERE")
-        c.drawString(grid_left_column + 70, patient_info_start_height, "CYLINDER")
-        c.drawString(grid_left_column + 140, patient_info_start_height, "AXIS")
+        c.drawString(name_label_x, name_y, "Name:")
+        c.drawString(name_value_x, name_y, str(form_data.get('customer', '')))
+        c.drawString(name_label_x, patient_info_start_height - 20, "Care:")
+        c.drawString(name_value_x, name_y - 20, str(form_data.get('care-system', '')))
+        c.drawString(name_label_x, patient_info_start_height - 40, "Next:")
+        c.drawString(name_value_x, name_y - 40, str(form_data.get('next-checkup-date', '')))
 
         # Drawing the grid lines
-        grid_height = patient_info_start_height - 15  # Starting just below the headers
-        c.grid([grid_left_column, grid_left_column + 70, grid_left_column + 140, width - left_margin],
-               [grid_height, grid_height - 20, grid_height - 40])
+        grid_height = patient_info_start_height + 15  # Starting just below the headers
+        c.grid([grid_left_column, grid_left_column + 35, grid_left_column + 105, grid_left_column + 175, grid_left_column + 245],
+               [grid_height, grid_height - 20, grid_height - 40, grid_height - 60])
 
-        # Fill in the 'glass-right-cyl' data into the grid
-        c.drawString(grid_left_column + 70, grid_height - 20, str(form_data.get('glass-right-cyl', '')))
+        # Glass Prescription Headers
+        c.drawString(grid_left_column, grid_height - 15, "")
+        c.drawString(grid_left_column + 50, grid_height - 15, "Sphere:")
+        c.drawString(grid_left_column + 117, grid_height - 15, "Cylinder:")
+        c.drawString(grid_left_column + 197, grid_height - 15, "Axis:")
+        
+        # Glass Prescription First Column Headers
+        c.drawString(grid_left_column + 12, grid_height - 34, "R:")
+        c.drawString(grid_left_column + 12, grid_height - 53, "L:")
+        
+        # Glass Prescription First Row Values
+        c.drawString(grid_left_column + 58, grid_height - 34, str(form_data.get('glass-right-sph', '')))
+        c.drawString(grid_left_column + 128, grid_height - 34, str(form_data.get('glass-right-cyl', '')))
+        c.drawString(grid_left_column + 200, grid_height - 34, str(form_data.get('glass-right-axis', '')))
+        
+        # Glass Prescription Second Row Values
+        c.drawString(grid_left_column + 58, grid_height - 53, str(form_data.get('glass-left-sph', '')))
+        c.drawString(grid_left_column + 128, grid_height - 53, str(form_data.get('glass-left-cyl', '')))
+        c.drawString(grid_left_column + 200, grid_height - 53, str(form_data.get('glass-left-axis', '')))
+        
+        #c.setFillColorRGB(0, 0, 0)
+        # Drawing the grid lines
+        grid_height = height - 190  # Starting just below the headers
+        c.grid([grid_left_column, grid_left_column + 35, grid_left_column + 105, grid_left_column + 175, grid_left_column + 245],
+               [grid_height, grid_height - 20, grid_height - 40, grid_height - 60])
 
-        # Footer
-        footer_height = 20
-        c.setFont("Helvetica-Oblique", 10)
-        c.drawString(left_margin, footer_height, "Optical Zone Ltd - Valentina Mall")
+        # Glass Prescription Headers
+        c.drawString(grid_left_column, grid_height - 15, "")
+        c.drawString(grid_left_column + 50, grid_height - 15, "Sphere:")
+        c.drawString(grid_left_column + 117, grid_height - 15, "Cylinder:")
+        c.drawString(grid_left_column + 197, grid_height - 15, "Axis:")
+        
+        # Glass Prescription First Column Headers
+        c.drawString(grid_left_column + 12, grid_height - 34, "R:")
+        c.drawString(grid_left_column + 12, grid_height - 53, "L:")
+        
+        # Glass Prescription First Row Values
+        c.drawString(grid_left_column + 58, grid_height - 34, str(form_data.get('lens-right-sph', '')))
+        c.drawString(grid_left_column + 128, grid_height - 34, str(form_data.get('lens-right-cyl', '')))
+        c.drawString(grid_left_column + 200, grid_height - 34, str(form_data.get('lens-right-axis', '')))
+        
+        # Glass Prescription Second Row Values
+        c.drawString(grid_left_column + 58, grid_height - 53, str(form_data.get('lens-left-sph', '')))
+        c.drawString(grid_left_column + 128, grid_height - 53, str(form_data.get('lens-left-cyl', '')))
+        c.drawString(grid_left_column + 200, grid_height - 53, str(form_data.get('lens-left-axis', '')))
+
+        
+        # Glass Prescription Strip
+        strip_x = grid_left_column  # X coordinate for the left side of the strip
+        strip_y = height - 15  # Y coordinate for the top side of the strip
+        strip_width = 245  # The width of the strip
+        strip_height = 20  # The height of the strip
+        strip_text = "Glass Prescription"  # The text you want to display
+
+        # Set the fill color to black
+        c.setFillColorRGB(0, 0, 0)  # RGB for black
+
+        # Draw the rectangle
+        c.rect(strip_x, strip_y - strip_height, strip_width, strip_height, stroke=0, fill=1)
+
+        # Set the text color to white for contrast
+        c.setFillColorRGB(1, 1, 1)  # RGB for white
+
+        # Choose the font and size for the text
+        c.setFont("Helvetica-Bold", 12)
+
+        # Calculate the width of the text
+        text_width = c.stringWidth(strip_text, "Helvetica-Bold", 12)
+
+        # Position the text in the center of the strip
+        text_x = strip_x + (strip_width - text_width) / 2
+        text_y = strip_y - strip_height + (strip_height - 8) / 2  # Adjust the 12 if using a different font size
+
+        # Draw the text on the strip
+        c.drawString(text_x, text_y, strip_text)
+        
+        # Lens Prescription Strip
+        strip_x = grid_left_column  # X coordinate for the left side of the strip
+        strip_y = height - 160  # Y coordinate for the top side of the strip
+        strip_width = 245  # The width of the strip
+        strip_height = 20  # The height of the strip
+        strip_text = "Lens Prescription"  # The text you want to display
+
+        # Set the fill color to black
+        c.setFillColorRGB(0, 0, 0)  # RGB for black
+
+        # Draw the rectangle
+        c.rect(strip_x, strip_y - strip_height, strip_width, strip_height, stroke=0, fill=1)
+
+        # Set the text color to white for contrast
+        c.setFillColorRGB(1, 1, 1)  # RGB for white
+
+        # Choose the font and size for the text
+        c.setFont("Helvetica-Bold", 12)
+
+        # Calculate the width of the text
+        text_width = c.stringWidth(strip_text, "Helvetica-Bold", 12)
+
+        # Position the text in the center of the strip
+        text_x = strip_x + (strip_width - text_width) / 2
+        text_y = strip_y - strip_height + (strip_height - 8) / 2  # Adjust the 12 if using a different font size
+
+        # Draw the text on the strip
+        c.drawString(text_x, text_y, strip_text)
+        
+        # Lens Prescription Strip
+        strip_x = 20  # X coordinate for the left side of the strip
+        strip_y = 40  # Y coordinate for the top side of the strip
+        strip_width = width - 40  # The width of the strip
+        strip_height = 20  # The height of the strip
+        strip_text = "Optical Zone Ltd | Valentina Mall | Tel: 5555 5555 | BRN: C0123541"  # The text you want to display
+
+        # Set the fill color to black
+        c.setFillColorRGB(0, 0, 0)  # RGB for black
+
+        # Draw the rectangle
+        c.rect(strip_x, strip_y - strip_height, strip_width, strip_height, stroke=0, fill=1)
+
+        # Set the text color to white for contrast
+        c.setFillColorRGB(1, 1, 1)  # RGB for white
+
+        # Choose the font and size for the text
+        c.setFont("Helvetica-Bold", 10)
+
+        # Calculate the width of the text
+        text_width = c.stringWidth(strip_text, "Helvetica-Bold", 10)
+
+        # Position the text in the center of the strip
+        text_x = strip_x + (strip_width - text_width) / 2
+        text_y = strip_y - strip_height + (strip_height - 8) / 2  # Adjust the 12 if using a different font size
+
+        # Draw the text on the strip
+        c.drawString(text_x, text_y, strip_text)
 
         # Finalize PDF
         c.showPage()
