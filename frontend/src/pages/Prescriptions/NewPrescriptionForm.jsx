@@ -51,7 +51,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             const downloadUrl = window.URL.createObjectURL(blob);
             const downloadLink = document.createElement('a');
             downloadLink.href = downloadUrl;
-            downloadLink.setAttribute('download', 'form-data.pdf'); // Any filename you like
+            downloadLink.setAttribute('download', `prescription_${formData.prescription_id}.pdf`); // Any filename you like
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
@@ -149,6 +149,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             pdr: prescriptionData.glass_prescription?.pdr,
             pdl: prescriptionData.glass_prescription?.pdl,
             "type-of-lenses": prescriptionData.glass_prescription?.type_of_lenses,
+            "type-of-contact-lenses": prescriptionData.contact_lens_prescription?.type_of_contact_lenses,
 
             "lens-right-sph": prescriptionData.contact_lens_prescription?.lens_detail_right.sph,
             "lens-right-cyl": prescriptionData.contact_lens_prescription?.lens_detail_right.cyl,

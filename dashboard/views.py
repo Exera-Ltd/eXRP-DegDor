@@ -558,10 +558,13 @@ def generate_prescription_pdf(request):
         # Glass Prescription First Row Values
         c.drawString(grid_left_column + 68, grid_height - 14, format_with_plus_if_positive(str(form_data.get('pdr', ''))))
         c.drawString(grid_left_column + 68, grid_height - 33, format_with_plus_if_positive(str(form_data.get('pdl', ''))))
+        
+        c.drawString(grid_left_column, patient_info_start_height - 120, "Type Of:")
+        c.drawString(grid_left_column + 68, patient_info_start_height - 120, str(form_data.get('type-of-lenses', '')))
             
         #c.setFillColorRGB(0, 0, 0)
         # Drawing the grid lines
-        grid_height = height - 190  # Starting just below the headers
+        grid_height = height - 230  # Starting just below the headers
         c.grid([grid_left_column, grid_left_column + 35, grid_left_column + 105, grid_left_column + 175, grid_left_column + 245],
                [grid_height, grid_height - 20, grid_height - 40, grid_height - 60])
 
@@ -585,6 +588,8 @@ def generate_prescription_pdf(request):
         c.drawString(grid_left_column + 125, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-cyl', ''))))
         c.drawString(grid_left_column + 195, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-axis', ''))))
 
+        c.drawString(grid_left_column, patient_info_start_height - 260, "Type Of:")
+        c.drawString(grid_left_column + 68, patient_info_start_height - 260, str(form_data.get('type-of-contact-lenses', '')))
         
         # Glass Prescription Strip
         strip_x = grid_left_column  # X coordinate for the left side of the strip
@@ -617,7 +622,7 @@ def generate_prescription_pdf(request):
         
         # Lens Prescription Strip
         strip_x = grid_left_column  # X coordinate for the left side of the strip
-        strip_y = height - 160  # Y coordinate for the top side of the strip
+        strip_y = height - 200  # Y coordinate for the top side of the strip
         strip_width = 245  # The width of the strip
         strip_height = 20  # The height of the strip
         strip_text = "Lens Prescription"  # The text you want to display
