@@ -131,6 +131,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
     useEffect(() => {
         prescriptionForm.resetFields();
         prescriptionForm.setFieldsValue({
+            prescription_id: prescriptionData.prescription?.id ? prescriptionData.prescription?.id : null,
             doctor_name: prescriptionData.prescription?.doctor_name,
             customer: prescriptionData.prescription?.customer_name,
             "last-eye-test": prescriptionData.prescription?.last_eye_test,
@@ -186,6 +187,13 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                 <Form.Item
                     name="doctor"
                     initialValue={user.id}
+                    hidden
+                >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item
+                    name="prescription_id"
                     hidden
                 >
                     <Input />
@@ -250,7 +258,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-right-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -258,7 +266,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -266,7 +274,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -279,7 +287,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-left-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -287,7 +295,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -295,7 +303,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -305,7 +313,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -313,7 +321,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -324,7 +332,8 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                 >
                     <Select placeholder="Lenses" disabled={readOnly}>
                         <Option value="Single">Single</Option>
-                        <Option value="Double">Double</Option>
+                        <Option value="Bi Focal">Bi Focal</Option>
+                        <Option value="Progressive">Progressive</Option>
                     </Select>
                 </Form.Item>
             </Col>
@@ -339,7 +348,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-right-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -347,7 +356,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -355,7 +364,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
         </Row>
@@ -368,7 +377,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-left-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -376,7 +385,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -384,7 +393,21 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value}/>
+                </Form.Item>
+            </Col>
+        </Row>
+        <Row gutter={24}>
+            <Col span={12}>
+                <Form.Item
+                    label="Type of Contact Lenses"
+                    name="type-of-contact-lenses"
+                    hasFeedback
+                >
+                    <Select placeholder="Contact Lenses" disabled={readOnly}>
+                        <Option value="Daily">Daily</Option>
+                        <Option value="Monthly">Monthly</Option>
+                    </Select>
                 </Form.Item>
             </Col>
         </Row>

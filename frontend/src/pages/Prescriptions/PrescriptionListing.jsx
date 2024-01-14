@@ -47,6 +47,7 @@ function PrescriptionListing() {
             })
             .then(data => {
                 console.log(data);
+                data.id = id;
                 setSelectedPrescriptionData(data);
                 setIsLoading(false);
                 setIsModalVisible(true);

@@ -22,6 +22,17 @@ today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
 def not_found_view(request):
     return render(request, 'notfound.html', status=404)
 
+def format_with_plus_if_positive(value):
+    try:
+        # Convert the value to a float and check if it's positive
+        if float(value) > 0:
+            return f"+{value}"
+    except ValueError:
+        # If value is not a number, return it as is
+        pass
+
+    return value
+
 @login_required(login_url='/accounts/login/')
 def dashboard_render (request):
 	"""
@@ -198,6 +209,7 @@ def create_prescription(request):
 
         ContactLensPrescription.objects.create(
             prescription=prescription,
+            type_of_contact_lenses=data.get('type-of-contact-lenses', ''),
             lens_detail_right=contact_lens_detail_right,
             lens_detail_left=contact_lens_detail_left,
         )
@@ -254,6 +266,7 @@ def get_prescription(request, prescription_id):
         try:
             contact_lens_prescription = prescription.contact_lens_prescription
             response['contact_lens_prescription'] = {
+                "type_of_contact_lenses": contact_lens_prescription.type_of_contact_lenses,
                 "lens_detail_right": model_to_dict(contact_lens_prescription.lens_detail_right),
                 "lens_detail_left": model_to_dict(contact_lens_prescription.lens_detail_left),
             }
@@ -472,8 +485,8 @@ def generate_prescription_pdf(request):
         left_margin = 20
         top_margin = height - 60
 
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(left_margin, height - 30, "KLER VISION")
+        #c.setFont("Helvetica-Bold", 16)
+        #c.drawString(left_margin, height - 30, "KLER VISION")
 
         # Patient Information and Prescription Grid
         c.setFont("Helvetica", 12)
@@ -483,13 +496,30 @@ def generate_prescription_pdf(request):
         name_label_x = left_margin
         name_value_x = left_margin + 70  # You might need to adjust the 70 points to align it as you wish
         name_y = patient_info_start_height
+        
+        #c.drawString(name_label_x, name_y, "LOGO GOES HERE")
+        image_path = 'static/img/logo.png'
+        # Specify image position and size
+        image_x = name_label_x + 40 # X-coordinate
+        image_y = patient_info_start_height - 45  # Y-coordinate (from the bottom)
+        image_width = 200  # Width of the image
+        image_height = 100  # Height of the image
 
-        c.drawString(name_label_x, name_y, "Name:")
-        c.drawString(name_value_x, name_y, str(form_data.get('customer', '')))
-        c.drawString(name_label_x, patient_info_start_height - 20, "Care:")
-        c.drawString(name_value_x, name_y - 20, str(form_data.get('care-system', '')))
-        c.drawString(name_label_x, patient_info_start_height - 40, "Next:")
-        c.drawString(name_value_x, name_y - 40, str(form_data.get('next-checkup-date', '')))
+        # Draw the image
+        c.drawImage(image_path, image_x, image_y, width=image_width,height=image_height)
+        
+        c.drawString(name_label_x, patient_info_start_height - 60, "Prescription ID: ")
+        c.drawString(name_value_x + 40, name_y - 60, str(form_data.get('prescription_id', '')))
+
+        c.drawString(name_label_x, patient_info_start_height - 100, "Name:")
+        c.drawString(name_value_x, name_y - 100, str(form_data.get('customer', '')))
+        c.drawString(name_label_x, patient_info_start_height - 120, "Care:")
+        c.drawString(name_value_x, name_y - 120, str(form_data.get('care-system', '')))
+        c.drawString(name_label_x, patient_info_start_height - 140, "Next:")
+        c.drawString(name_value_x, name_y - 140, str(form_data.get('next-checkup-date', '')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 260, "Doctor:")
+        c.drawString(name_value_x, name_y - 260, ".................................")
 
         # Drawing the grid lines
         grid_height = patient_info_start_height + 15  # Starting just below the headers
@@ -500,22 +530,35 @@ def generate_prescription_pdf(request):
         c.drawString(grid_left_column, grid_height - 15, "")
         c.drawString(grid_left_column + 50, grid_height - 15, "Sphere:")
         c.drawString(grid_left_column + 117, grid_height - 15, "Cylinder:")
-        c.drawString(grid_left_column + 197, grid_height - 15, "Axis:")
+        c.drawString(grid_left_column + 200, grid_height - 15, "Axis:")
         
         # Glass Prescription First Column Headers
         c.drawString(grid_left_column + 12, grid_height - 34, "R:")
         c.drawString(grid_left_column + 12, grid_height - 53, "L:")
         
         # Glass Prescription First Row Values
-        c.drawString(grid_left_column + 58, grid_height - 34, str(form_data.get('glass-right-sph', '')))
-        c.drawString(grid_left_column + 128, grid_height - 34, str(form_data.get('glass-right-cyl', '')))
-        c.drawString(grid_left_column + 200, grid_height - 34, str(form_data.get('glass-right-axis', '')))
+        c.drawString(grid_left_column + 55, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-sph', ''))))
+        c.drawString(grid_left_column + 125, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-cyl', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-axis', ''))))
         
         # Glass Prescription Second Row Values
-        c.drawString(grid_left_column + 58, grid_height - 53, str(form_data.get('glass-left-sph', '')))
-        c.drawString(grid_left_column + 128, grid_height - 53, str(form_data.get('glass-left-cyl', '')))
-        c.drawString(grid_left_column + 200, grid_height - 53, str(form_data.get('glass-left-axis', '')))
+        c.drawString(grid_left_column + 55, grid_height - 53, format_with_plus_if_positive(str(form_data.get('glass-left-sph', ''))))
+        c.drawString(grid_left_column + 125, grid_height - 53, format_with_plus_if_positive(str(form_data.get('glass-left-cyl', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 53, format_with_plus_if_positive(str(form_data.get('glass-left-axis', ''))))
         
+        # Drawing the grid lines
+        grid_height = height - 113  # Starting just below the headers
+        c.grid([grid_left_column, grid_left_column + 55, grid_left_column + 105],
+               [grid_height, grid_height - 20, grid_height - 40])
+        
+        # Glass Prescription First Column Headers
+        c.drawString(grid_left_column + 12, grid_height - 14, "PD R:")
+        c.drawString(grid_left_column + 12, grid_height - 33, "PD L:")
+        
+        # Glass Prescription First Row Values
+        c.drawString(grid_left_column + 68, grid_height - 14, format_with_plus_if_positive(str(form_data.get('pdr', ''))))
+        c.drawString(grid_left_column + 68, grid_height - 33, format_with_plus_if_positive(str(form_data.get('pdl', ''))))
+            
         #c.setFillColorRGB(0, 0, 0)
         # Drawing the grid lines
         grid_height = height - 190  # Starting just below the headers
@@ -526,21 +569,21 @@ def generate_prescription_pdf(request):
         c.drawString(grid_left_column, grid_height - 15, "")
         c.drawString(grid_left_column + 50, grid_height - 15, "Sphere:")
         c.drawString(grid_left_column + 117, grid_height - 15, "Cylinder:")
-        c.drawString(grid_left_column + 197, grid_height - 15, "Axis:")
+        c.drawString(grid_left_column + 200, grid_height - 15, "Axis:")
         
         # Glass Prescription First Column Headers
         c.drawString(grid_left_column + 12, grid_height - 34, "R:")
         c.drawString(grid_left_column + 12, grid_height - 53, "L:")
         
         # Glass Prescription First Row Values
-        c.drawString(grid_left_column + 58, grid_height - 34, str(form_data.get('lens-right-sph', '')))
-        c.drawString(grid_left_column + 128, grid_height - 34, str(form_data.get('lens-right-cyl', '')))
-        c.drawString(grid_left_column + 200, grid_height - 34, str(form_data.get('lens-right-axis', '')))
+        c.drawString(grid_left_column + 55, grid_height - 34, format_with_plus_if_positive(str(form_data.get('lens-right-sph', ''))))
+        c.drawString(grid_left_column + 125, grid_height - 34, format_with_plus_if_positive(str(form_data.get('lens-right-cyl', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 34, format_with_plus_if_positive(str(form_data.get('lens-right-axis', ''))))
         
         # Glass Prescription Second Row Values
-        c.drawString(grid_left_column + 58, grid_height - 53, str(form_data.get('lens-left-sph', '')))
-        c.drawString(grid_left_column + 128, grid_height - 53, str(form_data.get('lens-left-cyl', '')))
-        c.drawString(grid_left_column + 200, grid_height - 53, str(form_data.get('lens-left-axis', '')))
+        c.drawString(grid_left_column + 55, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-sph', ''))))
+        c.drawString(grid_left_column + 125, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-cyl', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-axis', ''))))
 
         
         # Glass Prescription Strip

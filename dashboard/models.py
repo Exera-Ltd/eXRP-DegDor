@@ -82,6 +82,7 @@ class GlassPrescription(models.Model):
 
 class ContactLensPrescription(models.Model):
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='contact_lens_prescription')
+    type_of_contact_lenses = models.CharField(max_length=255, blank=True)
     lens_detail_right = models.OneToOneField(LensDetails, related_name='right_contact_prescription', on_delete=models.CASCADE)
     lens_detail_left = models.OneToOneField(LensDetails, related_name='left_contact_prescription', on_delete=models.CASCADE)
     
