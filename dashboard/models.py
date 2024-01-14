@@ -67,7 +67,7 @@ class LensDetails(models.Model):
     side = models.CharField(max_length=5, choices=(('Right', 'Right'), ('Left', 'Left')))
     sph = models.DecimalField(max_digits=10, decimal_places=2)
     cyl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    axis = models.IntegerField(blank=True, null=True)
+    axis = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 class GlassPrescription(models.Model):
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='glass_prescription')
