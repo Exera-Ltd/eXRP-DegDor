@@ -12,6 +12,7 @@ app_urls = [
     path("get_all_prescriptions", views.get_all_prescriptions),
     path("get_prescription/<int:prescription_id>/", views.get_prescription),
     path("generate_prescription_pdf", views.generate_prescription_pdf),
+    path("get_prescriptions_by_customer/<int:customer_id>/", views.get_prescriptions_by_customer),
     
     path('create_job_card/', views.create_job_card, name='create_job_card'),
     path("get_all_job_cards", views.get_all_job_cards),

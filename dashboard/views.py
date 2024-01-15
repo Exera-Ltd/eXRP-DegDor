@@ -62,13 +62,15 @@ def add_customer(request):
             
             return JsonResponse({"message": "Duplicate customer found."}, status=400)
         
-        
+        dob = data.get('date_of_birth')
+        if (len(data.get('date_of_birth')) > 10):
+            dob = data.get('date_of_birth')[:10]
 
         customer = Customer(
             title=data.get('title'),
             first_name=data.get('first_name'),
             last_name=data.get('last_name'),
-            date_of_birth=data.get('date_of_birth'),
+            date_of_birth=dob,
             mobile_1=data.get('mobile_1'),
             mobile_2=data.get('mobile_2', ''),
             address=data.get('address'),
@@ -80,6 +82,8 @@ def add_customer(request):
             created_date=today_date_str,
             last_modified_date=today_date_str
         )
+        
+        print(data)
         
         customer.save()
         
@@ -112,11 +116,15 @@ def update_customer(request, customer_id):
     try:
         data = json.loads(request.body)
         customer = Customer.objects.get(id=customer_id)
+        
+        dob = data.get('date_of_birth')
+        if (len(data.get('date_of_birth')) > 10):
+            dob = data.get('date_of_birth')[:10]
     
         customer.title=data.get('title', customer.title)
         customer.first_name=data.get('first_name', customer.first_name)
         customer.last_name=data.get('last_name', customer.last_name)
-        customer.date_of_birth=data.get('date_of_birth', customer.date_of_birth)
+        customer.date_of_birth=dob
         customer.mobile_1=data.get('mobile_1', customer.mobile_1)
         customer.mobile_2=data.get('mobile_2', customer.mobile_2)
         customer.address=data.get('address', customer.address)
@@ -236,7 +244,7 @@ def create_prescription(request):
 def get_all_prescriptions(request):
 	entries = (
 		Prescription.objects.select_related("")
-            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date")
+            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date").order_by("-created_date")
 	)
 	return JsonResponse({"values": list(entries)})
 
@@ -247,6 +255,8 @@ def get_prescription(request, prescription_id):
         prescription_dict = model_to_dict(prescription, exclude=["doctor", "customer"])
         prescription_dict['doctor_name'] = f"{prescription.doctor.first_name} {prescription.doctor.last_name}"
         prescription_dict['customer_name'] = f"{prescription.customer.first_name} {prescription.customer.last_name}"
+        prescription_dict['customer_id'] = prescription.customer.id
+        
 
         # Initialize the response dictionary with the Prescription data
         response = {"prescription": prescription_dict}
@@ -278,11 +288,57 @@ def get_prescription(request, prescription_id):
     except Prescription.DoesNotExist:
         return JsonResponse({"error": "Prescription not found"}, status=404)
     
+def get_prescriptions_by_customer(request, customer_id):
+    try:
+        prescriptions = Prescription.objects.filter(customer__id=customer_id)
+        
+        prescriptions_list = []
+        for prescription in prescriptions:
+            prescription_dict = model_to_dict(prescription, exclude=["doctor", "customer"])
+            prescription_dict['doctor_name'] = f"{prescription.doctor.first_name} {prescription.doctor.last_name}"
+            prescription_dict['customer_name'] = f"{prescription.customer.first_name} {prescription.customer.last_name}"
+
+            # Initialize the response dictionary with the Prescription data
+            response = {"prescription": prescription_dict}
+
+            try:
+                glass_prescription = prescription.glass_prescription
+                response['glass_prescription'] = {
+                    "lens_detail_right": model_to_dict(glass_prescription.lens_detail_right),
+                    "lens_detail_left": model_to_dict(glass_prescription.lens_detail_left),
+                    "type_of_lenses": glass_prescription.type_of_lenses,
+                    "pdr": glass_prescription.pdr,
+                    "pdl": glass_prescription.pdl,
+                }
+            except ObjectDoesNotExist:
+                response['glass_prescription'] = None
+
+            try:
+                contact_lens_prescription = prescription.contact_lens_prescription
+                response['contact_lens_prescription'] = {
+                    "type_of_contact_lenses": contact_lens_prescription.type_of_contact_lenses,
+                    "lens_detail_right": model_to_dict(contact_lens_prescription.lens_detail_right),
+                    "lens_detail_left": model_to_dict(contact_lens_prescription.lens_detail_left),
+                }
+            except ObjectDoesNotExist:
+                response['contact_lens_prescription'] = None
+                
+            prescriptions_list.append(response)
+            print(prescriptions_list)
+
+        return JsonResponse(prescriptions_list, safe=False)
+
+    except Prescription.DoesNotExist:
+        return JsonResponse({"error": "Prescription not found"}, status=404)
+    
 @require_http_methods(["POST"])
 def create_job_card(request):
     try:
         data = json.loads(request.body)
         
+        print(data)
+        
+        prescription = data.get('prescription')
         customer = data.get('customer')
         type_of_job_card = data.get('typeOfJobCard')
         salesman = data.get('salesman')
@@ -290,10 +346,11 @@ def create_job_card(request):
         supplier = data.get('supplier')
         supplier_reference = data.get('supplierReference')
         estimated_delivery_date = data.get('estimatedDeliveryDate')
-        if estimated_delivery_date:
-            estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%d').date()
+        #if estimated_delivery_date:
+            #estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%d').date()
 
         job_card_fields = {
+            'prescription_id': prescription,
             'customer_id': customer,
             'job_type': type_of_job_card,
             'salesman': salesman,
@@ -301,6 +358,8 @@ def create_job_card(request):
             'supplier': supplier,
             'supplier_reference': supplier_reference,
             'estimated_delivery_date': estimated_delivery_date,
+            'created_date':today_date_str,
+            'last_modified_date':today_date_str
         }
 
         if type_of_job_card == 'lenses':
@@ -326,8 +385,7 @@ def create_job_card(request):
             action='CREATED',
             description=f"Job Card {job_card.id} of type {type_of_job_card} created successfully."
         )
-
-        return JsonResponse({'message': 'Job Card created successfully', 'id': job_card.id}, status=201)
+        return JsonResponse({"message": "Job Card created successfully", "id": job_card.id}, status=201)
     
     except Exception as e:
         # Log the error
@@ -337,14 +395,14 @@ def create_job_card(request):
             description=f"Error creating Job Card. Error: {e}"
         )
         
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({"error": str(e)}, status=400)
     
 def get_all_job_cards(request):
 	entries = JobCard.objects.select_related('customer').values(
         *{f.name for f in JobCard._meta.get_fields() if not f.is_relation or f.one_to_one or (f.many_to_one and f.related_model)},
         'customer__first_name',
         'customer__last_name',
-    )
+    ).order_by('created_date')
 	return JsonResponse({"values": list(entries)})
 
 def get_job_card(request, job_card_id):

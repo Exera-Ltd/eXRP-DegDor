@@ -64,15 +64,6 @@ function NewPrescription() {
             >
                 <JobCardForm jobCardData={{}} />
             </Modal>
-
-            <Row style={{ justifyContent: 'center', marginTop: 10 }}>
-                <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => showModal()}>
-                    Add Job Card
-                </Button>
-                <Button type="primary" htmlType="submit" style={{ width: 200, height: 40, marginRight: 10 }} onClick={() => handleSave()}>
-                    Print
-                </Button>
-            </Row>
         </div>
     );
 }

@@ -26,15 +26,15 @@ class Customer(models.Model):
     title = models.CharField(max_length=10, choices=TITLE_CHOICES)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    date_of_birth = models.DateTimeField()
+    date_of_birth = models.DateField()
     mobile_1 = models.CharField(validators=[phone_regex], max_length=17, blank=False)
     mobile_2 = models.CharField(validators=[phone_regex], max_length=17, blank=True, null=True)
     address = models.TextField()
     city = models.CharField(max_length=100)
-    email = models.EmailField()
+    email = models.EmailField(blank=True, null=True)
     nic_number = models.CharField(max_length=20, blank=True, null=True)
     profession = models.CharField(max_length=100, blank=True, null=True)
-    insurance = models.CharField(max_length=50, choices=INSURANCE_CHOICES)
+    insurance = models.CharField(max_length=50, choices=INSURANCE_CHOICES, blank=True, null=True)
     created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
     last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
     
@@ -109,6 +109,8 @@ class JobCard(models.Model):
     supplier_reference = models.CharField(max_length=100, blank=True, null=True)
     estimated_delivery_date = models.DateField(null=True, blank=True)
     no_of_boxes = models.IntegerField(null=True, blank=True)
+    created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
 
     prescription = models.ForeignKey(Prescription,on_delete=models.SET_NULL,null=True,blank=True,related_name='job_cards')
 

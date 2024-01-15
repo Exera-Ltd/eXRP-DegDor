@@ -28,7 +28,7 @@ const { Header, Content, Sider, Footer } = Layout;
 const d = new Date();
 
 const menu = [
-  /* { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Administrator', 'Manager', 'Staff'] },*/
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Administrator', 'Manager', 'Staff'] },
   { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Administrator', 'Manager', 'Staff'] },
   {
     key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [

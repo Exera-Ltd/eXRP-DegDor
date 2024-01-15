@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from 'react';
-import { Button, Row, Col, Form, Input, DatePicker, TimePicker, Select, notification } from 'antd';
-import moment from 'moment';
+import { Button, Row, Col, Form, Input, InputNumber, DatePicker, TimePicker, Select, notification } from 'antd';
+import dayjs from 'dayjs';
 import { useUser } from '../../contexts/UserContext';
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
@@ -108,9 +108,9 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
         appointmentForm.resetFields();
         appointmentForm.setFieldsValue({
             customer: slotInfo.customer ? slotInfo.customer : '',
-            appointmentDate: moment(slotInfo.appointment_date),
-            startTime: moment(slotInfo.start),
-            endTime: moment(slotInfo.end),
+            appointmentDate: dayjs(slotInfo.appointment_date),
+            startTime: dayjs(slotInfo.start),
+            endTime: dayjs(slotInfo.end),
             status: slotInfo.status ? slotInfo.status : '',
             doctor: slotInfo.doctor ? slotInfo.doctor : user.id,
             noOfPatients: slotInfo.number_of_patients ? slotInfo.number_of_patients : '',
@@ -164,9 +164,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                             name="appointmentDate"
                             label="Appointment Date"
                         >
-                            <DatePicker.MonthPicker
-                                format="DD-MM-YYYY"
-                            />
+                            <DatePicker format="DD-MM-YYYY"/>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -236,7 +234,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                             name="noOfPatients"
                             label="No. of Patients"
                         >
-                            <Input />
+                            <InputNumber />
                         </Form.Item>
                     </Col>
                 </Row>

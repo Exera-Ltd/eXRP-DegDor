@@ -16,16 +16,12 @@ function JobCardListing() {
     const [isLoading, setIsLoading] = useState(true);
 
     const filteredData = jobCardList.filter(item => {
-        const firstName = item.first_name || "";
-        const lastName = item.last_name || "";
-        const mobilePhone = item.mobile_1 || "";
-        const nic = item.nic_number || "";
+        const firstName = item.customer__first_name || "";
+        const lastName = item.customer__last_name || "";
 
         return (
             firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            mobilePhone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            nic.toLowerCase().includes(searchTerm.toLowerCase())
+            lastName.toLowerCase().includes(searchTerm.toLowerCase()) 
         );
     });
 

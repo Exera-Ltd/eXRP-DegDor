@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Row, Col, Form, Input, Select, DatePicker, notification } from 'antd';
-import moment from 'moment';
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 
 const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
     const [customerForm] = Form.useForm();
+    const [dateOfBirth, setDateOfBirth] = useState(dayjs())
 
     const onFinish = async (values) => {
         const endpoint = customerData.id ? `update_customer/${customerData.id}/` : 'create_customer';
@@ -24,7 +25,8 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                 },
                 body: JSON.stringify(values),
             });
-
+            console.log(response);
+            console.log(response.ok);
             if (response.ok) {
                 const result = await response.json();
                 customerForm.resetFields();
@@ -56,9 +58,10 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
         })
     };
 
-    const onChange = (date, dateString) => {
-        const localDate = date ? moment(date).format('YYYY-MM-DD') : null;
+    const onChange = (date) => {
+        const localDate = date ? dayjs(date).format('YYYY-MM-DD') : null;
         console.log(localDate);
+        setDateOfBirth(localDate);
     };
 
     useEffect(() => {
@@ -67,7 +70,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
             title: customerData?.title,
             first_name: customerData?.first_name,
             last_name: customerData?.last_name,
-            date_of_birth: moment(customerData.date_of_birth),
+            date_of_birth: dayjs(customerData.date_of_birth),
             mobile_1: customerData?.mobile_1,
             mobile_2: customerData?.mobile_2,
             address: customerData?.address,
@@ -150,7 +153,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                         },
                     ]}
                 >
-                    <DatePicker onChange={onChange} />
+                    <DatePicker onChange={onChange} value={dateOfBirth}/>
                 </Form.Item>
             </Col>
             <Col span={8}>

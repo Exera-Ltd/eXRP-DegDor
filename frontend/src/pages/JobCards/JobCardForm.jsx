@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Row, Col, Form, Input, Select, notification } from 'antd';
+import { Button, Row, Col, Form, Input, Select, DatePicker, InputNumber, notification } from 'antd';
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
+import dayjs from 'dayjs';
 
 const { Option } = Select;
 
@@ -9,10 +10,14 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
     const [jobCardType, setJobCardType] = useState('contactLenses');
     const [jobCardForm] = Form.useForm();
     const [customers, setCustomers] = useState([]);
+    const [deliveryDate, setDeliveryDate] = useState(dayjs())
 
     const onFinish = async (values) => {
         console.log('Success:', values);
-
+        const submissionValues = { ...values };
+        if (submissionValues.estimatedDeliveryDate) {
+            submissionValues.estimatedDeliveryDate = dayjs(submissionValues.estimatedDeliveryDate).format('YYYY-MM-DD');
+        }
         try {
             const csrftoken = getCookie('csrftoken');
             const response = await fetch(appUrl + `dashboard/create_job_card/`, {
@@ -22,11 +27,14 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify(values),
+                body: JSON.stringify(submissionValues),
             });
 
             if (response.ok) {
                 const result = await response.json();
+                console.log('success');
+                console.log(result);
+                console.log(result['message']);
                 jobCardForm.resetFields();
                 notification.success({
                     message: 'Success',
@@ -34,11 +42,14 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                 });
             } else {
                 const result = await response.json();
+                console.log('error');
+                console.log(result);
                 notification.error({
                     message: 'Error ',
                     description: result['error']
                 })
             }
+            closeModal();
         } catch (error) {
             notification.error({
                 message: 'Error ',
@@ -68,22 +79,28 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
         setJobCardType(value);
     };
 
+    const onChange = (date, dateString) => {
+        const localDate = date ? dayjs(date).format('YYYY-MM-DD') : null;
+        setDeliveryDate(localDate);
+    };
+
     useEffect(() => {
         jobCardForm.resetFields();
         jobCardForm.setFieldsValue({
-            customer: jobCardData?.customer?.id, // Assuming jobCardData.customer has id, first_name, and last_name
+            customer: jobCardData?.prescription?.customer_id,
+            prescription_id: jobCardData?.prescription?.id,
             typeOfJobCard: jobCardData?.job_type,
             supplier: jobCardData?.supplier,
             salesman: jobCardData?.salesman,
             status: jobCardData?.status || 'Work in Progress', // Default value if status is not set
             supplierReference: jobCardData?.supplier_reference,
-            estimatedDeliveryDate: jobCardData?.estimated_delivery_date, // Format this date if necessary
-            // Fields specific to contact lenses
+            estimatedDeliveryDate: dayjs(jobCardData?.estimated_delivery_date), // Format this date if necessary
+
             contactLens: jobCardData?.job_type === 'contactLenses' ? jobCardData?.contact_lens : undefined,
             noOfBoxes: jobCardData?.job_type === 'contactLenses' ? jobCardData?.no_of_boxes : undefined,
             baseCurve: jobCardData?.job_type === 'contactLenses' ? jobCardData?.base_curve : undefined,
             diameter: jobCardData?.job_type === 'contactLenses' ? jobCardData?.diameter : undefined,
-            // Fields specific to lenses
+
             lens: jobCardData?.job_type === 'lenses' ? jobCardData?.lens : undefined,
             ht: jobCardData?.job_type === 'lenses' ? jobCardData?.ht : undefined,
             frame: jobCardData?.job_type === 'lenses' ? jobCardData?.frame : undefined,
@@ -124,6 +141,13 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                                 </Option>
                             ))}
                         </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                        name="prescription_id"
+                        hidden
+                    >
+                        <Input />
                     </Form.Item>
 
                 </Col>
@@ -180,7 +204,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                             name="noOfBoxes"
                             label="Number of boxes"
                         >
-                            <Input readOnly={readOnly} />
+                            <InputNumber readOnly={readOnly} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -252,7 +276,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="estimatedDeliveryDate"
                         label="Estimated Delivery Date"
                     >
-                        <Input readOnly={readOnly} />
+                        <DatePicker onChange={onChange} value={deliveryDate} disabled={readOnly} />
                     </Form.Item>
                 </Col>
             </Row>

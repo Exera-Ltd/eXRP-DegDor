@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Space, Table, Tag } from 'antd';
 import { appUrl } from '../../constants';
-import moment from 'moment';
+import dayjs from 'dayjs';
+
 const columns = [
     {
         title: 'Time',
         dataIndex: 'timestamp',
         key: 'timestamp',
-        render: (date) => <a>{moment(date).format('LLLL')}</a>,
+        render: (date) => <a>{dayjs(date).format('LLLL')}</a>,
     },
     {
         title: 'Action',
