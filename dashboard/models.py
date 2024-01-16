@@ -65,7 +65,7 @@ class Prescription(models.Model):
 
 class LensDetails(models.Model):
     side = models.CharField(max_length=5, choices=(('Right', 'Right'), ('Left', 'Left')))
-    sph = models.DecimalField(max_digits=10, decimal_places=2)
+    sph = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     cyl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     axis = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
@@ -73,9 +73,9 @@ class GlassPrescription(models.Model):
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='glass_prescription')
     lens_detail_right = models.OneToOneField(LensDetails, related_name='right_glass_prescription', on_delete=models.CASCADE)
     lens_detail_left = models.OneToOneField(LensDetails, related_name='left_glass_prescription', on_delete=models.CASCADE)
-    type_of_lenses = models.CharField(max_length=255, blank=True)
-    pdr = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    pdl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    type_of_lenses = models.CharField(max_length=255, blank=True, null=True)
+    pdr = models.CharField(max_length=255, blank=True, null=True)
+    pdl = models.CharField(max_length=255, blank=True, null=True)
     
     def to_dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])

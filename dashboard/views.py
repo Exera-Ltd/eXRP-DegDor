@@ -165,12 +165,12 @@ def create_prescription(request):
         data = json.loads(request.body)
         
         customer = Customer.objects.filter(id=data['customer']).first()
-
+        print(data)
         prescription = Prescription.objects.create(
             customer_id=data['customer'],
             doctor_id=data['doctor'],
             last_eye_test=data.get('last-eye-test', ''),
-            next_checkup=datetime.strptime(data['next-checkup-date'], '%Y-%m-%d').date() if data['next-checkup-date'] else None,
+            next_checkup=datetime.strptime(data.get('next-checkup-date'), '%Y-%m-%d').date() if data.get('next-checkup-date') else None,
             care_system=data.get('care-system', ''),
             recommendation=data.get('recommendation', ''),
             vision=data.get('vision', ''),
@@ -263,6 +263,7 @@ def get_prescription(request, prescription_id):
 
         try:
             glass_prescription = prescription.glass_prescription
+            print(glass_prescription.pdr)
             response['glass_prescription'] = {
                 "lens_detail_right": model_to_dict(glass_prescription.lens_detail_right),
                 "lens_detail_left": model_to_dict(glass_prescription.lens_detail_left),
@@ -324,7 +325,6 @@ def get_prescriptions_by_customer(request, customer_id):
                 response['contact_lens_prescription'] = None
                 
             prescriptions_list.append(response)
-            print(prescriptions_list)
 
         return JsonResponse(prescriptions_list, safe=False)
 
@@ -577,7 +577,7 @@ def generate_prescription_pdf(request):
         c.drawString(name_value_x, name_y - 140, str(form_data.get('next-checkup-date', '')))
         
         c.drawString(name_label_x, patient_info_start_height - 260, "Doctor:")
-        c.drawString(name_value_x, name_y - 260, ".................................")
+        c.drawString(name_value_x, name_y - 260, "O. POLIN Optometrist")
 
         # Drawing the grid lines
         grid_height = patient_info_start_height + 15  # Starting just below the headers
@@ -597,12 +597,12 @@ def generate_prescription_pdf(request):
         # Glass Prescription First Row Values
         c.drawString(grid_left_column + 55, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-sph', ''))))
         c.drawString(grid_left_column + 125, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-cyl', ''))))
-        c.drawString(grid_left_column + 195, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-axis', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 34, str(form_data.get('glass-right-axis', '')))
         
         # Glass Prescription Second Row Values
         c.drawString(grid_left_column + 55, grid_height - 53, format_with_plus_if_positive(str(form_data.get('glass-left-sph', ''))))
         c.drawString(grid_left_column + 125, grid_height - 53, format_with_plus_if_positive(str(form_data.get('glass-left-cyl', ''))))
-        c.drawString(grid_left_column + 195, grid_height - 53, format_with_plus_if_positive(str(form_data.get('glass-left-axis', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 53, str(form_data.get('glass-left-axis', '')))
         
         # Drawing the grid lines
         grid_height = height - 113  # Starting just below the headers
@@ -614,8 +614,8 @@ def generate_prescription_pdf(request):
         c.drawString(grid_left_column + 12, grid_height - 33, "PD L:")
         
         # Glass Prescription First Row Values
-        c.drawString(grid_left_column + 68, grid_height - 14, format_with_plus_if_positive(str(form_data.get('pdr', ''))))
-        c.drawString(grid_left_column + 68, grid_height - 33, format_with_plus_if_positive(str(form_data.get('pdl', ''))))
+        c.drawString(grid_left_column + 68, grid_height - 14, str(form_data.get('pdr', '')))
+        c.drawString(grid_left_column + 68, grid_height - 33, str(form_data.get('pdl', '')))
         
         c.drawString(grid_left_column, patient_info_start_height - 120, "Type Of:")
         c.drawString(grid_left_column + 68, patient_info_start_height - 120, str(form_data.get('type-of-lenses', '')))

@@ -128,7 +128,7 @@ function PrescriptionListing() {
                             ]}
                         >
                             <Meta
-                                title={item.customer__first_name + ' ' + item.customer__last_name}
+                                title={item.customer__first_name + ' ' + item.customer__last_name.toUpperCase()}
                                 description={"Consulted by Dr. " + item.doctor__first_name + " on " + item.created_date}
                             />
                         </Card>

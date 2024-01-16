@@ -138,7 +138,7 @@ function CustomerListing() {
                                     ]}
                                 >
                                     <Meta
-                                        title={item.title + ' ' + item.first_name + ' ' + item.last_name}
+                                        title={item.title + ' ' + item.first_name + ' ' + item.last_name.toUpperCase()}
                                         description={item.nic_number}
                                     />
                                     <div>

@@ -312,8 +312,8 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                         disabled={readOnly}
                     >
                         {customers.map(customer => (
-                            <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name}`}>
-                                {customer.first_name} {customer.last_name}
+                            <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name.toUpperCase()}`}>
+                                {customer.first_name} {customer.last_name.toUpperCase()}
                             </Option>
                         ))}
                     </Select>
@@ -400,7 +400,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} min={-Infinity} formatter={value => !value || isNaN(value) ? '' : value < 0 ? value.toString() : ''}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -408,7 +408,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={readOnly} step={1} min={0} max={180} />
                 </Form.Item>
             </Col>
         </Row>
@@ -429,7 +429,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={readOnly} step={0.25} precision={2} min={-Infinity} formatter={value => !value || isNaN(value) ? '' : value < 0 ? value.toString() : ''}/>
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -437,7 +437,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={readOnly} step={1} min={0} max={180} />
                 </Form.Item>
             </Col>
         </Row>
@@ -447,7 +447,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={8}>
@@ -455,7 +455,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
             <Col span={8}>

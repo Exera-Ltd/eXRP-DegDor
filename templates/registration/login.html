@@ -15,7 +15,7 @@
 <body oncontextmenu="return false">
     <div id="particles-js"></div>
     <div class="login-wrapper">
-        <h1 class="login-title">KLER VISION</h1>
+        <h1 class="login-title"><img class="logo-image" src="{% static 'img/logo.png' %}" alt="KLER VISION"></h1>
         <div class="login-container">
             <form method="post" action="{% url 'login' %}" class="login-form">
                 {% csrf_token %}

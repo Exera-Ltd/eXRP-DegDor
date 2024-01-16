@@ -91,3 +91,8 @@ input {
     font-size: 14px;
     z-index: 2;
 }
+
+.logo-image {
+    width: 300px;
+    mix-blend-mode: multiply;
+}

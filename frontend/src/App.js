@@ -104,13 +104,13 @@ const App = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Header
         style={{
-          backgroundImage: 'linear-gradient(to right, #024550, #4ca1af)',
+          backgroundImage: 'linear-gradient(to left, #024550, #4ca1af)',
           padding: 0,
           margin: 0,
           display: 'flex',
         }}
       >
-        <div className="header-logo" style={{ fontSize: 24 }}>Kler Vision</div>
+        <div className="header-logo" style={{ fontSize: 24 }}><img style={{ width: 120, textAlign: 'center', mixBlendMode: 'multiply', marginTop: 2 }} src="../static/img/logo.png" alt="Kler Optics" /></div>
         <div className="header-content">
           {renderNotificationIcon()}
         </div>
@@ -272,7 +272,7 @@ const App = () => {
               padding: '10px 0px'
             }}
           >
-            Kler Vision © {d.getFullYear()} - Solution Designed by <a href='https://exera.mu?utm_source=optical-zone' target='_blank' rel="noreferrer">Exera</a>
+            Kler Optics © {d.getFullYear()} - Solution Designed by <a href='https://exera.mu?utm_source=optical-zone' target='_blank' rel="noreferrer">Exera</a>
           </Footer>
         </Layout>
       </Layout>
