@@ -197,6 +197,7 @@ def create_prescription(request):
             lens_detail_right=glass_lens_detail_right,
             lens_detail_left=glass_lens_detail_left,
             type_of_lenses=data.get('type-of-lenses', ''),
+            glass_add=data.get('glass-add', ''),
             pdr=data.get('pdr'),
             pdl=data.get('pdl')
         )
@@ -218,6 +219,7 @@ def create_prescription(request):
         ContactLensPrescription.objects.create(
             prescription=prescription,
             type_of_contact_lenses=data.get('type-of-contact-lenses', ''),
+            contact_lens_add=data.get('contact-lens-add', ''),
             lens_detail_right=contact_lens_detail_right,
             lens_detail_left=contact_lens_detail_left,
         )
@@ -270,6 +272,7 @@ def get_prescription(request, prescription_id):
                 "type_of_lenses": glass_prescription.type_of_lenses,
                 "pdr": glass_prescription.pdr,
                 "pdl": glass_prescription.pdl,
+                "glass_add": glass_prescription.glass_add
             }
         except ObjectDoesNotExist:
             response['glass_prescription'] = None
@@ -280,6 +283,7 @@ def get_prescription(request, prescription_id):
                 "type_of_contact_lenses": contact_lens_prescription.type_of_contact_lenses,
                 "lens_detail_right": model_to_dict(contact_lens_prescription.lens_detail_right),
                 "lens_detail_left": model_to_dict(contact_lens_prescription.lens_detail_left),
+                "contact_lens_add" : contact_lens_prescription.contact_lens_add
             }
         except ObjectDoesNotExist:
             response['contact_lens_prescription'] = None

@@ -238,11 +238,12 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             "glass-left-sph": prescriptionData.glass_prescription?.lens_detail_left.sph,
             "glass-left-cyl": prescriptionData.glass_prescription?.lens_detail_left.cyl,
             "glass-left-axis": prescriptionData.glass_prescription?.lens_detail_left.axis,
+            "glass-add": prescriptionData.glass_prescription?.glass_add,
             pdr: prescriptionData.glass_prescription?.pdr,
             pdl: prescriptionData.glass_prescription?.pdl,
             "type-of-lenses": prescriptionData.glass_prescription?.type_of_lenses,
             "type-of-contact-lenses": prescriptionData.contact_lens_prescription?.type_of_contact_lenses,
-
+            "contact-lens-add": prescriptionData.contact_lens_prescription?.contact_lens_add,
             "lens-right-sph": prescriptionData.contact_lens_prescription?.lens_detail_right.sph,
             "lens-right-cyl": prescriptionData.contact_lens_prescription?.lens_detail_right.cyl,
             "lens-right-axis": prescriptionData.contact_lens_prescription?.lens_detail_right.axis,
@@ -442,7 +443,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
             </Col>
         </Row>
         <Row gutter={24}>
-            <Col span={8}>
+            <Col span={6}>
                 <Form.Item
                     label="PDR."
                     name="pdr"
@@ -450,7 +451,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
                 <Form.Item
                     label="PDL."
                     name="pdl"
@@ -458,7 +459,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
                 <Form.Item
                     label="Type of Lenses"
                     name="type-of-lenses"
@@ -469,6 +470,14 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                         <Option value="Bi Focal">Bi Focal</Option>
                         <Option value="Progressive">Progressive</Option>
                     </Select>
+                </Form.Item>
+            </Col>
+            <Col span={6}>
+                <Form.Item
+                    label="Add."
+                    name="glass-add"
+                >
+                    <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -542,6 +551,14 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                         <Option value="Daily">Daily</Option>
                         <Option value="Monthly">Monthly</Option>
                     </Select>
+                </Form.Item>
+            </Col>
+            <Col span={6}>
+                <Form.Item
+                    label="Add."
+                    name="contact-lens-add"
+                >
+                    <Input readOnly={readOnly} />
                 </Form.Item>
             </Col>
         </Row>

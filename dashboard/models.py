@@ -76,6 +76,7 @@ class GlassPrescription(models.Model):
     type_of_lenses = models.CharField(max_length=255, blank=True, null=True)
     pdr = models.CharField(max_length=255, blank=True, null=True)
     pdl = models.CharField(max_length=255, blank=True, null=True)
+    glass_add = models.CharField(max_length=255, blank=True, null=True)
     
     def to_dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
@@ -85,6 +86,7 @@ class ContactLensPrescription(models.Model):
     type_of_contact_lenses = models.CharField(max_length=255, blank=True)
     lens_detail_right = models.OneToOneField(LensDetails, related_name='right_contact_prescription', on_delete=models.CASCADE)
     lens_detail_left = models.OneToOneField(LensDetails, related_name='left_contact_prescription', on_delete=models.CASCADE)
+    contact_lens_add = models.CharField(max_length=255, blank=True, null=True)
     
     def to_dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
