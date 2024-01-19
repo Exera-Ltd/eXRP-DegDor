@@ -3,14 +3,24 @@ import { Button, Row, Col, Form, Input, Select, DatePicker, notification } from 
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const { Option } = Select;
 
 const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
     const [customerForm] = Form.useForm();
-    const [dateOfBirth, setDateOfBirth] = useState(dayjs())
+    const [dateOfBirth, setDateOfBirth] = useState(customerData?.date_of_birth ? dayjs(customerData.date_of_birth).tz('Indian/Mauritius') : null);
 
     const onFinish = async (values) => {
+        const formattedValues = {
+            ...values,
+            date_of_birth: values.date_of_birth ? dayjs(values.date_of_birth).tz('Indian/Mauritius') : null
+        };
+        console.log(formattedValues);
         const endpoint = customerData.id ? `update_customer/${customerData.id}/` : 'create_customer';
         const method = customerData.id ? 'PUT' : 'POST';
 
@@ -23,7 +33,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken
                 },
-                body: JSON.stringify(values),
+                body: JSON.stringify(formattedValues),
             });
             console.log(response);
             console.log(response.ok);
@@ -58,8 +68,8 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
         })
     };
 
-    const onChange = (date) => {
-        const localDate = date ? dayjs(date).format('YYYY-MM-DD') : null;
+    const onChange = (date, dateString) => {
+        const localDate = date ? dayjs(date).tz('Indian/Mauritius').format('DD-MM-YYYY') : null;
         console.log(localDate);
         setDateOfBirth(localDate);
     };
@@ -153,7 +163,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                         },
                     ]}
                 >
-                    <DatePicker onChange={onChange} value={dateOfBirth}/>
+                    <DatePicker onChange={onChange} value={dateOfBirth} format="DD-MM-YYYY" />
                 </Form.Item>
             </Col>
             <Col span={8}>

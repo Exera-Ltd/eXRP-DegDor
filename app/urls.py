@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.views.generic import RedirectView
-from django.contrib.auth.views import LogoutView, LoginView
+from django.contrib.auth.views import LoginView
 from django.conf import settings
 from django.conf.urls.static import static
 from dashboard import views
@@ -15,3 +15,7 @@ urlpatterns = [
     path('log/', include('log.urls')),
     path('', RedirectView.as_view(url='dashboard/')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += [
+    #re_path(r'^(?:.*)/?$', RedirectView.as_view(url='dashboard/')),
+]

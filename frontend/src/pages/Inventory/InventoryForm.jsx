@@ -64,7 +64,7 @@ const InventoryForm = () => {
                 </Col>
                 <Col span={6}>
                     <Form.Item label="Date of Purchase" name="dateOfPurchase">
-                        <DatePicker />
+                        <DatePicker format="DD-MM-YYYY" />
                     </Form.Item>
                 </Col>
                 <Col span={6}>
@@ -74,7 +74,7 @@ const InventoryForm = () => {
                 </Col>
                 <Col span={6}>
                     <Form.Item label="Expiry Date" name="expiryDate">
-                        <DatePicker />
+                        <DatePicker format="DD-MM-YYYY" />
                     </Form.Item>
                 </Col>
             </Row>

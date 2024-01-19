@@ -26,7 +26,7 @@ class Customer(models.Model):
     title = models.CharField(max_length=10, choices=TITLE_CHOICES)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateTimeField()
     mobile_1 = models.CharField(validators=[phone_regex], max_length=17, blank=False)
     mobile_2 = models.CharField(validators=[phone_regex], max_length=17, blank=True, null=True)
     address = models.TextField()
@@ -67,7 +67,7 @@ class LensDetails(models.Model):
     side = models.CharField(max_length=5, choices=(('Right', 'Right'), ('Left', 'Left')))
     sph = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     cyl = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    axis = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    axis = models.IntegerField(blank=True, null=True)
 
 class GlassPrescription(models.Model):
     prescription = models.OneToOneField(Prescription, on_delete=models.CASCADE, related_name='glass_prescription')
@@ -109,7 +109,7 @@ class JobCard(models.Model):
     frame = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=100, blank=True, null=True)
     supplier_reference = models.CharField(max_length=100, blank=True, null=True)
-    estimated_delivery_date = models.DateField(null=True, blank=True)
+    estimated_delivery_date = models.DateTimeField(null=True, blank=True)
     no_of_boxes = models.IntegerField(null=True, blank=True)
     created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
     last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))

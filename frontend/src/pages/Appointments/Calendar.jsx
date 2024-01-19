@@ -33,8 +33,8 @@ const Calendar = () => {
                 setSelectedSlotInfo({
                     id: data.values.id,
                     description: data.values.description,
-                    start: `${data.values.appointment_date}T${data.values.start_time}`,
-                    end: `${data.values.appointment_date}T${data.values.end_time}`,
+                    start: `${data.values.appointment_date.slice(0,10)}T${data.values.start_time}`,
+                    end: `${data.values.appointment_date.slice(0,10)}T${data.values.end_time}`,
                     customer: data.values.customer,
                     appointment_date: data.values.appointment_date,
                     doctor: data.values.doctor,
@@ -77,8 +77,8 @@ const Calendar = () => {
         // Convert the appointmentList to FullCalendar events
         const calendarEvents = appointmentList.map((appointment) => ({
             title: `${appointment.customer__first_name} ${appointment.customer__last_name}\n${appointment.description}\n${appointment.status}`,
-            start: `${appointment.appointment_date}T${appointment.start_time}`,
-            end: `${appointment.appointment_date}T${appointment.end_time}`,
+            start: `${appointment.appointment_date.slice(0,10)}T${appointment.start_time}`,
+            end: `${appointment.appointment_date.slice(0,10)}T${appointment.end_time}`,
             id: appointment.id, // Optionally include the appointment ID
             // Other properties like resourceId can be included here if necessary
         }));

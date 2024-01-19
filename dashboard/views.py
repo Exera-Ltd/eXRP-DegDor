@@ -15,6 +15,8 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A5
 from reportlab.lib.pagesizes import landscape
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 
 today_date = date.today()
 today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
@@ -62,15 +64,11 @@ def add_customer(request):
             
             return JsonResponse({"message": "Duplicate customer found."}, status=400)
         
-        dob = data.get('date_of_birth')
-        if (len(data.get('date_of_birth')) > 10):
-            dob = data.get('date_of_birth')[:10]
-
         customer = Customer(
             title=data.get('title'),
             first_name=data.get('first_name'),
             last_name=data.get('last_name'),
-            date_of_birth=dob,
+            date_of_birth=data.get('date_of_birth'),
             mobile_1=data.get('mobile_1'),
             mobile_2=data.get('mobile_2', ''),
             address=data.get('address'),
@@ -116,15 +114,11 @@ def update_customer(request, customer_id):
     try:
         data = json.loads(request.body)
         customer = Customer.objects.get(id=customer_id)
-        
-        dob = data.get('date_of_birth')
-        if (len(data.get('date_of_birth')) > 10):
-            dob = data.get('date_of_birth')[:10]
-    
+        print(data)    
         customer.title=data.get('title', customer.title)
         customer.first_name=data.get('first_name', customer.first_name)
         customer.last_name=data.get('last_name', customer.last_name)
-        customer.date_of_birth=dob
+        customer.date_of_birth=data.get('date_of_birth')
         customer.mobile_1=data.get('mobile_1', customer.mobile_1)
         customer.mobile_2=data.get('mobile_2', customer.mobile_2)
         customer.address=data.get('address', customer.address)
@@ -241,12 +235,83 @@ def create_prescription(request):
         )
         
         return JsonResponse({'error': str(e)}, status=400)
+    
+@require_http_methods(["PUT"])
+def update_prescription(request, prescription_id):
+    try:
+        data = json.loads(request.body)
+        print(data)
+        prescription = Prescription.objects.get(id=prescription_id)
+
+        prescription.last_eye_test = data.get('last-eye-test', prescription.last_eye_test)
+        prescription.care_system = data.get('care-system', prescription.care_system)
+        prescription.recommendation = data.get('recommendation', prescription.recommendation)
+        if data.get('next-checkup'):
+            prescription.next_checkup = datetime.strptime(data['next-checkup'], '%Y-%m-%d').date()
+        prescription.vision = data.get('vision', prescription.vision)
+        prescription.last_modified_date = datetime.now().date() # Adjust as per your requirements
+        prescription.save()
+         # Update GlassPrescription
+        glass_prescription = prescription.glass_prescription
+        glass_prescription.lens_detail_right.sph = data.get('glass-right-sph', glass_prescription.lens_detail_right.sph)
+        glass_prescription.lens_detail_right.cyl = data.get('glass-right-cyl', glass_prescription.lens_detail_right.cyl)
+        glass_prescription.lens_detail_right.axis = data.get('glass-right-axis', glass_prescription.lens_detail_right.axis)
+        glass_prescription.lens_detail_right.save()
+
+        glass_prescription.lens_detail_left.sph = data.get('glass-left-sph', glass_prescription.lens_detail_left.sph)
+        glass_prescription.lens_detail_left.cyl = data.get('glass-left-cyl', glass_prescription.lens_detail_left.cyl)
+        glass_prescription.lens_detail_left.axis = data.get('glass-left-axis', glass_prescription.lens_detail_left.axis)
+        glass_prescription.lens_detail_left.save()
+
+        glass_prescription.type_of_lenses = data.get('type-of-lenses', glass_prescription.type_of_lenses)
+        glass_prescription.pdr = data.get('pdr', glass_prescription.pdr)
+        glass_prescription.pdl = data.get('pdl', glass_prescription.pdl)
+        glass_prescription.glass_add = data.get('glass-add', glass_prescription.glass_add)
+        glass_prescription.save()
+
+        # Update ContactLensPrescription
+        contact_lens_prescription = prescription.contact_lens_prescription
+        contact_lens_prescription.lens_detail_right.sph = data.get('lens-right-sph', contact_lens_prescription.lens_detail_right.sph)
+        contact_lens_prescription.lens_detail_right.cyl = data.get('lens-right-cyl', contact_lens_prescription.lens_detail_right.cyl)
+        contact_lens_prescription.lens_detail_right.axis = data.get('lens-right-axis', contact_lens_prescription.lens_detail_right.axis)
+        contact_lens_prescription.lens_detail_right.save()
+
+        contact_lens_prescription.lens_detail_left.sph = data.get('lens-left-sph', contact_lens_prescription.lens_detail_left.sph)
+        contact_lens_prescription.lens_detail_left.cyl = data.get('lens-left-cyl', contact_lens_prescription.lens_detail_left.cyl)
+        contact_lens_prescription.lens_detail_left.axis = data.get('lens-left-axis', contact_lens_prescription.lens_detail_left.axis)
+        contact_lens_prescription.lens_detail_left.save()
+
+        contact_lens_prescription.type_of_contact_lenses = data.get('type-of-contact-lenses', contact_lens_prescription.type_of_contact_lenses)
+        contact_lens_prescription.contact_lens_add = data.get('contact-lens-add', contact_lens_prescription.contact_lens_add)
+        contact_lens_prescription.save()
+        # Log the update
+        LogEntry.objects.create(
+            user=request.user,
+            action=LogEntry.UPDATED,
+            description=f"Prescription {prescription.id} updated successfully."
+        )
+
+        return JsonResponse({'message': 'Prescription updated successfully'}, status=200)
+
+    except Prescription.DoesNotExist:
+        LogEntry.objects.create(
+            user=request.user,
+            action=LogEntry.ERROR,
+            description="Update failed. Prescription does not exist."
+        )
+        return JsonResponse({'message': 'Prescription not found'}, status=404)
+    except Exception as e:
+        LogEntry.objects.create(
+            user=request.user,
+            action=LogEntry.ERROR,
+            description=f"Error updating Prescription. Error: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
     
 def get_all_prescriptions(request):
 	entries = (
 		Prescription.objects.select_related("")
-            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date").order_by("-created_date")
+            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date").order_by("-id","-created_date")
 	)
 	return JsonResponse({"values": list(entries)})
 
@@ -287,7 +352,6 @@ def get_prescription(request, prescription_id):
             }
         except ObjectDoesNotExist:
             response['contact_lens_prescription'] = None
-
         return JsonResponse(response)
 
     except Prescription.DoesNotExist:
@@ -342,7 +406,7 @@ def create_job_card(request):
         
         print(data)
         
-        prescription = data.get('prescription')
+        prescription_id = data.get('prescription_id')
         customer = data.get('customer')
         type_of_job_card = data.get('typeOfJobCard')
         salesman = data.get('salesman')
@@ -354,7 +418,7 @@ def create_job_card(request):
             #estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%d').date()
 
         job_card_fields = {
-            'prescription_id': prescription,
+            'prescription_id': prescription_id,
             'customer_id': customer,
             'job_type': type_of_job_card,
             'salesman': salesman,
@@ -401,33 +465,94 @@ def create_job_card(request):
         
         return JsonResponse({"error": str(e)}, status=400)
     
+@require_http_methods(["PUT"])
+def update_job_card(request, job_card_id):
+    try:
+        data = json.loads(request.body)
+
+        # Retrieve the existing job card
+        job_card = JobCard.objects.get(id=job_card_id)
+
+        # Update the job card fields from the request
+        job_card.prescription_id = data.get('prescription', job_card.prescription_id)
+        job_card.customer_id = data.get('customer', job_card.customer_id)
+        job_card.job_type = data.get('typeOfJobCard', job_card.job_type)
+        job_card.salesman = data.get('salesman', job_card.salesman)
+        job_card.status = data.get('status', job_card.status)
+        job_card.supplier = data.get('supplier', job_card.supplier)
+        job_card.supplier_reference = data.get('supplierReference', job_card.supplier_reference)
+        estimated_delivery_date = data.get('estimatedDeliveryDate', job_card.estimated_delivery_date)
+        if estimated_delivery_date:
+            job_card.estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
+
+        # Update additional fields based on the type of job card
+        if job_card.job_type == 'lenses':
+            job_card.frame = data.get('frame', job_card.frame)
+            job_card.ht = data.get('ht', job_card.ht)
+            job_card.lens = data.get('lens', job_card.lens)
+
+        elif job_card.job_type == 'contactLenses':
+            job_card.base_curve = data.get('baseCurve', job_card.base_curve)
+            job_card.diameter = data.get('diameter', job_card.diameter)
+            job_card.no_of_boxes = data.get('noOfBoxes', job_card.no_of_boxes)
+            job_card.contact_lens = data.get('contactLens', job_card.contact_lens)
+
+        # Save the changes to the job card
+        job_card.last_modified_date = datetime.now() # Assuming you have a field for last modified date
+        job_card.save()
+
+        # Log the action
+        LogEntry.objects.create(
+            user=request.user,
+            action=LogEntry.UPDATED,
+            description=f"Job Card {job_card_id} of type {job_card.job_type} updated successfully."
+        )
+
+        return JsonResponse({'message': 'Job Card updated successfully'}, status=200)
+
+    except JobCard.DoesNotExist:
+        return JsonResponse({'message': 'Job Card not found'}, status=404)
+
+    except Exception as e:
+        LogEntry.objects.create(
+            user=request.user,
+            action=LogEntry.ERROR,
+            description=f"Job Card {job_card_id} update failed. {str(e)}"
+        )
+        return JsonResponse({'message': str(e)}, status=500)
+    
 def get_all_job_cards(request):
 	entries = JobCard.objects.select_related('customer').values(
         *{f.name for f in JobCard._meta.get_fields() if not f.is_relation or f.one_to_one or (f.many_to_one and f.related_model)},
         'customer__first_name',
-        'customer__last_name',
+        'customer__last_name'
     ).order_by('created_date')
+    
 	return JsonResponse({"values": list(entries)})
 
 def get_job_card(request, job_card_id):
+    print(job_card_id)
     job_card = JobCard.objects.get(id=job_card_id)
+    print(job_card)
     return JsonResponse({"values": job_card.to_dict()})
 
 @require_http_methods(["POST"])
 def create_appointment(request):
     try:
         data = json.loads(request.body)
-
+        print(data)
         # Parse the datetime string to a datetime object
         appointment_datetime = parse_datetime(data['appointmentDate'])
-
+        print('appointment_datetime')
+        print(appointment_datetime)
         # If the appointment_datetime is None, the string is not properly formatted.
         if not appointment_datetime:
             raise ValueError("Incorrect date format for 'appointmentDate'")
 
         # Extract the date component for the appointment_date
         appointment_date = appointment_datetime.date()
-
+        print('appointment_date')
+        print(appointment_date)
         # Parse the datetime fields for start and end times
         start_time = parse_datetime(data['startTime']).time() if parse_datetime(data['startTime']) else None
         end_time = parse_datetime(data['endTime']).time() if parse_datetime(data['endTime']) else None
@@ -623,10 +748,12 @@ def generate_prescription_pdf(request):
         
         c.drawString(grid_left_column, patient_info_start_height - 120, "Type Of:")
         c.drawString(grid_left_column + 68, patient_info_start_height - 120, str(form_data.get('type-of-lenses', '')))
+        c.drawString(grid_left_column, patient_info_start_height - 140, "Add:")
+        c.drawString(grid_left_column + 68, patient_info_start_height - 140, str(form_data.get('glass-add', '')))
             
         #c.setFillColorRGB(0, 0, 0)
         # Drawing the grid lines
-        grid_height = height - 230  # Starting just below the headers
+        grid_height = height - 250  # Starting just below the headers
         c.grid([grid_left_column, grid_left_column + 35, grid_left_column + 105, grid_left_column + 175, grid_left_column + 245],
                [grid_height, grid_height - 20, grid_height - 40, grid_height - 60])
 
@@ -650,8 +777,10 @@ def generate_prescription_pdf(request):
         c.drawString(grid_left_column + 125, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-cyl', ''))))
         c.drawString(grid_left_column + 195, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-axis', ''))))
 
-        c.drawString(grid_left_column, patient_info_start_height - 260, "Type Of:")
-        c.drawString(grid_left_column + 68, patient_info_start_height - 260, str(form_data.get('type-of-contact-lenses', '')))
+        c.drawString(grid_left_column, patient_info_start_height - 280, "Type Of:")
+        c.drawString(grid_left_column + 68, patient_info_start_height - 280, str(form_data.get('type-of-contact-lenses', '')))
+        c.drawString(grid_left_column, patient_info_start_height - 300, "Add:")
+        c.drawString(grid_left_column + 68, patient_info_start_height - 300, str(form_data.get('contact-lens-add', '')))
         
         # Glass Prescription Strip
         strip_x = grid_left_column  # X coordinate for the left side of the strip
@@ -684,7 +813,7 @@ def generate_prescription_pdf(request):
         
         # Lens Prescription Strip
         strip_x = grid_left_column  # X coordinate for the left side of the strip
-        strip_y = height - 200  # Y coordinate for the top side of the strip
+        strip_y = height - 220  # Y coordinate for the top side of the strip
         strip_width = 245  # The width of the strip
         strip_height = 20  # The height of the strip
         strip_text = "Lens Prescription"  # The text you want to display
@@ -740,6 +869,137 @@ def generate_prescription_pdf(request):
         # Draw the text on the strip
         c.drawString(text_x, text_y, strip_text)
 
+        # Finalize PDF
+        c.showPage()
+        c.save()
+        # Return the response
+        return response
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'message': str(e)}, status=500)
+    
+def generate_job_card_pdf(request):
+    try:
+        form_data = json.loads(request.body)
+        print('prescription_id')
+        print(form_data)
+        try:
+            # Select related Prescription with the JobCard to minimize database hits
+            job_card = JobCard.objects.select_related('prescription', 'customer').get(id=form_data['job_card_id'])
+            prescription = job_card.prescription
+            # Start building the response dictionary
+            job_card_data = {
+                'job_card': model_to_dict(job_card),
+                'prescription': model_to_dict(prescription, exclude=['doctor', 'customer']),
+            }
+
+            # Add extra details from related objects
+            job_card_data['prescription']['doctor_name'] = f"{prescription.doctor.first_name} {prescription.doctor.last_name}"
+            job_card_data['prescription']['customer_name'] = f"{prescription.customer.first_name} {prescription.customer.last_name}"
+            job_card_data['prescription']['customer_address'] = f"{prescription.customer.address}"
+            job_card_data['prescription']['customer_tel'] = f"{prescription.customer.mobile_1}"
+            job_card_data['prescription']['customer_id'] = prescription.customer.id
+
+            # Try to get the GlassPrescription and its LensDetails
+            try:
+                glass_prescription = prescription.glass_prescription
+                job_card_data['glass_prescription'] = {
+                    "lens_detail_right": model_to_dict(glass_prescription.lens_detail_right),
+                    "lens_detail_left": model_to_dict(glass_prescription.lens_detail_left),
+                    "type_of_lenses": glass_prescription.type_of_lenses,
+                    "pdr": glass_prescription.pdr,
+                    "pdl": glass_prescription.pdl,
+                    "glass_add": glass_prescription.glass_add
+                }
+            except ObjectDoesNotExist:
+                job_card_data['glass_prescription'] = None
+
+            # Try to get the ContactLensPrescription and its LensDetails
+            try:
+                contact_lens_prescription = prescription.contact_lens_prescription
+                job_card_data['contact_lens_prescription'] = {
+                    "type_of_contact_lenses": contact_lens_prescription.type_of_contact_lenses,
+                    "lens_detail_right": model_to_dict(contact_lens_prescription.lens_detail_right),
+                    "lens_detail_left": model_to_dict(contact_lens_prescription.lens_detail_left),
+                    "contact_lens_add": contact_lens_prescription.contact_lens_add
+                }
+            except ObjectDoesNotExist:
+                job_card_data['contact_lens_prescription'] = None
+        except JobCard.DoesNotExist:
+            job_card_data['error'] = {"error": "Job Card not found"}
+        print('response')
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="prescription.pdf"'
+
+        c = canvas.Canvas(response, pagesize=landscape(A5))
+        width, height = landscape(A5)
+
+        left_margin = 20
+        top_margin = height - 60
+
+        c.setFont("Helvetica", 12)
+        patient_info_start_height = top_margin
+        grid_left_column = width - left_margin - 245  # This is the X position where your grid starts
+
+        name_label_x = left_margin
+        name_value_x = left_margin + 70
+        
+        c.drawString(width/3, patient_info_start_height + 30, "KLER OPTICS | Valentina Mall")
+        
+        c.drawString(name_label_x, patient_info_start_height, "Job Card ID: ")
+        c.drawString(name_value_x + 20, patient_info_start_height, str(job_card_data.get('job_card', {}).get('id', '-')))
+        c.drawString(grid_left_column, patient_info_start_height, "Prescription ID:")
+        c.drawString(grid_left_column + 100, patient_info_start_height, str(job_card_data.get('prescription', {}).get('id', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 30, "Date:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 30, str(job_card_data.get('job_card', {}).get('created_date', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 60, "Name:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 60, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 90, "Address:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 90, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 120, "Tel:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 150, "R:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('sph', '-')))
+        c.drawString(name_value_x + 55, patient_info_start_height - 150, "/")
+        c.drawString(name_value_x + 60, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-')))
+        c.drawString(name_value_x + 95, patient_info_start_height - 150, "/")
+        c.drawString(name_value_x + 100, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 150, "PDR:")
+        c.drawString(grid_left_column + 100, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('pdr', '-')))
+        
+        c.drawString(grid_left_column, patient_info_start_height - 180, "ADD:")
+        c.drawString(grid_left_column + 100, patient_info_start_height - 180, str(form_data.get('glass_add', '-')))
+
+        c.drawString(name_label_x, patient_info_start_height - 210, "L:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('sph', '-')))
+        c.drawString(name_value_x + 55, patient_info_start_height - 210, "/")
+        c.drawString(name_value_x + 60, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-')))
+        c.drawString(name_value_x + 95, patient_info_start_height - 210, "/")
+        c.drawString(name_value_x + 100, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 210, "PDR:")
+        c.drawString(grid_left_column + 100, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('pdl', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 240, "HT:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 240, str(job_card_data.get('job_card', '-').get('ht', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 270, "Base Curve:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('base_curve', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 270, "Diameter:")
+        c.drawString(grid_left_column + 100, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('diameter', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 300, "Frame:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 300, str(job_card_data.get('job_card', '-').get('frame', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 330, "Lenses:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 330, str(job_card_data.get('job_card', '-').get('lens', '-')))
+        
         # Finalize PDF
         c.showPage()
         c.save()

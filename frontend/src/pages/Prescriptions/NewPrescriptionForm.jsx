@@ -14,9 +14,7 @@ const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
 };
 
-
-
-const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
+const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOnly = () => { }, setIsPrescriptionModalVisible = () => { } }) => {
     const { user } = useUser();
     const [customers, setCustomers] = useState([]);
     const [prescriptionForm] = Form.useForm();
@@ -24,9 +22,9 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
     const [prescriptionList, setPrescriptionList] = useState([]);
     const [selectedPrescriptionData, setSelectedPrescriptionData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
-    const [isModalVisible, setIsModalVisible] = useState(false);
     const [isJobCardModalVisible, setIsJobCardModalVisible] = useState(false);
     const [selectedJobCardData, setSelectedJobCardData] = useState({});
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const fetchCustomers = () => {
         fetch(appUrl + `dashboard/get_all_customers`)
@@ -38,14 +36,15 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
     };
 
     const handleCancel = () => {
-        setIsModalVisible(false);
+        //setIsModalVisible(false);
     };
 
     const handleOk = () => {
-        setIsModalVisible(false);
+        //setIsModalVisible(false);
     };
 
     const handleJobCardCancel = () => {
+        setIsReadOnly(true);
         setIsJobCardModalVisible(false);
     };
 
@@ -125,8 +124,12 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
 
         try {
             const csrftoken = getCookie('csrftoken');
-            const response = await fetch(appUrl + `dashboard/create_prescription/`, {
-                method: 'POST',
+            const prescriptionId = prescriptionForm.getFieldValue('prescription_id');
+            const method = prescriptionId ? 'PUT' : 'POST';
+            const endpoint = prescriptionId ? `dashboard/update_prescription/${prescriptionId}/` : 'dashboard/create_prescription/';
+
+            const response = await fetch(appUrl + endpoint, {
+                method: method,
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
@@ -137,23 +140,25 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
 
             if (response.ok) {
                 const result = await response.json();
-                prescriptionForm.resetFields();
                 notification.success({
                     message: 'Success',
                     description: result['message'],
                 });
+                setIsPrescriptionModalVisible(false);
+                setIsReadOnly(true);
+                prescriptionForm.resetFields();
             } else {
                 const result = await response.json();
                 notification.error({
-                    message: 'Error ',
+                    message: 'Error',
                     description: result['error']
-                })
+                });
             }
         } catch (error) {
             notification.error({
-                message: 'Error ',
-                description: error
-            })
+                message: 'Error',
+                description: error.toString()
+            });
         }
     };
 
@@ -211,13 +216,17 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
         console.log(customerId);
         console.log(prescriptionId);
         if (customerId != null) {
-            let jobCardData = { 'prescription' : {'customer_id': customerId, 'id': prescriptionId} }
+            let jobCardData = { 'prescription': { 'customer_id': customerId, 'id': prescriptionId } }
             setSelectedJobCardData(jobCardData);
             setIsJobCardModalVisible(true);
         } else {
             setIsJobCardModalVisible(true);
         }
     };
+
+    const disableReadOnly = () => {
+        setIsReadOnly(false);
+    }
 
     useEffect(() => {
         prescriptionForm.resetFields();
@@ -310,7 +319,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                         filterOption={(input, option) =>
                             option.label.toLowerCase().includes(input.toLowerCase())
                         }
-                        disabled={readOnly}
+                        disabled={isReadOnly}
                     >
                         {customers.map(customer => (
                             <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name.toUpperCase()}`}>
@@ -327,7 +336,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                 </Form.Item>
             </Col>
 
-            {(!readOnly && prescriptionList.length > 0) && (
+            {(!isReadOnly && prescriptionList.length > 0) && (
                 <Col span={8}>
                     <Button onClick={toggleDrawer}>View Previous Prescriptions</Button>
                 </Col>
@@ -367,7 +376,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Last Eye Test"
                     name="last-eye-test"
                 >
-                    <Input readOnly={readOnly} />
+                    <Input readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -377,7 +386,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Vision"
                     name="vision"
                 >
-                    <Input.TextArea readOnly={readOnly} />
+                    <Input.TextArea readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -393,7 +402,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-right-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -401,7 +410,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} min={-Infinity} formatter={value => !value || isNaN(value) ? '' : value < 0 ? value.toString() : ''}/>
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} min={-Infinity} formatter={value => !value || isNaN(value) ? '' : value < 0 ? value.toString() : ''} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -409,7 +418,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={1} min={0} max={180} />
+                    <InputNumber readOnly={isReadOnly} step={1} min={0} max={180} />
                 </Form.Item>
             </Col>
         </Row>
@@ -422,7 +431,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="glass-left-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -430,7 +439,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="glass-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} min={-Infinity} formatter={value => !value || isNaN(value) ? '' : value < 0 ? value.toString() : ''}/>
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} min={-Infinity} formatter={value => !value || isNaN(value) ? '' : value < 0 ? value.toString() : ''} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -438,7 +447,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="glass-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={1} min={0} max={180} />
+                    <InputNumber readOnly={isReadOnly} step={1} min={0} max={180} />
                 </Form.Item>
             </Col>
         </Row>
@@ -448,7 +457,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDR."
                     name="pdr"
                 >
-                    <Input readOnly={readOnly} />
+                    <Input readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
             <Col span={6}>
@@ -456,7 +465,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="PDL."
                     name="pdl"
                 >
-                    <Input readOnly={readOnly} />
+                    <Input readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
             <Col span={6}>
@@ -465,7 +474,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     name="type-of-lenses"
                     hasFeedback
                 >
-                    <Select placeholder="Lenses" disabled={readOnly}>
+                    <Select placeholder="Lenses" disabled={isReadOnly}>
                         <Option value="Single">Single</Option>
                         <Option value="Bi Focal">Bi Focal</Option>
                         <Option value="Progressive">Progressive</Option>
@@ -477,7 +486,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Add."
                     name="glass-add"
                 >
-                    <Input readOnly={readOnly} />
+                    <Input readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -491,7 +500,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-right-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -499,7 +508,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-right-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -507,7 +516,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-right-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
         </Row>
@@ -520,7 +529,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="SPH"
                     name="lens-left-sph"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -528,7 +537,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="CYL"
                     name="lens-left-cyl"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
             <Col span={7}>
@@ -536,7 +545,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Axis"
                     name="lens-left-axis"
                 >
-                    <InputNumber readOnly={readOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
+                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => !value || isNaN(value) ? value : value > 0 ? `+${value}` : value} />
                 </Form.Item>
             </Col>
         </Row>
@@ -547,7 +556,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     name="type-of-contact-lenses"
                     hasFeedback
                 >
-                    <Select placeholder="Contact Lenses" disabled={readOnly}>
+                    <Select placeholder="Contact Lenses" disabled={isReadOnly}>
                         <Option value="Daily">Daily</Option>
                         <Option value="Monthly">Monthly</Option>
                     </Select>
@@ -558,7 +567,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Add."
                     name="contact-lens-add"
                 >
-                    <Input readOnly={readOnly} />
+                    <Input readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -570,7 +579,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     name="care-system"
                     hasFeedback
                 >
-                    <Select placeholder="Care" disabled={readOnly}>
+                    <Select placeholder="Care" disabled={isReadOnly}>
                         <Option value="Permanent">Permanent</Option>
                         <Option value="One Off">One Off</Option>
                     </Select>
@@ -582,7 +591,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     name="next-checkup"
                     hasFeedback
                 >
-                    <Select placeholder="Next Checkup" onChange={handleCheckupChange} disabled={readOnly}>
+                    <Select placeholder="Next Checkup" onChange={handleCheckupChange} disabled={isReadOnly}>
                         <Option value="6">6 Months</Option>
                         <Option value="12">1 Year</Option>
                         <Option value="24">2 Years</Option>
@@ -605,7 +614,7 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
                     label="Recommendation"
                     name="recommendation"
                 >
-                    <Input.TextArea readOnly={readOnly} />
+                    <Input.TextArea readOnly={isReadOnly} />
                 </Form.Item>
             </Col>
         </Row>
@@ -619,14 +628,14 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
         >
             <JobCardForm jobCardData={selectedJobCardData} closeModal={closeJobCardModal} />
         </Modal>
-        {!readOnly &&
+        {!isReadOnly &&
             <Row style={{ justifyContent: 'center' }}>
                 <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
                     Save
                 </Button>
             </Row>
         }
-        {readOnly &&
+        {isReadOnly &&
             <Row style={{ justifyContent: 'center' }}>
                 <Button type="primary" htmlType="button" style={{ width: 200, height: 40 }} onClick={handlePrint} >
                     Print
@@ -634,6 +643,10 @@ const NewPrescriptionForm = ({ prescriptionData, readOnly = false }) => {
 
                 <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => showJobCardModal()}>
                     Add Job Card
+                </Button>
+
+                <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
+                    Edit
                 </Button>
             </Row>
         }

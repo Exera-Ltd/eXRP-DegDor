@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 const { Option } = Select;
 
-const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false }) => {
+const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = false, setIsReadOnly = () => { } }) => {
     const [jobCardType, setJobCardType] = useState('contactLenses');
     const [jobCardForm] = Form.useForm();
     const [customers, setCustomers] = useState([]);
@@ -20,8 +20,12 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
         }
         try {
             const csrftoken = getCookie('csrftoken');
-            const response = await fetch(appUrl + `dashboard/create_job_card/`, {
-                method: 'POST',
+            const jobCardId = jobCardForm.getFieldValue('job_card_id');
+            const method = jobCardId ? 'PUT' : 'POST';
+            const endpoint = jobCardId ? `dashboard/update_job_card/${jobCardId}/` : 'dashboard/create_job_card/';
+
+            const response = await fetch(appUrl + endpoint, {
+                method: method,
                 credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
@@ -35,6 +39,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                 console.log('success');
                 console.log(result);
                 console.log(result['message']);
+                setIsReadOnly(true);
                 jobCardForm.resetFields();
                 notification.success({
                     message: 'Success',
@@ -56,6 +61,53 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                 description: error
             })
         }
+    };
+
+    const disableReadOnly = () => {
+        setIsReadOnly(false);
+    }
+
+    const generatePdf = async (job_card_id) => {
+        try {
+            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(appUrl + `dashboard/generate_job_card_pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                    // Include authorization headers if necessary
+                },
+                body: JSON.stringify({ 'job_card_id': job_card_id }),
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok.');
+
+            // Get the PDF Blob from the response
+            const blob = await response.blob();
+
+            // Create a link element, use it to download the PDF
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            downloadLink.setAttribute('download', `job_card_${job_card_id}.pdf`); // Any filename you like
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+        } catch (error) {
+            console.error('Error:', error);
+            notification.error({
+                message: 'Error',
+                description: 'There was a problem generating the PDF.'
+            });
+        }
+    };
+
+    const handlePrint = () => {
+        const job_card_id = jobCardForm.getFieldValue('job_card_id');
+        console.log(job_card_id);
+
+        generatePdf(job_card_id);
     };
 
     const fetchCustomers = () => {
@@ -85,10 +137,12 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
     };
 
     useEffect(() => {
+        console.log(jobCardData);
         jobCardForm.resetFields();
         jobCardForm.setFieldsValue({
+            job_card_id: jobCardData?.id,
             customer: jobCardData?.prescription?.customer_id,
-            prescription_id: jobCardData?.prescription?.id,
+            prescription_id: jobCardData?.prescription,
             typeOfJobCard: jobCardData?.job_type,
             supplier: jobCardData?.supplier,
             salesman: jobCardData?.salesman,
@@ -133,7 +187,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                             filterOption={(input, option) =>
                                 option.label.toLowerCase().includes(input.toLowerCase())
                             }
-                            disabled={readOnly}
+                            disabled={isReadOnly}
                         >
                             {customers.map(customer => (
                                 <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name}`}>
@@ -150,6 +204,13 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         <Input />
                     </Form.Item>
 
+                    <Form.Item
+                        name="job_card_id"
+                        hidden
+                    >
+                        <Input />
+                    </Form.Item>
+
                 </Col>
             </Row>
             <Row gutter={24}>
@@ -160,7 +221,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         hasFeedback
                         rules={[{ required: true, message: 'Please select a job card type!' }]}
                     >
-                        <Select placeholder="Select a job card type" onChange={handleJobCardTypeChange} disabled={readOnly}>
+                        <Select placeholder="Select a job card type" onChange={handleJobCardTypeChange} disabled={isReadOnly}>
                             <Option value="contactLenses">Contact Lenses</Option>
                             <Option value="lenses">Lenses</Option>
                             {/* Add other job card types as needed */}
@@ -172,7 +233,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="supplier"
                         label="Supplier"
                     >
-                        <Input readOnly={readOnly} />
+                        <Input readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
             </Row>
@@ -183,7 +244,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="salesman"
                         label="Salesman"
                     >
-                        <Input readOnly={readOnly} />
+                        <Input readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -191,7 +252,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name={jobCardType === 'contactLenses' ? "contactLens" : "lens"}
                         label={jobCardType === 'contactLenses' ? "Contact Lens" : "Lens"}
                     >
-                        <Input readOnly={readOnly} />
+                        <Input readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
             </Row>
@@ -204,7 +265,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                             name="noOfBoxes"
                             label="Number of boxes"
                         >
-                            <InputNumber readOnly={readOnly} />
+                            <InputNumber readOnly={isReadOnly} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -216,7 +277,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="baseCurve"
                         label="Base Curve"
                     >
-                        <Input readOnly={readOnly} />
+                        <Input readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -224,7 +285,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="diameter"
                         label="Diameter"
                     >
-                        <Input readOnly={readOnly} />
+                        <Input readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
             </Row>
@@ -235,7 +296,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="status"
                         label="Status"
                     >
-                        <Input defaultValue="Work in Progress" readOnly={readOnly} />
+                        <Input defaultValue="Work in Progress" readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
 
@@ -247,7 +308,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                                 name="ht"
                                 label="HT"
                             >
-                                <Input readOnly={readOnly} />
+                                <Input readOnly={isReadOnly} />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
@@ -255,7 +316,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                                 name="frame"
                                 label="Frame"
                             >
-                                <Input readOnly={readOnly} />
+                                <Input readOnly={isReadOnly} />
                             </Form.Item>
                         </Col>
                     </>
@@ -268,7 +329,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="supplierReference"
                         label="Supplier Reference"
                     >
-                        <Input readOnly={readOnly} />
+                        <Input readOnly={isReadOnly} />
                     </Form.Item>
                 </Col>
                 <Col span={12}>
@@ -276,17 +337,28 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, readOnly = false
                         name="estimatedDeliveryDate"
                         label="Estimated Delivery Date"
                     >
-                        <DatePicker onChange={onChange} value={deliveryDate} disabled={readOnly} />
+                        <DatePicker format="DD-MM-YYYY" onChange={onChange} value={deliveryDate} disabled={isReadOnly} />
                     </Form.Item>
                 </Col>
             </Row>
 
-            {!readOnly &&
+            {!isReadOnly &&
                 <Row style={{ justifyContent: 'center' }}>
                     <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }}>
-                        Add Job Card
+                        Save
                     </Button>
                 </Row>}
+            {isReadOnly &&
+                <Row style={{ justifyContent: 'center' }}>
+                    <Button type="primary" htmlType="button" style={{ width: 200, height: 40 }} onClick={handlePrint} >
+                        Print
+                    </Button>
+
+                    <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
+                        Edit
+                    </Button>
+                </Row>
+            }
         </Form>
     );
 };

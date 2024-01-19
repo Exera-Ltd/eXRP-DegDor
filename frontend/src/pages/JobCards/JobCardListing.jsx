@@ -14,6 +14,7 @@ function JobCardListing() {
     const [searchTerm, setSearchTerm] = useState("");
     const [jobCardList, setJobCardList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isReadOnly, setIsReadOnly] = useState(false);
 
     const filteredData = jobCardList.filter(item => {
         const firstName = item.customer__first_name || "";
@@ -65,6 +66,7 @@ function JobCardListing() {
             .then(data => {
                 console.log(data);
                 setSelectedJobCardData(data.values);
+                setIsReadOnly(true);
                 setIsLoading(false);
                 setIsModalVisible(true);
             })
@@ -108,7 +110,6 @@ function JobCardListing() {
 
             <Row style={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
                 <Title level={3}>Job Card Listing </Title>
-                <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal(null)} />
             </Row>
             <Input
                 placeholder="Search by First Name, Last Name, Mobile or NIC"
@@ -154,7 +155,7 @@ function JobCardListing() {
                 width={1000}
                 footer={null}
             >
-                <JobCardForm jobCardData={selectedJobCardData} onJobCardAdded={fetchJobCards} closeModal={closeModal} readOnly={true}/>
+                <JobCardForm jobCardData={selectedJobCardData} onJobCardAdded={fetchJobCards} closeModal={closeModal} isReadOnly={isReadOnly} setIsReadOnly={setIsReadOnly}/>
             </Modal>
             <Pagination
                 current={currentPage}

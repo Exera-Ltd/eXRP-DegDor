@@ -36,12 +36,13 @@ const menu = [
       { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions', roles: ['Administrator', 'Manager', 'Staff'] }
     ]
   },
-  {
+  /* {
     key: 'job-card', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
       { key: 'new-job-card', label: 'New', icon: React.createElement(PlusOutlined), path: '/job-card', roles: ['Administrator', 'Manager', 'Staff'] },
       { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Manager', 'Staff'] }
     ]
-  },
+  }, */
+  { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Manager', 'Staff'] },
   { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
   /* { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
   { key: 'invoices', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '/invoices', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
@@ -123,8 +124,7 @@ const App = () => {
             zIndex: 1
           }}
         >
-          {
-            user?.profile && user?.first_name !== "" &&
+          {user?.profile && user?.first_name !== "" &&
             <Badge.Ribbon text={user.profile.role} color="#024550">
               <div className="centered-title-div">
                 Welcome<br />{user.first_name}
@@ -154,6 +154,10 @@ const App = () => {
               }
             })}
           </Menu>
+          <div style={{ padding: '10px', textAlign: 'center' }}>
+            <span className='footer-exrp-logo'>eXRP</span><br />
+            <span>v1.0</span>
+          </div>
         </Sider>
         <Layout
           style={{
@@ -272,7 +276,7 @@ const App = () => {
               padding: '10px 0px'
             }}
           >
-            Kler Optics © {d.getFullYear()} - Solution Designed by <a href='https://exera.mu?utm_source=optical-zone' target='_blank' rel="noreferrer">Exera</a>
+            Kler Optics © {d.getFullYear()} - Solution Designed by <a className='footer-exera-logo' href='https://exera.mu?utm_source=kleroptics' target='_blank' rel="noreferrer">exera</a>
           </Footer>
         </Layout>
       </Layout>

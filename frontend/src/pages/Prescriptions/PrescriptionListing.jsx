@@ -12,6 +12,7 @@ function PrescriptionListing() {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [prescriptionList, setPrescriptionList] = useState([]);
+    const [isReadOnly, setIsReadOnly] = useState(false);
     const filteredData = prescriptionList.filter(item => {
         const doctorFirstName = item.doctor__first_name || "";
         const doctorLastName = item.doctor__last_name || "";
@@ -49,6 +50,7 @@ function PrescriptionListing() {
                 console.log(data);
                 data.id = id;
                 setSelectedPrescriptionData(data);
+                setIsReadOnly(true);
                 setIsLoading(false);
                 setIsModalVisible(true);
             })
@@ -109,7 +111,6 @@ function PrescriptionListing() {
 
             <Row style={{ alignItems: 'baseline', justifyContent: 'space-between' }}>
                 <Title level={3}>All Prescriptions </Title>
-                <PlusCircleOutlined style={{ fontSize: 20 }} onClick={() => showModal()} />
             </Row>
             <Input
                 placeholder="Search by Customer or Doctor Name or Date"
@@ -147,7 +148,7 @@ function PrescriptionListing() {
                 }}
 
             >
-                <NewPrescriptionForm prescriptionData={selectedPrescriptionData} readOnly={true} />
+                <NewPrescriptionForm prescriptionData={selectedPrescriptionData} isReadOnly={isReadOnly} setIsReadOnly={setIsReadOnly} setIsPrescriptionModalVisible={setIsModalVisible}/>
             </Modal>
             <Pagination
                 current={currentPage}

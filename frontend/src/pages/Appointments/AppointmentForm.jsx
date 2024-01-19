@@ -12,6 +12,8 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
     const [appointmentForm] = Form.useForm();
     const { user } = useUser();
     const [customers, setCustomers] = useState([]);
+    const [appointmentDate, setAppointmentDate] = useState(dayjs().tz('Indian/Mauritius'));
+
 
     const fetchCustomers = () => {
         fetch(appUrl + `dashboard/get_all_customers`)
@@ -33,7 +35,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
         console.log(values);
         const formattedValues = {
             ...values,
-            appointmentDate: values.appointmentDate.format(),
+            appointmentDate: values.appointmentDate ? dayjs(values.appointmentDate).tz('Indian/Mauritius') : null,
             startTime: values.startTime.format(),
             endTime: values.endTime.format(),
         };
@@ -113,10 +115,16 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
             endTime: dayjs(slotInfo.end),
             status: slotInfo.status ? slotInfo.status : '',
             doctor: slotInfo.doctor ? slotInfo.doctor : user.id,
-            noOfPatients: slotInfo.number_of_patients ? slotInfo.number_of_patients : '',
+            noOfPatients: slotInfo.number_of_patients ? slotInfo.number_of_patients : 1,
             description: slotInfo.description ? slotInfo.description : ''
         });
     }, [slotInfo, appointmentForm]);
+
+    const onChange = (date, dateString) => {
+        const localDate = date ? dayjs(date).tz('Indian/Mauritius').format('DD-MM-YYYY') : null;
+        console.log(localDate);
+        setAppointmentDate(localDate);
+    };
 
     return (
         <>
@@ -148,8 +156,8 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                                 disabled={readOnly}
                             >
                                 {customers.map(customer => (
-                                    <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name}`}>
-                                        {customer.first_name} {customer.last_name}
+                                    <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name.toUpperCase()}`}>
+                                        {customer.first_name} {customer.last_name.toUpperCase()}
                                     </Option>
                                 ))}
                             </Select>
@@ -164,13 +172,14 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                             name="appointmentDate"
                             label="Appointment Date"
                         >
-                            <DatePicker format="DD-MM-YYYY"/>
+                            <DatePicker onChange={onChange} value={appointmentDate} format="DD-MM-YYYY"/>
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item
                             name="status"
                             label="Status"
+                            rules={[{ required: true, message: 'Please input initial status!' }]}
                         >
                             <Select placeholder="Select Status">
                                 <Option value="scheduled">Scheduled</Option>
@@ -233,8 +242,9 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                         <Form.Item
                             name="noOfPatients"
                             label="No. of Patients"
+                            //initialValue={1}
                         >
-                            <InputNumber />
+                            <InputNumber defaultValue={1}/>
                         </Form.Item>
                     </Col>
                 </Row>
