@@ -58,7 +58,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
         } catch (error) {
             notification.error({
                 message: 'Error ',
-                description: error
+                description: error.message
             })
         }
     };

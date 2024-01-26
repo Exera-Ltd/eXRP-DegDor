@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { Route, Link, Routes, Navigate } from 'react-router-dom';
-import { UserOutlined, MedicineBoxOutlined, CalendarOutlined, AccountBookOutlined, PlusOutlined, AreaChartOutlined, ContainerOutlined, DollarCircleOutlined, DashboardOutlined, LogoutOutlined, FileExcelOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { AccountBookOutlined, UserOutlined, MedicineBoxOutlined, CalendarOutlined, PlusOutlined, ContainerOutlined, DashboardOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, ConfigProvider, Badge } from 'antd';
 import { loadFull } from "tsparticles";
 
@@ -22,6 +22,8 @@ import Quotation from './pages/Quotations/Quotation';
 import Report from './pages/Reports/Report';
 import JobCardForm from './pages/JobCards/JobCardForm';
 import JobCardListing from './pages/JobCards/JobCardListing';
+import ProductListing from './pages/Inventory/ProductListing';
+import InvoiceListing from './pages/Invoices/InvoiceListing';
 
 const { Header, Content, Sider, Footer } = Layout;
 
@@ -44,9 +46,19 @@ const menu = [
   }, */
   { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Manager', 'Staff'] },
   { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
-  /* { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
-  { key: 'invoices', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '/invoices', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
-  { key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  {
+    key: 'product', label: 'Products', icon: React.createElement(ContainerOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
+      { key: 'new-product', label: 'New Product', icon: React.createElement(ContainerOutlined), path: '/new-product', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+      { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+    ]
+  },
+  {
+    key: 'invoice', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
+      { key: 'new-invoice', label: 'New Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/new-invoice', roles: ['Administrator', 'Manager', 'Staff'] },
+      { key: 'invoices', label: 'Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/invoices', roles: ['Administrator', 'Manager', 'Staff'] }
+    ]
+  },
+  /*{ key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
   { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
   { key: 'logs', label: 'Logs', icon: React.createElement(FileExcelOutlined), path: '/logs', items: [], roles: ['Administrator'] } */
 ]
@@ -259,8 +271,10 @@ const App = () => {
               <Route path="/job-card" element={<JobCardForm />} />
               <Route path="/job-cards" element={<JobCardListing />} />
               <Route path="/appointment" element={<Calendar />} />
-              <Route path="/inventory" element={<NewProduct />} />
-              <Route path="/invoices" element={<NewInvoice />} />
+              <Route path="/new-product" element={<NewProduct />} />
+              <Route path="/inventory" element={<ProductListing />} />
+              <Route path="/new-invoice" element={<NewInvoice />} />
+              <Route path="/invoices" element={<InvoiceListing />} />
               <Route path="/quotations" element={<Quotation />} />
               <Route path="/reports" element={<Report />} />
               {user?.profile?.role === 'Administrator' && (

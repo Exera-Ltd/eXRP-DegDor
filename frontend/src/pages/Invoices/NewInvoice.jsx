@@ -12,8 +12,6 @@ function NewInvoice() {
             <Title level={3}>Create New Invoice</Title>
 
             <InvoiceForm />
-
-            <InvoiceToPDF data={{}} />
         </div>
     );
 }

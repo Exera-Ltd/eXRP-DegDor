@@ -3,6 +3,8 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from datetime import datetime, date
 from django.forms.models import model_to_dict
+from django.conf import settings
+from decimal import Decimal
 
 # Validators
 phone_regex = RegexValidator(
@@ -144,3 +146,84 @@ class Appointment(models.Model):
     
     def to_dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+    
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
+class Supplier(models.Model):
+    name = models.CharField(max_length=200)
+    # Include additional fields for the supplier as needed, like address, contact info, etc.
+
+    def __str__(self):
+        return self.name
+
+class Location(models.Model):
+    storage_location = models.CharField(max_length=200)
+    # Additional fields can be added to describe the location in more detail
+
+    def __str__(self):
+        return self.storage_location
+
+class Product(models.Model):
+    item_id = models.CharField(max_length=50, unique=True)
+    item_name = models.CharField(max_length=200)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True)
+    date_of_purchase = models.DateField()
+    reorder_level = models.PositiveIntegerField(default=0)
+    expiry_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=100)
+    serial_number_or_barcode = models.CharField(max_length=200, blank=True, null=True)
+    sku = models.CharField('SKU', max_length=100, blank=True, null=True)
+    image = models.ImageField(upload_to='static/img/product_images/', blank=True, null=True)
+    
+    def __str__(self):
+        return self.item_name
+    
+    def to_dict(self):
+        """
+        Convert model instance to dictionary, handling file fields appropriately.
+        """
+        data = model_to_dict(self, fields=[field.name for field in self._meta.fields if field.name != 'image'])
+        
+        # Handle the image field specifically
+        if self.image:
+            # If you are using a storage system that provides a full URL, use this:
+            # data['image'] = self.image.url
+
+            # If the storage system doesn't provide a full URL, you need to construct it manually:
+            data['image'] = settings.MEDIA_URL + str(self.image)
+        else:
+            data['image'] = None
+
+        return data
+    
+class Invoice(models.Model):
+    invoice_number = models.CharField(max_length=50, unique=True)
+    date = models.DateField()
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number}"
+
+class InvoiceLineItem(models.Model):
+    invoice = models.ForeignKey(Invoice, related_name='line_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True, null=True)
+    item = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    @property
+    def line_total(self):
+        return self.quantity * self.unit_price
+
+    def __str__(self):
+        return f"{self.item} - {self.quantity} @ {self.unit_price}"

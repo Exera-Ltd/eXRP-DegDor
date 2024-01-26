@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from log.models import LogEntry
-from .models import Prescription, GlassPrescription, ContactLensPrescription, LensDetails, Customer, JobCard, Appointment
+from .models import Prescription, GlassPrescription, ContactLensPrescription, LensDetails, Customer, JobCard, Appointment, Invoice, InvoiceLineItem
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.utils.dateparse import parse_date, parse_datetime
@@ -17,6 +17,9 @@ from reportlab.lib.pagesizes import A5
 from reportlab.lib.pagesizes import landscape
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
+from .models import Product, Category, Supplier, Location
+import base64
+from django.core.files.base import ContentFile
 
 today_date = date.today()
 today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
@@ -45,7 +48,7 @@ def dashboard_render (request):
 
 #@login_required(login_url='/accounts/login/')
 @require_http_methods(["POST"])
-def add_customer(request):    
+def create_customer(request):    
     try:
         data = json.loads(request.body)
         
@@ -1007,5 +1010,206 @@ def generate_job_card_pdf(request):
         return response
     except json.JSONDecodeError:
         return JsonResponse({'message': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'message': str(e)}, status=500)
+    
+@require_http_methods(["POST"])
+def create_product(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Assuming that category, supplier, and location are provided as names, not IDs
+        category, _ = Category.objects.get_or_create(name=data.get('category'))
+        supplier, _ = Supplier.objects.get_or_create(name=data.get('supplier'))
+        location, _ = Location.objects.get_or_create(storage_location=data.get('location'))
+
+        # Handle the image, converting it from base64 to an image file
+        image_data = data.get('image', [])
+        image = None
+        if image_data:
+            format, imgstr = image_data[0]['thumbUrl'].split(';base64,') # You might need to adjust this depending on the actual format of your image data
+            ext = format.split('/')[-1]
+            image = ContentFile(base64.b64decode(imgstr), name='temp.' + ext) # 'temp.' is used as a filename prefix; you might want to change this
+
+        # Create the product instance
+        product = Product.objects.create(
+            item_id=data.get('itemId'),
+            item_name=data.get('itemName'),
+            category=category,
+            quantity=data.get('quantity'),
+            unit_price=data.get('unitPrice'),
+            location=location,
+            supplier=supplier,
+            date_of_purchase=datetime.strptime(data.get('dateOfPurchase'), "%Y-%m-%dT%H:%M:%S.%fZ").date(),
+            reorder_level=data.get('reorderLevel'),
+            expiry_date=datetime.strptime(data.get('expiryDate'), "%Y-%m-%dT%H:%M:%S.%fZ").date() if data.get('expiryDate') else None,
+            status=data.get('status'),
+            serial_number_or_barcode=data.get('serialNumber'),
+            sku=data.get('sku'),
+            image=image
+        )
+
+        # Saving the product to handle image file correctly
+        product.save()
+
+        return JsonResponse({"message": "Product added successfully.", "id": product.id}, status=201)
+    
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=400)
+    
+#@login_required(login_url='/accounts/login/')
+def get_all_products(request):
+	entries = (
+		Product.objects.values("id", "item_name", "quantity", "unit_price", "image")
+	)
+	return JsonResponse({"values": list(entries)})
+
+#@login_required(login_url='/accounts/login/')
+def get_product(request, product_id):
+	product = Product.objects.get(id=product_id)
+	return JsonResponse({"values": product.to_dict()})
+
+@require_http_methods(["PUT"])
+def update_product(request, product_id):
+    try:
+        data = json.loads(request.body)
+        product = Product.objects.get(id=product_id)
+
+        # Update fields
+        product.item_name = data.get('itemName', product.item_name)
+        product.quantity = data.get('quantity', product.quantity)
+        product.unit_price = data.get('unitPrice', product.unit_price)
+        product.reorder_level = data.get('reorderLevel', product.reorder_level)
+        product.status = data.get('status', product.status)
+        product.serial_number_or_barcode = data.get('serialNumber', product.serial_number_or_barcode)
+        product.sku = data.get('sku', product.sku)
+
+        # Update dates
+        if data.get('dateOfPurchase'):
+            product.date_of_purchase = parse_datetime(data.get('dateOfPurchase'))
+        if data.get('expiryDate'):
+            product.expiry_date = parse_datetime(data.get('expiryDate'))
+
+        # Update ForeignKey fields (Category, Supplier, Location)
+        if data.get('category'):
+            category, _ = Category.objects.get_or_create(name=data.get('category'))
+            product.category = category
+        if data.get('supplier'):
+            supplier, _ = Supplier.objects.get_or_create(name=data.get('supplier'))
+            product.supplier = supplier
+        if data.get('location'):
+            location, _ = Location.objects.get_or_create(storage_location=data.get('location'))
+            product.location = location
+
+        # Update image if it exists
+        image_data = data.get('image')
+        print('in1')
+        #print(image_data[0]['thumbUrl'])
+        if 'thumbUrl' in image_data[0]:
+            print('in2')
+            format, imgstr = image_data[0]['thumbUrl'].split(';base64,')
+            ext = format.split('/')[-1]
+            product.image = ContentFile(base64.b64decode(imgstr), name=f'{product.item_id}.{ext}')
+
+        product.save()
+
+        return JsonResponse({'message': 'Product updated successfully'}, status=200)
+    except Product.DoesNotExist:
+        return JsonResponse({'message': 'Product not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'message': str(e)}, status=500)
+    
+@require_http_methods(["POST"])
+def create_invoice(request):
+    try:
+        data = json.loads(request.body)
+
+        customer, _ = Customer.objects.get_or_create(id=data.get('customer'))
+
+        invoice = Invoice.objects.create(
+            invoice_number=data['invoiceNumber'],
+            date=parse_datetime(data['date']),
+            customer=customer,
+            total_amount=data.get('totalAmount', 0),
+        )
+        
+        line_items = data.get('items', [])
+        for item in line_items:
+            product = None
+            if item['item'] == 'product' and 'product' in item:
+                product = Product.objects.get(id=item['product'])
+                
+            InvoiceLineItem.objects.create(
+                invoice=invoice,
+                item=item['item'],
+                product=product,
+                description=item['description'],
+                quantity=item['quantity'],
+                unit_price=item['unitPrice'],
+            )
+
+        invoice.save()
+
+        return JsonResponse({"message": "Invoice created successfully.", "id": invoice.id}, status=201)
+    except KeyError as e:
+        return JsonResponse({"message": f"Missing field: {e}"}, status=400)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=400)
+
+def get_all_invoices(request):
+    invoices = Invoice.objects.all().select_related("customer").values(
+        "id", "invoice_number", "date", "customer__first_name", "total_amount"
+    )
+    return JsonResponse({"values": list(invoices)})
+
+
+def get_invoice(request, invoice_id):
+    try:
+        invoice = Invoice.objects.get(id=invoice_id)
+        invoice_data = {
+            "invoiceNumber": invoice.invoice_number,
+            "date": invoice.date,
+            #"customerName": invoice.customer.name,
+            # Add other fields as necessary
+            "lineItems": list(invoice.line_items.values("item", "description", "quantity", "unit_price"))
+        }
+        return JsonResponse({"invoice": invoice_data})
+    except Invoice.DoesNotExist:
+        return JsonResponse({'message': 'Invoice not found'}, status=404)
+
+@require_http_methods(["PUT"])
+def update_invoice(request, invoice_id):
+    try:
+        data = json.loads(request.body)
+        invoice = Invoice.objects.get(id=invoice_id)
+
+        # Update invoice fields
+        invoice.date = datetime.strptime(data.get('date', str(invoice.date)), "%Y-%m-%d").date()
+        #invoice.downpayment_percentage = data.get('downpaymentPercentage', invoice.downpayment_percentage)
+        #invoice.discount_type = data.get('discountType', invoice.discount_type)
+        #invoice.discount_amount = data.get('discountAmount', invoice.discount_amount)
+        invoice.total_amount = data.get('totalAmount', invoice.total_amount)
+        #invoice.discounted_total = data.get('discountedTotal', invoice.discounted_total)
+        #invoice.balance_due = data.get('balanceDue', invoice.balance_due)
+
+        invoice.save()
+
+        # Update line items
+        line_items_data = data.get('lineItems', [])
+        for item_data in line_items_data:
+            line_item, created = InvoiceLineItem.objects.update_or_create(
+                invoice=invoice,
+                id=item_data.get('id'),  # Assuming each line item's data includes its ID
+                defaults={
+                    'item': item_data['item'],
+                    'description': item_data['description'],
+                    'quantity': item_data['quantity'],
+                    'unit_price': item_data['unit_price'],
+                }
+            )
+
+        return JsonResponse({'message': 'Invoice updated successfully'}, status=200)
+    except Invoice.DoesNotExist:
+        return JsonResponse({'message': 'Invoice not found'}, status=404)
     except Exception as e:
         return JsonResponse({'message': str(e)}, status=500)

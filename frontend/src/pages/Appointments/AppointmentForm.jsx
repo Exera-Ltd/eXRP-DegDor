@@ -97,7 +97,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
         } catch (error) {
             notification.error({
                 message: 'Error ',
-                description: error
+                description: error.message
             })
         }
     };

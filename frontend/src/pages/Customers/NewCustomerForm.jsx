@@ -56,7 +56,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
         } catch (error) {
             notification.error({
                 message: 'Error ',
-                description: error
+                description: error.message
             })
         }
     };
@@ -64,7 +64,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
         console.log('Failed:', errorInfo);
         notification.error({
             message: 'Error ',
-            description: errorInfo
+            description: errorInfo.message
         })
     };
 

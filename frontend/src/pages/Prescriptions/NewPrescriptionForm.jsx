@@ -157,7 +157,7 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
         } catch (error) {
             notification.error({
                 message: 'Error',
-                description: error.toString()
+                description: error.message
             });
         }
     };

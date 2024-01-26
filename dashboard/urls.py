@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 from dashboard import views
 
 app_urls = [
-	path("create_customer", views.add_customer),
+	path("create_customer", views.create_customer),
  	path("get_all_customers", views.get_all_customers),
     path("get_customer/<int:customer_id>/", views.get_customer),
     path("update_customer/<int:customer_id>/", views.update_customer, name="update_customer"),
@@ -25,7 +25,17 @@ app_urls = [
     path("get_all_appointments", views.get_all_appointments),
     path("get_appointment/<int:appointment_id>/", views.get_appointment),
     path("update_appointment/<int:appointment_id>/", views.update_appointment, name='update_appointment'),
-]
+
+    path('create_product/', views.create_product, name='create_product'),
+    path("get_all_products", views.get_all_products),
+    path("get_product/<int:product_id>/", views.get_product),
+    path("update_product/<int:product_id>/", views.update_product, name="update_product"),
+    
+    path('create_invoice/', views.create_invoice, name='create_invoice'),
+    path("get_all_invoices", views.get_all_invoices),
+    path("get_invoice/<int:invoice_id>/", views.get_invoice),
+    path("update_invoice/<int:invoice_id>/", views.update_invoice, name="update_invoice"),
+]   
 
 urlpatterns = [
    	re_path(r'^$', views.dashboard_render, name='index'),

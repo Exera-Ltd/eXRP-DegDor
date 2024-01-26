@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from 'antd';
-import InventoryForm from './InventoryForm';
+import InventoryForm from './NewProductForm';
 
 const { Title } = Typography;
 
