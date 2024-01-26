@@ -1248,6 +1248,8 @@ def generate_invoice_pdf(request):
         invoice_data = invoice_with_line_items.to_dict()
         invoice_data['line_items'] = line_items_data 
         
+        print(invoice_data)
+        
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = 'attachment; filename="prescription.pdf"'
 
@@ -1276,25 +1278,29 @@ def generate_invoice_pdf(request):
         
         c.drawString(grid_left_column, top_margin, "Invoice: ")
         c.drawString(grid_left_column + 70, top_margin, str(invoice_data.get('invoice_number', '')))
-
+        
+        customer_name = f"{invoice_data['customer_details'].get('first_name', '')} {invoice_data['customer_details'].get('last_name', '')}"
         c.drawString(grid_left_column, top_margin - 30, "Name:")
-        c.drawString(grid_left_column + 70, top_margin - 30, str(invoice_data.get('customer', '')))
+        c.drawString(grid_left_column + 70, top_margin - 30, customer_name)
 
-        c.drawString(name_label_x, patient_info_start_height - 260, "Doctor:")
-        c.drawString(name_value_x, name_y - 260, "O. POLIN Optometrist")
+        c.drawString(name_label_x, patient_info_start_height - 280, "Doctor:")
+        c.drawString(name_value_x, name_y - 280, "O. POLIN Optometrist")
+        
+        print(line_items_data)
+        total_sum = sum(item['unit_price'] * item['quantity'] for item in line_items_data)
+        print(total_sum)
+        c.drawString(grid_left_column , patient_info_start_height - 280, "Total:")
+        c.drawString(grid_left_column + 40, name_y - 280, "Rs")
+        c.drawString(grid_left_column + 70, name_y - 280, str(total_sum))
 
         grid_height = patient_info_start_height - 85 
         c.grid([left_margin, left_margin + 90, left_margin + 410, left_margin + 485, left_margin + 555],
-               [grid_height, grid_height - 20, grid_height - 40, grid_height - 60])
+               [grid_height, grid_height - 20])
 
         c.drawString(left_margin + 25, grid_height - 15, "Product")
         c.drawString(left_margin + 220, grid_height - 15, "Description")
         c.drawString(left_margin + 425, grid_height - 15, "Quantity")
         c.drawString(left_margin + 495, grid_height - 15, "Unit Price")
-        
-        c.drawString(left_margin + 55, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-sph', ''))))
-        c.drawString(left_margin + 125, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-cyl', ''))))
-        c.drawString(left_margin + 195, grid_height - 34, str(invoice_data.get('glass-right-axis', '')))
 
         strip_x = grid_left_column 
         strip_y = height - 15  
@@ -1358,6 +1364,24 @@ def generate_invoice_pdf(request):
         text_y = strip_y - strip_height + (strip_height - 8) / 2  
 
         c.drawString(text_x, text_y, strip_text)
+        c.setFillColorRGB(0, 0, 0) 
+        item_start_y = left_margin
+        strip_x = 20
+        print(height/2)
+        for index, line_item in enumerate(line_items_data):
+            print(index)
+            print(line_item)
+            y_position = 235 - (25 * index)
+            print(y_position)
+
+            c.drawString(left_margin + 25, y_position, line_item['item'])
+            c.drawString(left_margin + 220, y_position, line_item['description'])
+            c.drawString(left_margin + 440, y_position, str(line_item['quantity']))
+            c.drawString(left_margin + 495, y_position, f"Rs {line_item['unit_price']}")
+
+            # Displaying line item details
+                
+        
         c.showPage()
         c.save()
         

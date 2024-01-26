@@ -318,16 +318,16 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                         rules={[{ required: true, message: 'Missing item' }]}
                                     >
                                         <Select placeholder="Select an item" disabled={isReadOnly} style={{ width: 130 }} onChange={(value) => handleItemTypeChange(value, name)}>
-                                            <Option value="product">Product</Option>
-                                            <Option value="consultation">Consultation</Option>
+                                            <Option value="Product">Product</Option>
+                                            <Option value="Consultation">Consultation</Option>
                                         </Select>
                                     </Form.Item>
 
                                     {/* Conditionally render the Product Select based on the item type */}
-                                    {invoiceForm.getFieldValue(['items', name, 'item']) === 'product' && (
+                                    {invoiceForm.getFieldValue(['items', name, 'item']) === 'Product' && (
                                         <Form.Item
                                             {...restField}
-                                            name={[name, 'product']}
+                                            name={[name, 'Product']}
                                             rules={[{ required: true, message: 'Please select a product' }]}
                                         >
                                             <Select

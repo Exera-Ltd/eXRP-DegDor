@@ -214,7 +214,11 @@ class Invoice(models.Model):
         return f"Invoice {self.invoice_number}"
     
     def to_dict(self):
-        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+        invoice_data = model_to_dict(self, fields=[field.name for field in self._meta.fields])
+
+        # Add customer details
+        invoice_data['customer_details'] = model_to_dict(self.customer)
+        return invoice_data
 
 class InvoiceLineItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='line_items', on_delete=models.CASCADE)
