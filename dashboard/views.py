@@ -1246,45 +1246,122 @@ def generate_invoice_pdf(request):
         line_items_array = list(invoice_with_line_items.line_items.all())
         line_items_data = [line_item.to_dict() for line_item in line_items_array]
         invoice_data = invoice_with_line_items.to_dict()
-        invoice_data['line_items'] = line_items_data
+        invoice_data['line_items'] = line_items_data 
         
         response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+        response['Content-Disposition'] = 'attachment; filename="prescription.pdf"'
 
         c = canvas.Canvas(response, pagesize=landscape(A5))
         width, height = landscape(A5)
 
-        # Draw the logo at the top
+        left_margin = 20
+        top_margin = height - 60
+
+        c.setFont("Helvetica", 12)
+        patient_info_start_height = top_margin
+        grid_left_column = width - left_margin - 245 
+
+        name_label_x = left_margin
+        name_value_x = left_margin + 70  
+        name_y = patient_info_start_height
+        
         image_path = 'static/img/logo.png'
-        c.drawImage(image_path, inch, height - inch - 50, width=100, height=50, mask='auto')
+        
+        image_x = name_label_x + 40 
+        image_y = patient_info_start_height - 45
+        image_width = 200 
+        image_height = 100
 
-        # Draw the invoice number and customer details at the top right
-        c.drawString(width - 3 * inch, height - inch, f"Invoice Number: {invoice_data.get('invoice_number', '')}")
-        c.drawString(width - 3 * inch, height - 1.25 * inch, f"Customer: {invoice_data.get('customer', '')}")
-        c.drawString(width - 3 * inch, height - 1.5 * inch, f"Date: {invoice_data.get('date', '').strftime('%d-%m-%Y')}")
+        c.drawImage(image_path, image_x, image_y, width=image_width,height=image_height)
+        
+        c.drawString(grid_left_column, top_margin, "Invoice: ")
+        c.drawString(grid_left_column + 70, top_margin, str(invoice_data.get('invoice_number', '')))
 
-        # Draw the 'Line Items' header
+        c.drawString(grid_left_column, top_margin - 30, "Name:")
+        c.drawString(grid_left_column + 70, top_margin - 30, str(invoice_data.get('customer', '')))
+
+        c.drawString(name_label_x, patient_info_start_height - 260, "Doctor:")
+        c.drawString(name_value_x, name_y - 260, "O. POLIN Optometrist")
+
+        grid_height = patient_info_start_height - 85 
+        c.grid([left_margin, left_margin + 90, left_margin + 410, left_margin + 485, left_margin + 555],
+               [grid_height, grid_height - 20, grid_height - 40, grid_height - 60])
+
+        c.drawString(left_margin + 25, grid_height - 15, "Product")
+        c.drawString(left_margin + 220, grid_height - 15, "Description")
+        c.drawString(left_margin + 425, grid_height - 15, "Quantity")
+        c.drawString(left_margin + 495, grid_height - 15, "Unit Price")
+        
+        c.drawString(left_margin + 55, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-sph', ''))))
+        c.drawString(left_margin + 125, grid_height - 34, format_with_plus_if_positive(str(form_data.get('glass-right-cyl', ''))))
+        c.drawString(left_margin + 195, grid_height - 34, str(invoice_data.get('glass-right-axis', '')))
+
+        strip_x = grid_left_column 
+        strip_y = height - 15  
+        strip_width = 245  
+        strip_height = 20
+        strip_text = "Invoice"  
+
+        c.setFillColorRGB(0, 0, 0)  
+
+        c.rect(strip_x, strip_y - strip_height, strip_width, strip_height, stroke=0, fill=1)
+
+        c.setFillColorRGB(1, 1, 1) 
+
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(inch, height - 2 * inch, "Line Items")
 
-        # Start drawing the line items grid below the 'Line Items' header
-        line_item_start_y = height - 2.5 * inch
-        c.grid([inch, 2 * inch, 3 * inch, 4 * inch, 5 * inch],
-               [line_item_start_y, line_item_start_y - 0.25 * inch, line_item_start_y - 0.5 * inch])
+        text_width = c.stringWidth(strip_text, "Helvetica-Bold", 12)
 
-        # Populate the grid with line items
-        for index, line_item in enumerate(line_items_data, start=0):
-            y_position = line_item_start_y - (0.25 * inch * (index + 1))
-            c.drawString(inch + 5, y_position, line_item['item'])
-            c.drawString(2 * inch + 5, y_position, line_item['description'])
-            c.drawString(3 * inch + 5, y_position, str(line_item['quantity']))
-            c.drawString(4 * inch + 5, y_position, f"${line_item['unit_price']}")
+        text_x = strip_x + (strip_width - text_width) / 2
+        text_y = strip_y - strip_height + (strip_height - 8) / 2 
 
-        # Finalize the PDF and return the response
+        c.drawString(text_x, text_y, strip_text)
+        
+        strip_x = left_margin 
+        strip_y = height - 115  
+        strip_width = width - 2 * left_margin  
+        strip_height = 20
+        strip_text = "Items" 
+
+        c.setFillColorRGB(0, 0, 0)
+
+        c.rect(strip_x, strip_y - strip_height, strip_width, strip_height, stroke=0, fill=1)
+
+        c.setFillColorRGB(1, 1, 1) 
+
+        c.setFont("Helvetica-Bold", 12)
+
+        text_width = c.stringWidth(strip_text, "Helvetica-Bold", 12)
+
+        text_x = strip_x + (strip_width - text_width) / 2
+        text_y = strip_y - strip_height + (strip_height - 8) / 2
+
+        c.drawString(text_x, text_y, strip_text)
+                
+        strip_x = 20 
+        strip_y = 40 
+        strip_width = width - 40
+        strip_height = 20 
+        strip_text = "Optical Zone Ltd | Valentina Mall | Tel: 5555 5555 | BRN: C0123541"  
+
+        c.setFillColorRGB(0, 0, 0) 
+
+        c.rect(strip_x, strip_y - strip_height, strip_width, strip_height, stroke=0, fill=1)
+
+        c.setFillColorRGB(1, 1, 1)  
+
+        c.setFont("Helvetica-Bold", 10)
+
+        text_width = c.stringWidth(strip_text, "Helvetica-Bold", 10)
+
+        text_x = strip_x + (strip_width - text_width) / 2
+        text_y = strip_y - strip_height + (strip_height - 8) / 2  
+
+        c.drawString(text_x, text_y, strip_text)
         c.showPage()
         c.save()
+        
         return response
-
     except json.JSONDecodeError:
         return JsonResponse({'message': 'Invalid JSON data'}, status=400)
     except Exception as e:
