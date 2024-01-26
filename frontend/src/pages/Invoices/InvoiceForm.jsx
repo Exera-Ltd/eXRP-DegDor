@@ -227,11 +227,11 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                         </Select>
                     </Form.Item>
                 </Col>
-                <Col span={8}>
+{/*                 <Col span={8}>
                     <Form.Item name="invoiceNumber" label="Invoice Number" rules={[{ required: true }]}>
-                        <Input placeholder="Enter Invoice Number" />
+                        <Input readOnly={true} />
                     </Form.Item>
-                </Col>
+                </Col> */}
                 <Col span={8}>
                     <Form.Item
                         name="date"

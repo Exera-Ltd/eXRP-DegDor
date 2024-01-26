@@ -1123,11 +1123,17 @@ def update_product(request, product_id):
 def create_invoice(request):
     try:
         data = json.loads(request.body)
+        customer = Customer.objects.get(id=data.get('customer'))
 
-        customer, _ = Customer.objects.get_or_create(id=data.get('customer'))
+        try:
+            latest_invoice = Invoice.objects.latest('id')
+            new_invoice_number = f"INV-{latest_invoice.id + 1}"
+        except Invoice.DoesNotExist:
+            new_invoice_number = "INV-1"
+
 
         invoice = Invoice.objects.create(
-            invoice_number=data['invoiceNumber'],
+            invoice_number=new_invoice_number,
             date=parse_datetime(data['date']),
             customer=customer,
             total_amount=data.get('totalAmount', 0),
@@ -1135,26 +1141,44 @@ def create_invoice(request):
         
         line_items = data.get('items', [])
         for item in line_items:
-            product = None
-            if item['item'] == 'product' and 'product' in item:
+            if item['item'] == 'product':
                 product = Product.objects.get(id=item['product'])
-                
-            InvoiceLineItem.objects.create(
-                invoice=invoice,
-                item=item['item'],
-                product=product,
-                description=item['description'],
-                quantity=item['quantity'],
-                unit_price=item['unitPrice'],
-            )
+                if product.quantity < item['quantity']:
+                    raise ValueError(f"Not enough quantity for product {product.item_name}")
+
+                # Deduct the quantity from the product inventory
+                product.quantity -= item['quantity']
+                product.save()
+
+                InvoiceLineItem.objects.create(
+                    invoice=invoice,
+                    item=item['item'],
+                    product=product,
+                    description=item['description'],
+                    quantity=item['quantity'],
+                    unit_price=item['unitPrice'],
+                )
+            else:
+                # Handle non-product items like 'consultation'
+                InvoiceLineItem.objects.create(
+                    invoice=invoice,
+                    item=item['item'],
+                    description=item['description'],
+                    quantity=item['quantity'],
+                    unit_price=item['unitPrice'],
+                )
 
         invoice.save()
 
         return JsonResponse({"message": "Invoice created successfully.", "id": invoice.id}, status=201)
-    except KeyError as e:
-        return JsonResponse({"message": f"Missing field: {e}"}, status=400)
-    except Exception as e:
+    except Customer.DoesNotExist:
+        return JsonResponse({"message": "Customer not found"}, status=404)
+    except Product.DoesNotExist:
+        return JsonResponse({"message": "Product not found"}, status=404)
+    except ValueError as e:
         return JsonResponse({"message": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"message": str(e)}, status=500)
 
 def get_all_invoices(request):
     invoices = Invoice.objects.all().select_related("customer").values(
