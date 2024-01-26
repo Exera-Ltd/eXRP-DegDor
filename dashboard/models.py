@@ -212,6 +212,9 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice {self.invoice_number}"
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
 
 class InvoiceLineItem(models.Model):
     invoice = models.ForeignKey(Invoice, related_name='line_items', on_delete=models.CASCADE)
@@ -227,3 +230,6 @@ class InvoiceLineItem(models.Model):
 
     def __str__(self):
         return f"{self.item} - {self.quantity} @ {self.unit_price}"
+    
+    def to_dict(self):
+        return model_to_dict(self, fields=[field.name for field in self._meta.fields])

@@ -65,7 +65,7 @@ function InvoiceListing() {
             })
             .then(data => {
                 console.log(data);
-                setSelectedInvoiceData(data.values);
+                setSelectedInvoiceData(data.invoice);
                 setIsReadOnly(true);
                 setIsLoading(false);
                 setIsModalVisible(true);
@@ -148,7 +148,7 @@ function InvoiceListing() {
             </Row>
 
             <Modal
-                title="New/ Edit Job Card"
+                title="View Invoice"
                 open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}

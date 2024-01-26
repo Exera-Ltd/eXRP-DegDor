@@ -20,6 +20,7 @@ from django.utils import timezone
 from .models import Product, Category, Supplier, Location
 import base64
 from django.core.files.base import ContentFile
+from reportlab.lib.units import inch
 
 today_date = date.today()
 today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
@@ -1154,7 +1155,7 @@ def create_invoice(request):
                     invoice=invoice,
                     item=item['item'],
                     product=product,
-                    description=item['description'],
+                    description=item.get('description', ''),
                     quantity=item['quantity'],
                     unit_price=item['unitPrice'],
                 )
@@ -1163,7 +1164,7 @@ def create_invoice(request):
                 InvoiceLineItem.objects.create(
                     invoice=invoice,
                     item=item['item'],
-                    description=item['description'],
+                    description=item.get('description', ''),
                     quantity=item['quantity'],
                     unit_price=item['unitPrice'],
                 )
@@ -1191,11 +1192,11 @@ def get_invoice(request, invoice_id):
     try:
         invoice = Invoice.objects.get(id=invoice_id)
         invoice_data = {
+            "id": invoice.id,
             "invoiceNumber": invoice.invoice_number,
             "date": invoice.date,
-            #"customerName": invoice.customer.name,
-            # Add other fields as necessary
-            "lineItems": list(invoice.line_items.values("item", "description", "quantity", "unit_price"))
+            "customer": invoice.customer_id,
+            "lineItems": list(invoice.line_items.values("item", "description", "quantity", "unit_price", "product"))
         }
         return JsonResponse({"invoice": invoice_data})
     except Invoice.DoesNotExist:
@@ -1235,5 +1236,56 @@ def update_invoice(request, invoice_id):
         return JsonResponse({'message': 'Invoice updated successfully'}, status=200)
     except Invoice.DoesNotExist:
         return JsonResponse({'message': 'Invoice not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'message': str(e)}, status=500)
+    
+def generate_invoice_pdf(request):
+    try:
+        form_data = json.loads(request.body)
+        invoice_with_line_items = Invoice.objects.prefetch_related('line_items').get(id=form_data['invoice_id'])
+        line_items_array = list(invoice_with_line_items.line_items.all())
+        line_items_data = [line_item.to_dict() for line_item in line_items_array]
+        invoice_data = invoice_with_line_items.to_dict()
+        invoice_data['line_items'] = line_items_data
+        
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+
+        c = canvas.Canvas(response, pagesize=landscape(A5))
+        width, height = landscape(A5)
+
+        # Draw the logo at the top
+        image_path = 'static/img/logo.png'
+        c.drawImage(image_path, inch, height - inch - 50, width=100, height=50, mask='auto')
+
+        # Draw the invoice number and customer details at the top right
+        c.drawString(width - 3 * inch, height - inch, f"Invoice Number: {invoice_data.get('invoice_number', '')}")
+        c.drawString(width - 3 * inch, height - 1.25 * inch, f"Customer: {invoice_data.get('customer', '')}")
+        c.drawString(width - 3 * inch, height - 1.5 * inch, f"Date: {invoice_data.get('date', '').strftime('%d-%m-%Y')}")
+
+        # Draw the 'Line Items' header
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(inch, height - 2 * inch, "Line Items")
+
+        # Start drawing the line items grid below the 'Line Items' header
+        line_item_start_y = height - 2.5 * inch
+        c.grid([inch, 2 * inch, 3 * inch, 4 * inch, 5 * inch],
+               [line_item_start_y, line_item_start_y - 0.25 * inch, line_item_start_y - 0.5 * inch])
+
+        # Populate the grid with line items
+        for index, line_item in enumerate(line_items_data, start=0):
+            y_position = line_item_start_y - (0.25 * inch * (index + 1))
+            c.drawString(inch + 5, y_position, line_item['item'])
+            c.drawString(2 * inch + 5, y_position, line_item['description'])
+            c.drawString(3 * inch + 5, y_position, str(line_item['quantity']))
+            c.drawString(4 * inch + 5, y_position, f"${line_item['unit_price']}")
+
+        # Finalize the PDF and return the response
+        c.showPage()
+        c.save()
+        return response
+
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'Invalid JSON data'}, status=400)
     except Exception as e:
         return JsonResponse({'message': str(e)}, status=500)

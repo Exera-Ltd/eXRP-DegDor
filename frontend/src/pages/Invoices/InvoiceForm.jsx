@@ -98,41 +98,6 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
         });
     }, [totalAmount, downPaymentPercentage, discountType, discountValue, invoiceForm]);
 
-    useEffect(() => {
-        // Initialize form with invoice data if available
-        if (invoiceData) {
-            const items = invoiceData.items.map(item => ({
-                item: item.product, // Assuming 'product' is the field name in your invoice items data
-                description: item.description,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-            }));
-
-            invoiceForm.setFieldsValue({
-                invoiceNumber: invoiceData.invoiceNumber,
-                date: invoiceData.date ? dayjs(invoiceData.date) : null, // You might need to convert to your date object format
-                customerName: invoiceData.customerName,
-                items, // Line items
-                downPaymentPercentage: invoiceData.downPaymentPercentage,
-                discountType: invoiceData.discountType,
-                discountValue: invoiceData.discountValue,
-            });
-
-            // Initialize other state variables if needed
-            setTotalAmount(invoiceData.totalAmount);
-            setDownPaymentPercentage(invoiceData.downPaymentPercentage);
-            setDiscountType(invoiceData.discountType);
-            setDiscountValue(invoiceData.discountValue);
-        } else {
-            // If there's no invoiceData, reset to default values
-            invoiceForm.resetFields();
-            setTotalAmount(0);
-            setDownPaymentPercentage(100);
-            setDiscountType('fixed');
-            setDiscountValue(0);
-        }
-    }, [invoiceData, invoiceForm]);
-
     const onFinish = async (values) => {
         console.log('Received values of form: ', values);
 
@@ -201,6 +166,98 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
         setSelectedItems(prevItems => ({ ...prevItems, [name]: value }));
     };
 
+    const handleProductChange = (value, name) => {
+        // Find the product's unit price from the products state.
+        const selectedProduct = products.find(product => product.id === value);
+        if (selectedProduct) {
+            // Set the unit price in the form.
+            invoiceForm.setFieldsValue({
+                items: {
+                    ...invoiceForm.getFieldValue('items'),
+                    [name]: {
+                        ...invoiceForm.getFieldValue(['items', name]),
+                        unitPrice: selectedProduct.unit_price, // Assuming 'unit_price' is the field from your product data
+                    },
+                },
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (invoiceData) {
+            // Format the date to be compatible with the DatePicker component
+            const formattedDate = invoiceData.date ? dayjs(invoiceData.date).format('YYYY-MM-DD') : null;
+
+            // Format the line items to match the Form.List structure
+            const formattedLineItems = invoiceData.lineItems.map(lineItem => ({
+                item: lineItem.item,
+                product: lineItem.product,
+                description: lineItem.description || '', // Use empty string if description is missing
+                quantity: lineItem.quantity,
+                unitPrice: lineItem.unit_price,
+            }));
+
+            // Set the form values
+            invoiceForm.setFieldsValue({
+                invoice_id: invoiceData.id,
+                customer: invoiceData.customer,
+                date: dayjs(invoiceData.date),
+                items: formattedLineItems,
+                totalAmount: invoiceData.lineItems.reduce((total, currentItem) => {
+                    return total + (currentItem.quantity * parseFloat(currentItem.unit_price));
+                }, 0),
+            });
+
+            // Set the total amount
+            setTotalAmount(invoiceData.lineItems.reduce((total, currentItem) => {
+                return total + (currentItem.quantity * parseFloat(currentItem.unit_price));
+            }, 0));
+        }
+    }, [invoiceData]);
+
+    const handlePrint = () => {
+        const invoice_id = invoiceForm.getFieldValue('invoice_id');
+        console.log(invoice_id);
+
+        generatePdf(invoice_id);
+    };
+
+    const generatePdf = async (invoice_id) => {
+        try {
+            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(appUrl + `dashboard/generate_invoice_pdf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                    // Include authorization headers if necessary
+                },
+                body: JSON.stringify({ 'invoice_id': invoice_id }),
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok.');
+
+            // Get the PDF Blob from the response
+            const blob = await response.blob();
+
+            // Create a link element, use it to download the PDF
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = downloadUrl;
+            downloadLink.setAttribute('download', `invoice_${invoice_id}.pdf`); // Any filename you like
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+        } catch (error) {
+            console.error('Error:', error);
+            notification.error({
+                message: 'Error',
+                description: 'There was a problem generating the PDF.'
+            });
+        }
+    };
+
     return (
         <Form form={invoiceForm} name="invoice_form" onFieldsChange={onFieldsChange} onFinish={onFinish} onValuesChange={onValuesChange} autoComplete="off" >
             <Row gutter={16}>
@@ -227,7 +284,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                         </Select>
                     </Form.Item>
                 </Col>
-{/*                 <Col span={8}>
+                {/*                 <Col span={8}>
                     <Form.Item name="invoiceNumber" label="Invoice Number" rules={[{ required: true }]}>
                         <Input readOnly={true} />
                     </Form.Item>
@@ -238,6 +295,13 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                         label="Date"
                     >
                         <DatePicker format="DD-MM-YYYY" onChange={onDateChange} value={date} disabled={isReadOnly} />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="invoice_id"
+                        hidden
+                    >
+                        <Input />
                     </Form.Item>
                 </Col>
             </Row>
@@ -253,7 +317,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                         name={[name, 'item']}
                                         rules={[{ required: true, message: 'Missing item' }]}
                                     >
-                                        <Select placeholder="Select an item" style={{ width: 130 }} onChange={(value) => handleItemTypeChange(value, name)}>
+                                        <Select placeholder="Select an item" disabled={isReadOnly} style={{ width: 130 }} onChange={(value) => handleItemTypeChange(value, name)}>
                                             <Option value="product">Product</Option>
                                             <Option value="consultation">Consultation</Option>
                                         </Select>
@@ -273,6 +337,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                                 filterOption={(input, option) =>
                                                     option.children.toLowerCase().includes(input.toLowerCase())
                                                 }
+                                                onChange={(value) => handleProductChange(value, name)}
                                                 disabled={isReadOnly}
                                                 style={{ width: 200 }} // Set the width as needed
                                             >
@@ -288,7 +353,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                         {...restField}
                                         name={[name, 'description']}
                                     >
-                                        <Input placeholder="Description" />
+                                        <Input placeholder="Description" readOnly={isReadOnly} />
                                     </Form.Item>
 
                                     <Form.Item
@@ -296,7 +361,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                         name={[name, 'quantity']}
                                         rules={[{ required: true, message: 'Missing quantity' }]}
                                     >
-                                        <InputNumber min={1} placeholder="Quantity" />
+                                        <InputNumber min={1} placeholder="Quantity" readOnly={isReadOnly} />
                                     </Form.Item>
 
                                     <Form.Item
@@ -304,19 +369,25 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                         name={[name, 'unitPrice']}
                                         rules={[{ required: true, message: 'Missing unit price' }]}
                                     >
-                                        <InputNumber min={0} placeholder="Unit Price" />
+                                        <InputNumber min={0} placeholder="Unit Price" readOnly={isReadOnly} />
                                     </Form.Item>
 
-                                    <MinusCircleOutlined onClick={() => remove(name)} />
+                                    {
+                                        !isReadOnly && (<MinusCircleOutlined onClick={() => remove(name)} />)
+                                    }
                                 </Space>
                             </Row>
                         ))}
 
-                        <Form.Item>
-                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                                Add Item
-                            </Button>
-                        </Form.Item>
+                        {
+                            !isReadOnly && (
+                                <Form.Item>
+                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                        Add Item
+                                    </Button>
+                                </Form.Item>
+                            )
+                        }
 
                         {/* <Form.Item shouldUpdate={(prevValues, curValues) => prevValues.items !== curValues.items}>
                             {() => {
@@ -362,11 +433,23 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                 </Text>
             </Form.Item> */}
 
-            <Form.Item>
-                <Button type="primary" htmlType="submit">
-                    Create Invoice
-                </Button>
-            </Form.Item>
+            {
+                isReadOnly && (
+                    <Button type="primary" htmlType="button" style={{ width: 200, height: 40 }} onClick={handlePrint} >
+                        Print
+                    </Button>
+                )
+            }
+
+            {
+                !isReadOnly && (
+                    <Row style={{ justifyContent: 'center' }}>
+                        <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
+                            Create Invoice
+                        </Button>
+                    </Row>
+                )
+            }
         </Form>
     );
 };

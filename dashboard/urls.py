@@ -35,6 +35,7 @@ app_urls = [
     path("get_all_invoices", views.get_all_invoices),
     path("get_invoice/<int:invoice_id>/", views.get_invoice),
     path("update_invoice/<int:invoice_id>/", views.update_invoice, name="update_invoice"),
+    path("generate_invoice_pdf", views.generate_invoice_pdf),
 ]   
 
 urlpatterns = [
