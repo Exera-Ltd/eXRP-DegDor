@@ -110,7 +110,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
             const method = invoiceId ? 'PUT' : 'POST';
             const endpoint = invoiceId ? `dashboard/update_invoice/${invoiceId}/` : 'dashboard/create_invoice/';
 
-            const response = await fetch(`${appUrl}/${endpoint}`, {
+            const response = await fetch(appUrl + endpoint, {
                 method: method,
                 credentials: 'include',
                 headers: {
