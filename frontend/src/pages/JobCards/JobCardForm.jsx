@@ -15,9 +15,12 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
     const onFinish = async (values) => {
         console.log('Success:', values);
         const submissionValues = { ...values };
+        console.log(submissionValues.estimatedDeliveryDate);
         if (submissionValues.estimatedDeliveryDate) {
             submissionValues.estimatedDeliveryDate = dayjs(submissionValues.estimatedDeliveryDate).format('YYYY-MM-DD');
         }
+        console.log(submissionValues.estimatedDeliveryDate);
+
         try {
             const csrftoken = getCookie('csrftoken');
             const jobCardId = jobCardForm.getFieldValue('job_card_id');
@@ -123,6 +126,10 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
         fetchCustomers();
     }, []);
 
+    useEffect(() => {
+        fetchCustomers();
+    }, [jobCardData]);
+
     const onFinishFailed = (errorInfo) => {
         console.log('Failed:', errorInfo);
     };
@@ -137,11 +144,13 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
     };
 
     useEffect(() => {
+        console.log('from job card listing');
+
         console.log(jobCardData);
         jobCardForm.resetFields();
         jobCardForm.setFieldsValue({
             job_card_id: jobCardData?.id,
-            customer: jobCardData?.prescription?.customer_id,
+            customer: jobCardData?.customer,//issues
             prescription_id: jobCardData?.prescription,
             typeOfJobCard: jobCardData?.job_type,
             supplier: jobCardData?.supplier,

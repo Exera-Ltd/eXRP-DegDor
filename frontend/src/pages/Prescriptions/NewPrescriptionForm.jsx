@@ -36,7 +36,8 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
     };
 
     const handleCancel = () => {
-        //setIsModalVisible(false);
+        console.log('cancelled');
+        setIsModalVisible(false);
     };
 
     const handleOk = () => {
@@ -121,7 +122,7 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
 
     const onFinish = async (values) => {
         console.log('Success:', values);
-
+        
         try {
             const csrftoken = getCookie('csrftoken');
             const prescriptionId = prescriptionForm.getFieldValue('prescription_id');
@@ -216,7 +217,7 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
         console.log(customerId);
         console.log(prescriptionId);
         if (customerId != null) {
-            let jobCardData = { 'prescription': { 'customer_id': customerId, 'id': prescriptionId } }
+            let jobCardData = { 'customer': customerId, 'prescription': prescriptionId }
             setSelectedJobCardData(jobCardData);
             setIsJobCardModalVisible(true);
         } else {
@@ -368,7 +369,7 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
                 }}
 
             >
-                <NewPrescriptionForm prescriptionData={selectedPrescriptionData} readOnly={true} />
+                <NewPrescriptionForm prescriptionData={selectedPrescriptionData} isReadOnly={true} />
             </Modal>
 
             <Col span={8}>

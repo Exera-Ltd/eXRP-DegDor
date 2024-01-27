@@ -487,8 +487,8 @@ def update_job_card(request, job_card_id):
         job_card.supplier_reference = data.get('supplierReference', job_card.supplier_reference)
         estimated_delivery_date = data.get('estimatedDeliveryDate', job_card.estimated_delivery_date)
         if estimated_delivery_date:
-            job_card.estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
-
+            #job_card.estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
+            job_card.estimated_delivery_date = parse_datetime(estimated_delivery_date)
         # Update additional fields based on the type of job card
         if job_card.job_type == 'lenses':
             job_card.frame = data.get('frame', job_card.frame)
