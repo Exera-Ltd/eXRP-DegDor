@@ -100,7 +100,10 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
 
     const onFinish = async (values) => {
         console.log('Received values of form: ', values);
-
+        const submissionValues = { ...values };
+        if (submissionValues.date) {
+            submissionValues.date = dayjs(submissionValues.date).format('YYYY-MM-DD');
+        }
         try {
             const csrftoken = getCookie('csrftoken'); // Replace getCookie with your method to get CSRF token if needed
             const invoiceId = invoiceForm.getFieldValue('invoice_id'); // Ensure you have a hidden 'invoice_id' field if editing
@@ -114,12 +117,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken,
                 },
-                body: JSON.stringify({
-                    ...values,
-                    totalAmount, // Assuming the API expects this field
-                    balanceDue: calculateBalanceDue(),
-                    discountedTotal: calculateDiscountedTotal(),
-                }),
+                body: JSON.stringify(values),
             });
 
             if (response.ok) {
