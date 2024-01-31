@@ -117,7 +117,7 @@ def get_all_users(request):
 def get_all_doctors(request):
     entries = (
         User.objects.select_related('userprofile')
-        .filter(userprofile__role='Doctor')
+        .filter(userprofile__role='Doctor', userprofile__role='Administrator')
         .values("id", "first_name", "last_name")
     )
     return JsonResponse({"values": list(entries)})
@@ -800,12 +800,12 @@ def generate_prescription_pdf(request):
         # Glass Prescription First Row Values
         c.drawString(grid_left_column + 55, grid_height - 34, format_with_plus_if_positive(str(form_data.get('lens-right-sph', ''))))
         c.drawString(grid_left_column + 125, grid_height - 34, format_with_plus_if_positive(str(form_data.get('lens-right-cyl', ''))))
-        c.drawString(grid_left_column + 195, grid_height - 34, format_with_plus_if_positive(str(form_data.get('lens-right-axis', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 34, str(form_data.get('lens-right-axis', '')))
         
         # Glass Prescription Second Row Values
         c.drawString(grid_left_column + 55, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-sph', ''))))
         c.drawString(grid_left_column + 125, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-cyl', ''))))
-        c.drawString(grid_left_column + 195, grid_height - 53, format_with_plus_if_positive(str(form_data.get('lens-left-axis', ''))))
+        c.drawString(grid_left_column + 195, grid_height - 53, str(form_data.get('lens-left-axis', '')))
 
         c.drawString(grid_left_column, patient_info_start_height - 280, "Type Of:")
         c.drawString(grid_left_column + 68, patient_info_start_height - 280, str(form_data.get('type-of-contact-lenses', '')))
