@@ -21,6 +21,7 @@ from .models import Product, Category, Supplier, Location
 import base64
 from django.core.files.base import ContentFile
 from reportlab.lib.units import inch
+from django.contrib.auth.models import User
 
 today_date = date.today()
 today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
@@ -106,6 +107,20 @@ def get_all_customers(request):
 		Customer.objects.values("id", "title", "first_name", "last_name", "mobile_1", "city", "nic_number")
 	)
 	return JsonResponse({"values": list(entries)})
+
+def get_all_users(request):
+	entries = (
+		User.objects.values("id", "first_name", "last_name")
+	)
+	return JsonResponse({"values": list(entries)})
+
+def get_all_doctors(request):
+    entries = (
+        User.objects.select_related('userprofile')
+        .filter(userprofile__role='Doctor')
+        .values("id", "first_name", "last_name")
+    )
+    return JsonResponse({"values": list(entries)})
 
 #@login_required(login_url='/accounts/login/')
 def get_customer(request, customer_id):
@@ -602,12 +617,22 @@ def get_all_appointments(request):
         *{f.name for f in Appointment._meta.get_fields() if not f.is_relation or f.one_to_one or (f.many_to_one and f.related_model)},
         'customer__first_name',
         'customer__last_name',
+        'doctor__first_name',
+        'doctor__last_name',
     )
 	return JsonResponse({"values": list(entries)})
 
 def get_appointment(request, appointment_id):
     appointment = Appointment.objects.get(id=appointment_id)
     return JsonResponse({"values": appointment.to_dict()})
+
+def get_appointment_by_doctor(request, doctor_id):
+    appointments = Appointment.objects.filter(doctor=doctor_id).select_related('customer').values(
+        *{f.name for f in Appointment._meta.get_fields() if not f.is_relation or f.one_to_one or (f.many_to_one and f.related_model)},
+        'customer__first_name',
+        'customer__last_name',
+    )
+    return JsonResponse({"values": list(appointments)})
 
 @require_http_methods(["PUT"])
 def update_appointment(request, appointment_id):
@@ -690,12 +715,11 @@ def generate_prescription_pdf(request):
         name_value_x = left_margin + 70  # You might need to adjust the 70 points to align it as you wish
         name_y = patient_info_start_height
         
-        #c.drawString(name_label_x, name_y, "LOGO GOES HERE")
         image_path = 'static/img/logo.png'
         # Specify image position and size
         image_x = name_label_x + 40 # X-coordinate
         image_y = patient_info_start_height - 45  # Y-coordinate (from the bottom)
-        image_width = 200  # Width of the image
+        image_width = 150  # Width of the image
         image_height = 100  # Height of the image
 
         # Draw the image
@@ -954,53 +978,61 @@ def generate_job_card_pdf(request):
         
         c.drawString(width/3, patient_info_start_height + 30, "KLER OPTICS | Valentina Mall")
         
-        c.drawString(name_label_x, patient_info_start_height, "Job Card ID: ")
-        c.drawString(name_value_x + 20, patient_info_start_height, str(job_card_data.get('job_card', {}).get('id', '-')))
-        c.drawString(grid_left_column, patient_info_start_height, "Prescription ID:")
-        c.drawString(grid_left_column + 100, patient_info_start_height, str(job_card_data.get('prescription', {}).get('id', '-')))
+        c.drawString(name_label_x, patient_info_start_height - 120, "Job Card ID: ")
+        c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('job_card', {}).get('id', '-')))
+        #c.drawString(grid_left_column, patient_info_start_height, "Prescription ID:")
+        #c.drawString(grid_left_column + 100, patient_info_start_height, str(job_card_data.get('prescription', {}).get('id', '-')))
+        image_path = 'static/img/logo.png'
         
-        c.drawString(name_label_x, patient_info_start_height - 30, "Date:")
+        image_x = name_label_x + 40 
+        image_y = patient_info_start_height - 75
+        image_width = 150 
+        image_height = 100
+
+        c.drawImage(image_path, image_x, image_y, width=image_width,height=image_height)
+        
+        c.drawString(grid_left_column, patient_info_start_height, "Date:")
         created_date = str(job_card_data.get('job_card', {}).get('created_date', '-'))
         created_date_obj = datetime.strptime(created_date, '%Y-%m-%d')
         created_date_formatted = created_date_obj.strftime('%d-%m-%Y')
-        c.drawString(name_value_x + 20, patient_info_start_height - 30, created_date_formatted)
+        c.drawString(grid_left_column + 90, patient_info_start_height, created_date_formatted)
         
         c.drawString(grid_left_column, patient_info_start_height - 30, "Print Date:")
         print_date = datetime.now()
         print(print_date)
         print_date_gmt_plus_4 = print_date + timedelta(hours=4)
-        print_date_str = datetime.strftime(print_date_gmt_plus_4, "%d-%m-%Y %H:%M:%S")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 30, print_date_str)
+        print_date_str = datetime.strftime(print_date_gmt_plus_4, "%d-%m-%Y")
+        c.drawString(grid_left_column + 90, patient_info_start_height - 30, print_date_str)
         
-        c.drawString(name_label_x, patient_info_start_height - 60, "Name:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 60, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 60, "Name:")
+        c.drawString(grid_left_column + 90, patient_info_start_height - 60, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
         
-        c.drawString(name_label_x, patient_info_start_height - 90, "Address:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 90, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 90, "Address:")
+        c.drawString(grid_left_column + 90, patient_info_start_height - 90, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
         
-        c.drawString(name_label_x, patient_info_start_height - 120, "Tel:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 120, "Tel:")
+        c.drawString(grid_left_column + 90, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 150, "R:")
         c.drawString(name_value_x + 20, patient_info_start_height - 150, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('sph', '-'))))
         c.drawString(name_value_x + 55, patient_info_start_height - 150, "/")
         c.drawString(name_value_x + 60, patient_info_start_height - 150, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
         c.drawString(name_value_x + 95, patient_info_start_height - 150, "/")
-        c.drawString(name_value_x + 100, patient_info_start_height - 150, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'))))
+        c.drawString(name_value_x + 100, patient_info_start_height - 150, format_with_plus_if_positive(str(format(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'), '.2f'))))
         c.drawString(grid_left_column, patient_info_start_height - 150, "PDR:")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('pdr', '-')))
+        c.drawString(grid_left_column + 90, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('pdr', '-')))
         
         c.drawString(grid_left_column, patient_info_start_height - 180, "ADD:")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 180, str(form_data.get('glass_add', '-')))
+        c.drawString(grid_left_column + 90, patient_info_start_height - 180, str(form_data.get('glass_add', '-')))
 
         c.drawString(name_label_x, patient_info_start_height - 210, "L:")
         c.drawString(name_value_x + 20, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('sph', '-'))))
         c.drawString(name_value_x + 55, patient_info_start_height - 210, "/")
         c.drawString(name_value_x + 60, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
         c.drawString(name_value_x + 95, patient_info_start_height - 210, "/")
-        c.drawString(name_value_x + 100, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'))))
+        c.drawString(name_value_x + 100, patient_info_start_height - 210, format_with_plus_if_positive(str(format(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'), '.2f'))))
         c.drawString(grid_left_column, patient_info_start_height - 210, "PDR:")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('pdl', '-')))
+        c.drawString(grid_left_column + 90, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('pdl', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 240, "HT:")
         c.drawString(name_value_x + 20, patient_info_start_height - 240, str(job_card_data.get('job_card', '-').get('ht', '-')))
@@ -1008,7 +1040,7 @@ def generate_job_card_pdf(request):
         c.drawString(name_label_x, patient_info_start_height - 270, "Base Curve:")
         c.drawString(name_value_x + 20, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('base_curve', '-')))
         c.drawString(grid_left_column, patient_info_start_height - 270, "Diameter:")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('diameter', '-')))
+        c.drawString(grid_left_column + 90, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('diameter', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 300, "Frame:")
         c.drawString(name_value_x + 20, patient_info_start_height - 300, str(job_card_data.get('job_card', '-').get('frame', '-')))
@@ -1283,7 +1315,7 @@ def generate_invoice_pdf(request):
         
         image_x = name_label_x + 40 
         image_y = patient_info_start_height - 45
-        image_width = 200 
+        image_width = 150 
         image_height = 100
 
         c.drawImage(image_path, image_x, image_y, width=image_width,height=image_height)

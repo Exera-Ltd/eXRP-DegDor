@@ -659,9 +659,11 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
                     Add Job Card
                 </Button>
 
-                <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
-                    Edit
-                </Button>
+                {user.profile.role !== 'Staff' &&
+                        <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
+                            Edit
+                        </Button>
+                    }
             </Row>
         }
     </Form>

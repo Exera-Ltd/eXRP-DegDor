@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Form, Input, Select, DatePicker, InputNumber, notification } from 'antd';
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
+import { useUser } from '../../contexts/UserContext';
 import dayjs from 'dayjs';
 
 const { Option } = Select;
@@ -11,6 +12,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
     const [jobCardForm] = Form.useForm();
     const [customers, setCustomers] = useState([]);
     const [deliveryDate, setDeliveryDate] = useState(dayjs())
+    const { user } = useUser();
 
     const onFinish = async (values) => {
         console.log('Success:', values);
@@ -363,9 +365,11 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
                         Print
                     </Button>
 
-                    <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
-                        Edit
-                    </Button>
+                    {user.profile.role !== 'Staff' &&
+                        <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
+                            Edit
+                        </Button>
+                    }
                 </Row>
             }
         </Form>

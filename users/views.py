@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 @login_required(login_url='/accounts/login/')
 def get_user(request):
     user = request.user
+    print(user.groups)
     user_data = {
         "id": user.id,
         "email": user.email,

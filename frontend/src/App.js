@@ -30,12 +30,12 @@ const { Header, Content, Sider, Footer } = Layout;
 const d = new Date();
 
 const menu = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Administrator', 'Manager', 'Staff'] },
-  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Administrator'] },
+  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Administrator', 'Doctor', 'Staff'] },
   {
-    key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
-      { key: 'new-prescription', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-prescription', roles: ['Administrator', 'Manager', 'Staff'] },
-      { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions', roles: ['Administrator', 'Manager', 'Staff'] }
+    key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Administrator', 'Doctor', 'Staff'], items: [
+      { key: 'new-prescription', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-prescription', roles: ['Administrator', 'Doctor'] },
+      { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions', roles: ['Administrator', 'Doctor', 'Staff'] }
     ]
   },
   /* {
@@ -44,18 +44,18 @@ const menu = [
       { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Manager', 'Staff'] }
     ]
   }, */
-  { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Manager', 'Staff'] },
-  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+  { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Staff'] },
+  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Staff'] },
   {
-    key: 'product', label: 'Products', icon: React.createElement(ContainerOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
-      { key: 'new-product', label: 'New Product', icon: React.createElement(ContainerOutlined), path: '/new-product', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
-      { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
+    key: 'product', label: 'Products', icon: React.createElement(ContainerOutlined), path: '', roles: ['Administrator'], items: [
+      { key: 'new-product', label: 'New Product', icon: React.createElement(ContainerOutlined), path: '/new-product', items: [], roles: ['Administrator'] },
+      { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator'] },
     ]
   },
   {
-    key: 'invoice', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
-      { key: 'new-invoice', label: 'New Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/new-invoice', roles: ['Administrator', 'Manager', 'Staff'] },
-      { key: 'invoices', label: 'Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/invoices', roles: ['Administrator', 'Manager', 'Staff'] }
+    key: 'invoice', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '', roles: ['Administrator', 'Staff'], items: [
+      { key: 'new-invoice', label: 'New Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/new-invoice', roles: ['Administrator', 'Staff'] },
+      { key: 'invoices', label: 'Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/invoices', roles: ['Administrator', 'Staff'] }
     ]
   },
   /*{ key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
@@ -148,7 +148,7 @@ const App = () => {
               if (item.items && item.items.length > 0) {
                 return (
                   <Menu.SubMenu key={item.key} icon={item.icon} title={item.label}>
-                    {item.items.map(subItem => (
+                    {item.items.filter(subItem => !subItem.roles || subItem.roles.includes(user?.profile?.role)).map(subItem => (
                       <Menu.Item key={subItem.key}>
                         <Link to={subItem.path}>
                           {subItem.icon} {subItem.label}

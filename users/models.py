@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):    
     ROLE_CHOICES = (
         ('Staff', 'Staff'),
-        ('Manager', 'Manager'),
+        ('Doctor', 'Doctor'),
         ('Administrator', 'Administrator'),
     )
     

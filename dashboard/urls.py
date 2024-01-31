@@ -3,6 +3,9 @@ from django.views.generic import TemplateView
 from dashboard import views
 
 app_urls = [
+    path("get_all_users", views.get_all_users),
+    path("get_all_doctors", views.get_all_doctors),
+    
 	path("create_customer", views.create_customer),
  	path("get_all_customers", views.get_all_customers),
     path("get_customer/<int:customer_id>/", views.get_customer),
@@ -23,6 +26,7 @@ app_urls = [
         
     path('create_appointment/', views.create_appointment, name='create_appointment'),
     path("get_all_appointments", views.get_all_appointments),
+    path("get_appointment_by_doctor/<int:doctor_id>/", views.get_appointment_by_doctor),
     path("get_appointment/<int:appointment_id>/", views.get_appointment),
     path("update_appointment/<int:appointment_id>/", views.update_appointment, name='update_appointment'),
 

@@ -12,6 +12,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
     const [appointmentForm] = Form.useForm();
     const { user } = useUser();
     const [customers, setCustomers] = useState([]);
+    const [doctors, setDoctors] = useState([]);
     const [appointmentDate, setAppointmentDate] = useState(dayjs().tz('Indian/Mauritius'));
 
 
@@ -24,8 +25,18 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
             .catch(error => console.error('Error fetching customers:', error));
     };
 
+    const fetchDoctors = () => {
+        fetch(appUrl + `dashboard/get_all_doctors`)
+            .then(response => response.json())
+            .then(data => {
+                setDoctors(data.values);
+            })
+            .catch(error => console.error('Error fetching doctors:', error));
+    };
+
     useEffect(() => {
         fetchCustomers();
+        fetchDoctors();
         appointmentForm.setFieldsValue({
             doctor: user.id,
         });
@@ -172,7 +183,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                             name="appointmentDate"
                             label="Appointment Date"
                         >
-                            <DatePicker onChange={onChange} value={appointmentDate} format="DD-MM-YYYY"/>
+                            <DatePicker onChange={onChange} value={appointmentDate} format="DD-MM-YYYY" />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -218,7 +229,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
 
                 <Row gutter={24}>
                     <Col span={12}>
-                        <Form.Item
+                        {/* <Form.Item
                             label="Doctor Name"
                         >
                             <Input
@@ -233,6 +244,28 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                             hidden
                         >
                             <Input />
+                        </Form.Item> */}
+                        <Form.Item
+                            label="Doctor"
+                            name="doctor"
+                            rules={[{ required: true, message: 'Please input doctor name!' }]}
+                        >
+                            <Select
+                                showSearch
+                                placeholder="Select a doctor"
+                                optionFilterProp="label"
+                                filterOption={(input, option) =>
+                                    option.label.toLowerCase().includes(input.toLowerCase())
+                                }
+                                defaultValue={''}
+                                disabled={readOnly}
+                            >
+                                {doctors.map(doctor => (
+                                    <Option key={doctor.id} value={doctor.id} label={`${doctor.first_name} ${doctor.last_name.toUpperCase()}`}>
+                                        {doctor.first_name} {doctor.last_name.toUpperCase()}
+                                    </Option>
+                                ))}
+                            </Select>
                         </Form.Item>
                     </Col>
                 </Row>
@@ -242,9 +275,9 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
                         <Form.Item
                             name="noOfPatients"
                             label="No. of Patients"
-                            //initialValue={1}
+                        //initialValue={1}
                         >
-                            <InputNumber defaultValue={1}/>
+                            <InputNumber defaultValue={1} />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -262,7 +295,7 @@ const AppointmentForm = ({ onSubmit, slotInfo, readOnly = false }) => {
 
                 <Row style={{ justifyContent: 'center' }}>
                     <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }}>
-                        Add
+                        Save
                     </Button>
                 </Row>
             </Form>

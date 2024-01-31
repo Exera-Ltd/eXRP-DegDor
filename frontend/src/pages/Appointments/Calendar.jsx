@@ -5,6 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import { Modal } from 'antd';
 import AppointmentForm from './AppointmentForm'; // Your previously created form component
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
+import { useUser } from '../../contexts/UserContext';
 import { appUrl } from '../../constants';
 
 const Calendar = () => {
@@ -13,6 +14,7 @@ const Calendar = () => {
     const [selectedSlotInfo, setSelectedSlotInfo] = useState(null);
     const [appointmentList, setAppointmentList] = useState([]);
     const [isEvent, setIsEvent] = useState(false);
+    const { user } = useUser();
 
     const handleSlotClick = (selectionInfo) => {
         console.log(selectedSlotInfo);
@@ -41,12 +43,10 @@ const Calendar = () => {
                     number_of_patients: data.values.number_of_patients,
                     status: data.values.status
                 });
-                //setIsLoading(false);
                 setModalVisible(true);
             })
             .catch(error => {
                 console.error('Failed to fetch:', error);
-                //setIsLoading(false);
             });
     };
 
@@ -58,32 +58,18 @@ const Calendar = () => {
 
 
     const handleOk = (formData) => {
-        /*const newEvent = {
-            // Use the description as the title for the event
-            title: formData.customerName + ' | ' + formData.description,
-            start: formData.appointmentDate.format('YYYY-MM-DD') + 'T' + formData.startTime.format('HH:mm:ss'),
-            end: formData.appointmentDate.format('YYYY-MM-DD') + 'T' + formData.endTime.format('HH:mm:ss'),
-            // Add other event properties as needed
-            // e.g., extendedProps for additional details
-        };
-
-        // Add the new event to the calendar's events state
-        setEvents([...events, newEvent]);*/
         fetchAppointments();
         setModalVisible(false);
     };
 
     useEffect(() => {
-        // Convert the appointmentList to FullCalendar events
         const calendarEvents = appointmentList.map((appointment) => ({
-            title: `${appointment.customer__first_name} ${appointment.customer__last_name}\n${appointment.description}\n${appointment.status}`,
+            title: `[${appointment.doctor__first_name} ${appointment.doctor__last_name}] | ${appointment.customer__first_name} ${appointment.customer__last_name}\n${appointment.description}\n${appointment.status}`,
             start: `${appointment.appointment_date.slice(0,10)}T${appointment.start_time}`,
             end: `${appointment.appointment_date.slice(0,10)}T${appointment.end_time}`,
-            id: appointment.id, // Optionally include the appointment ID
-            // Other properties like resourceId can be included here if necessary
+            id: appointment.id,
         }));
 
-        // Set these events into the state to be displayed by FullCalendar
         setEvents(calendarEvents);
     }, [appointmentList]);
 
@@ -98,8 +84,7 @@ const Calendar = () => {
         // Add more rooms as needed
     ];
 
-    const fetchAppointments = () => {
-        //setIsLoading(true);
+    /* const fetchAppointments = () => {
         fetch(appUrl + 'dashboard/get_all_appointments')
             .then(response => {
                 if (!response.ok) {
@@ -114,6 +99,28 @@ const Calendar = () => {
             .catch(error => {
                 console.error('Failed to fetch:', error);
                 //setIsLoading(false);
+            });
+    }; */
+
+    const fetchAppointments = () => {
+        const seeAllAppointments = (user.profile.role === "Administrator" || user.profile.role === "Staff");
+    
+        // Set the URL based on the user's role
+        const url = seeAllAppointments ? appUrl + 'dashboard/get_all_appointments' : appUrl + `dashboard/get_appointment_by_doctor/${user.id}`;
+    
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data.values);
+                setAppointmentList(data.values);
+            })
+            .catch(error => {
+                console.error('Failed to fetch:', error);
             });
     };
 
