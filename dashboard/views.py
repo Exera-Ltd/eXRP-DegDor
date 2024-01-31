@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils.timezone import make_aware
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A5
@@ -173,7 +173,8 @@ def create_prescription(request):
             recommendation=data.get('recommendation', ''),
             vision=data.get('vision', ''),
             created_date=today_date_str,
-            last_modified_date=today_date_str            
+            last_modified_date=today_date_str,
+            prescription_issuer=data.get('prescription-issuer', ''), 
         )
 
         glass_lens_detail_right = LensDetails.objects.create(
@@ -254,6 +255,7 @@ def update_prescription(request, prescription_id):
             prescription.next_checkup = datetime.strptime(data['next-checkup'], '%Y-%m-%d').date()
         prescription.vision = data.get('vision', prescription.vision)
         prescription.last_modified_date = datetime.now().date() # Adjust as per your requirements
+        prescription.prescription_issuer = data.get('prescription-issuer', prescription.prescription_issuer)
         prescription.save()
          # Update GlassPrescription
         glass_prescription = prescription.glass_prescription
@@ -315,7 +317,7 @@ def update_prescription(request, prescription_id):
 def get_all_prescriptions(request):
 	entries = (
 		Prescription.objects.select_related("")
-            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date").order_by("-id","-created_date")
+            .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date", "prescription_issuer").order_by("-id","-created_date")
 	)
 	return JsonResponse({"values": list(entries)})
 
@@ -710,8 +712,8 @@ def generate_prescription_pdf(request):
         c.drawString(name_value_x, name_y - 140, str(form_data.get('next-checkup-date', '')))
         
         c.drawString(name_label_x, patient_info_start_height - 260, "Doctor:")
-        c.drawString(name_value_x, name_y - 260, "O. POLIN Optometrist")
-
+        c.drawString(name_value_x, name_y - 260, str(form_data.get('prescription-issuer', '')))
+        
         # Drawing the grid lines
         grid_height = patient_info_start_height + 15  # Starting just below the headers
         c.grid([grid_left_column, grid_left_column + 35, grid_left_column + 105, grid_left_column + 175, grid_left_column + 245],
@@ -849,7 +851,7 @@ def generate_prescription_pdf(request):
         strip_y = 40  # Y coordinate for the top side of the strip
         strip_width = width - 40  # The width of the strip
         strip_height = 20  # The height of the strip
-        strip_text = "Optical Zone Ltd | Valentina Mall | Tel: 5555 5555 | BRN: C0123541"  # The text you want to display
+        strip_text = "Optical Zone Ltd | Valentina Mall | Tel: 606 7890 / 5944 4844 | BRN: C22189013"  # The text you want to display
 
         # Set the fill color to black
         c.setFillColorRGB(0, 0, 0)  # RGB for black
@@ -958,7 +960,17 @@ def generate_job_card_pdf(request):
         c.drawString(grid_left_column + 100, patient_info_start_height, str(job_card_data.get('prescription', {}).get('id', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 30, "Date:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 30, str(job_card_data.get('job_card', {}).get('created_date', '-')))
+        created_date = str(job_card_data.get('job_card', {}).get('created_date', '-'))
+        created_date_obj = datetime.strptime(created_date, '%Y-%m-%d')
+        created_date_formatted = created_date_obj.strftime('%d-%m-%Y')
+        c.drawString(name_value_x + 20, patient_info_start_height - 30, created_date_formatted)
+        
+        c.drawString(grid_left_column, patient_info_start_height - 30, "Print Date:")
+        print_date = datetime.now()
+        print(print_date)
+        print_date_gmt_plus_4 = print_date + timedelta(hours=4)
+        print_date_str = datetime.strftime(print_date_gmt_plus_4, "%d-%m-%Y %H:%M:%S")
+        c.drawString(grid_left_column + 100, patient_info_start_height - 30, print_date_str)
         
         c.drawString(name_label_x, patient_info_start_height - 60, "Name:")
         c.drawString(name_value_x + 20, patient_info_start_height - 60, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
@@ -970,11 +982,11 @@ def generate_job_card_pdf(request):
         c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 150, "R:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('sph', '-')))
+        c.drawString(name_value_x + 20, patient_info_start_height - 150, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('sph', '-'))))
         c.drawString(name_value_x + 55, patient_info_start_height - 150, "/")
-        c.drawString(name_value_x + 60, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-')))
+        c.drawString(name_value_x + 60, patient_info_start_height - 150, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
         c.drawString(name_value_x + 95, patient_info_start_height - 150, "/")
-        c.drawString(name_value_x + 100, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-')))
+        c.drawString(name_value_x + 100, patient_info_start_height - 150, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'))))
         c.drawString(grid_left_column, patient_info_start_height - 150, "PDR:")
         c.drawString(grid_left_column + 100, patient_info_start_height - 150, str(job_card_data.get('glass_prescription', '-').get('pdr', '-')))
         
@@ -982,11 +994,11 @@ def generate_job_card_pdf(request):
         c.drawString(grid_left_column + 100, patient_info_start_height - 180, str(form_data.get('glass_add', '-')))
 
         c.drawString(name_label_x, patient_info_start_height - 210, "L:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('sph', '-')))
+        c.drawString(name_value_x + 20, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('sph', '-'))))
         c.drawString(name_value_x + 55, patient_info_start_height - 210, "/")
-        c.drawString(name_value_x + 60, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-')))
+        c.drawString(name_value_x + 60, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
         c.drawString(name_value_x + 95, patient_info_start_height - 210, "/")
-        c.drawString(name_value_x + 100, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-')))
+        c.drawString(name_value_x + 100, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'))))
         c.drawString(grid_left_column, patient_info_start_height - 210, "PDR:")
         c.drawString(grid_left_column + 100, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('pdl', '-')))
         
@@ -1283,8 +1295,8 @@ def generate_invoice_pdf(request):
         c.drawString(grid_left_column, top_margin - 30, "Name:")
         c.drawString(grid_left_column + 70, top_margin - 30, customer_name)
 
-        c.drawString(name_label_x, patient_info_start_height - 280, "Doctor:")
-        c.drawString(name_value_x, name_y - 280, "O. POLIN Optometrist")
+        #c.drawString(name_label_x, patient_info_start_height - 280, "Doctor:")
+        #c.drawString(name_value_x, name_y - 280, str(invoice_data.get('prescription-issuer', '')))
         
         print(line_items_data)
         total_sum = sum(item['unit_price'] * item['quantity'] for item in line_items_data)
@@ -1348,7 +1360,7 @@ def generate_invoice_pdf(request):
         strip_y = 40 
         strip_width = width - 40
         strip_height = 20 
-        strip_text = "Optical Zone Ltd | Valentina Mall | Tel: 5555 5555 | BRN: C0123541"  
+        strip_text = "Optical Zone Ltd | Valentina Mall | Tel: 606 7890 / 5944 4844 | BRN: C22189013"  
 
         c.setFillColorRGB(0, 0, 0) 
 

@@ -61,6 +61,7 @@ class Prescription(models.Model):
     vision = models.CharField(max_length=255, blank=True)
     created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
     last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    prescription_issuer = models.CharField(max_length=255, blank=True)
     
     def to_dict(self):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])

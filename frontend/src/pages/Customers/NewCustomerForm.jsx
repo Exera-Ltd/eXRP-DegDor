@@ -253,6 +253,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                     hasFeedback
                 >
                     <Select placeholder="Insurance">
+                        <Option value="Med Scheme">Med Scheme</Option>
                         <Option value="Swan">Swan</Option>
                         <Option value="Mauritius Union">Mauritius Union</Option>
                     </Select>
