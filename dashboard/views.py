@@ -117,7 +117,7 @@ def get_all_users(request):
 def get_all_doctors(request):
     entries = (
         User.objects.select_related('userprofile')
-        .filter(userprofile__role='Doctor', userprofile__role='Administrator')
+        .exclude(userprofile__role='Staff')
         .values("id", "first_name", "last_name")
     )
     return JsonResponse({"values": list(entries)})
