@@ -137,7 +137,9 @@ function JobCardListing() {
                                         description={item.nic_number}
                                     />
                                     <div>
-                                        <p>Delivery Date: {item.estimated_delivery_date}</p>
+                                        <p>Delivery Date: {item.estimated_delivery_date.slice(0,10)}</p>
+                                        <p>Phone: {item.customer__mobile_1}</p>
+                                        <p>Type: {item.job_type}</p>
                                         <span>Status: {item.status}</span>
                                     </div>
                                 </Card>

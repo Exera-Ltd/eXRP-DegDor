@@ -550,7 +550,8 @@ def get_all_job_cards(request):
 	entries = JobCard.objects.select_related('customer').values(
         *{f.name for f in JobCard._meta.get_fields() if not f.is_relation or f.one_to_one or (f.many_to_one and f.related_model)},
         'customer__first_name',
-        'customer__last_name'
+        'customer__last_name',
+        'customer__mobile_1'
     ).order_by('created_date')
     
 	return JsonResponse({"values": list(entries)})
