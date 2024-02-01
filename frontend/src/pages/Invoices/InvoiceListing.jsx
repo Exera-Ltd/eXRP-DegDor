@@ -137,6 +137,7 @@ function InvoiceListing() {
                                         description={item.customer}
                                     />
                                     <div>
+                                        <span>{item.customer__first_name} {item.customer__last_name}</span><br />
                                         <span>Date: {item.date}</span>
                                         <p>Amount: {item.total_amount}</p>
                                     </div>

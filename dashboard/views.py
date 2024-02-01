@@ -1272,7 +1272,7 @@ def create_invoice(request):
 
 def get_all_invoices(request):
     invoices = Invoice.objects.all().select_related("customer").values(
-        "id", "invoice_number", "date", "customer__first_name", "total_amount"
+        "id", "invoice_number", "date", "customer__first_name", "customer__last_name", "total_amount"
     )
     return JsonResponse({"values": list(invoices)})
 
