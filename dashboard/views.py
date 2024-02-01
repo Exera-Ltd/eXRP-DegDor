@@ -930,8 +930,11 @@ def generate_job_card_pdf(request):
             job_card_data['prescription']['customer_address'] = f"{prescription.customer.address}"
             job_card_data['prescription']['customer_tel'] = f"{prescription.customer.mobile_1}"
             job_card_data['prescription']['customer_id'] = prescription.customer.id
-
+            print('----------')
+            print(job_card_data)
+            print('-----------')
             # Try to get the GlassPrescription and its LensDetails
+            
             try:
                 glass_prescription = prescription.glass_prescription
                 job_card_data['glass_prescription'] = {
@@ -1013,71 +1016,78 @@ def generate_job_card_pdf(request):
         c.drawString(grid_left_column, patient_info_start_height - 120, "Tel:")
         c.drawString(grid_left_column + 90, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
         
-        c.drawString(name_label_x, patient_info_start_height - 150, "Lens:")
+        c.drawString(name_label_x, patient_info_start_height - 150, "Job Card Type:")
+        c.drawString(name_label_x + 90, patient_info_start_height - 150, str(job_card_data.get('job_card', {}).get('job_type', '-')))
+        
+        if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Lens'):
+            c.drawString(name_label_x, patient_info_start_height - 180, "R:")
+            c.drawString(name_label_x + 20, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('sph', '-'))))
+            c.drawString(name_label_x + 55, patient_info_start_height - 180, "/")
+            c.drawString(name_label_x + 60, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
+            c.drawString(name_label_x + 95, patient_info_start_height - 180, "/")
+            c.drawString(name_label_x + 100, patient_info_start_height - 180, str(format(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'), '.2f')))
+            
+            c.drawString(name_label_x + 150, patient_info_start_height - 180, "PDR:")
+            c.drawString(name_label_x + 200, patient_info_start_height - 180, str(job_card_data.get('glass_prescription', '-').get('pdr', '-')))
 
-        c.drawString(name_label_x, patient_info_start_height - 180, "R:")
-        c.drawString(name_label_x + 20, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('sph', '-'))))
-        c.drawString(name_label_x + 55, patient_info_start_height - 180, "/")
-        c.drawString(name_label_x + 60, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
-        c.drawString(name_label_x + 95, patient_info_start_height - 180, "/")
-        c.drawString(name_label_x + 100, patient_info_start_height - 180, str(format(job_card_data.get('glass_prescription', '-').get('lens_detail_right', '-').get('axis', '-'), '.2f')))
+            c.drawString(name_label_x, patient_info_start_height - 210, "L:")
+            c.drawString(name_label_x + 20, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('sph', '-'))))
+            c.drawString(name_label_x + 55, patient_info_start_height - 210, "/")
+            c.drawString(name_label_x + 60, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('cyl', '-'))))
+            c.drawString(name_label_x + 95, patient_info_start_height - 210, "/")
+            c.drawString(name_label_x + 100, patient_info_start_height - 210, str(format(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('axis', '-'), '.2f')))
+            
+            c.drawString(name_label_x + 150, patient_info_start_height - 210, "PDR:")
+            c.drawString(name_label_x + 200, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('pdl', '-')))
+            
+            c.drawString(name_label_x, patient_info_start_height - 240, "ADD:")
+            c.drawString(name_label_x + 40, patient_info_start_height - 240, str(job_card_data.get('glass_prescription', '-').get('glass_add', '-')))
         
-        c.drawString(name_label_x + 150, patient_info_start_height - 180, "PDR:")
-        c.drawString(name_label_x + 200, patient_info_start_height - 180, str(job_card_data.get('glass_prescription', '-').get('pdr', '-')))
+        if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Contact Lens'):
+            c.drawString(name_label_x, patient_info_start_height - 180, "R:")
+            c.drawString(name_label_x + 20, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_right', '-').get('sph', '-'))))
+            c.drawString(name_label_x + 55, patient_info_start_height - 180, "/")
+            c.drawString(name_label_x + 60, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
+            c.drawString(name_label_x + 95, patient_info_start_height - 180, "/")
+            c.drawString(name_label_x + 100, patient_info_start_height - 180, str(format(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_right', '-').get('axis', '-'), '.2f')))
+            
+            c.drawString(name_label_x + 150, patient_info_start_height - 180, "PDR:")
+            c.drawString(name_label_x + 200, patient_info_start_height - 180, str(job_card_data.get('contact_lens_prescription', '-').get('pdr', '-')))
 
-        c.drawString(name_label_x, patient_info_start_height - 210, "L:")
-        c.drawString(name_label_x + 20, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('sph', '-'))))
-        c.drawString(name_label_x + 55, patient_info_start_height - 210, "/")
-        c.drawString(name_label_x + 60, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('cyl', '-'))))
-        c.drawString(name_label_x + 95, patient_info_start_height - 210, "/")
-        c.drawString(name_label_x + 100, patient_info_start_height - 210, str(format(job_card_data.get('glass_prescription', '-').get('lens_detail_left', '-').get('axis', '-'), '.2f')))
+            c.drawString(name_label_x, patient_info_start_height - 210, "L:")
+            c.drawString(name_label_x + 20, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_left', '-').get('sph', '-'))))
+            c.drawString(name_label_x + 55, patient_info_start_height - 210, "/")
+            c.drawString(name_label_x + 60, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_left', '-').get('cyl', '-'))))
+            c.drawString(name_label_x + 95, patient_info_start_height - 210, "/")
+            c.drawString(name_label_x + 100, patient_info_start_height - 210, str(format(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_left', '-').get('axis', '-'), '.2f')))
+            
+            c.drawString(name_label_x + 150, patient_info_start_height - 210, "PDR:")
+            c.drawString(name_label_x + 200, patient_info_start_height - 210, str(job_card_data.get('contact_lens_prescription', '-').get('pdl', '-')))
+            
+            
+            c.drawString(name_label_x, patient_info_start_height - 240, "ADD:")
+            c.drawString(name_label_x + 90, patient_info_start_height - 240, str(job_card_data.get('contact_lens_prescription', '-').get('contact_lens_add', '-')))
         
-        c.drawString(name_label_x + 150, patient_info_start_height - 210, "PDR:")
-        c.drawString(name_label_x + 200, patient_info_start_height - 210, str(job_card_data.get('glass_prescription', '-').get('pdl', '-')))
-        
-        c.drawString(name_label_x, patient_info_start_height - 240, "ADD:")
-        c.drawString(name_label_x + 40, patient_info_start_height - 240, str(form_data.get('glass_add', '-')))
-        
-        c.drawString(grid_left_column, patient_info_start_height - 150, "Contact Lens:")
-
-        c.drawString(grid_left_column, patient_info_start_height - 180, "R:")
-        c.drawString(grid_left_column + 20, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_right', '-').get('sph', '-'))))
-        c.drawString(grid_left_column + 55, patient_info_start_height - 180, "/")
-        c.drawString(grid_left_column + 60, patient_info_start_height - 180, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_right', '-').get('cyl', '-'))))
-        c.drawString(grid_left_column + 95, patient_info_start_height - 180, "/")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 180, str(format(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_right', '-').get('axis', '-'), '.2f')))
-        
-        c.drawString(grid_left_column + 150, patient_info_start_height - 180, "PDR:")
-        c.drawString(grid_left_column + 200, patient_info_start_height - 180, str(job_card_data.get('contact_lens_prescription', '-').get('pdr', '-')))
-
-        c.drawString(grid_left_column, patient_info_start_height - 210, "L:")
-        c.drawString(grid_left_column + 20, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_left', '-').get('sph', '-'))))
-        c.drawString(grid_left_column + 55, patient_info_start_height - 210, "/")
-        c.drawString(grid_left_column + 60, patient_info_start_height - 210, format_with_plus_if_positive(str(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_left', '-').get('cyl', '-'))))
-        c.drawString(grid_left_column + 95, patient_info_start_height - 210, "/")
-        c.drawString(grid_left_column + 100, patient_info_start_height - 210, str(format(job_card_data.get('contact_lens_prescription', '-').get('lens_detail_left', '-').get('axis', '-'), '.2f')))
-        
-        c.drawString(grid_left_column + 150, patient_info_start_height - 210, "PDR:")
-        c.drawString(grid_left_column + 200, patient_info_start_height - 210, str(job_card_data.get('contact_lens_prescription', '-').get('pdl', '-')))
-        
-        
-        c.drawString(grid_left_column, patient_info_start_height - 240, "ADD:")
-        c.drawString(grid_left_column + 90, patient_info_start_height - 240, str(form_data.get('contact_lens_add', '-')))
-        
-        c.drawString(name_label_x, patient_info_start_height - 270, "HT:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('ht', '-')))
+        if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Lens'):
+            c.drawString(name_label_x, patient_info_start_height - 270, "HT:")
+            c.drawString(name_value_x + 20, patient_info_start_height - 270, str(job_card_data.get('job_card', '-').get('ht', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 300, "Base Curve:")
         c.drawString(name_value_x + 20, patient_info_start_height - 300, str(job_card_data.get('job_card', '-').get('base_curve', '-')))
         c.drawString(grid_left_column, patient_info_start_height - 300, "Diameter:")
         c.drawString(grid_left_column + 90, patient_info_start_height - 300, str(job_card_data.get('job_card', '-').get('diameter', '-')))
         
-        c.drawString(name_label_x, patient_info_start_height - 330, "Frame:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 330, str(job_card_data.get('job_card', '-').get('frame', '-')))
+        if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Lens'):
+            c.drawString(name_label_x, patient_info_start_height - 330, "Frame:")
+            c.drawString(name_value_x + 20, patient_info_start_height - 330, str(job_card_data.get('job_card', '-').get('frame', '-')))
         
-        c.drawString(grid_left_column, patient_info_start_height - 330, "Lenses:")
-        c.drawString(grid_left_column + 90, patient_info_start_height - 330, str(job_card_data.get('job_card', '-').get('lens', '-')))
+        if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Lens'):
+            c.drawString(grid_left_column, patient_info_start_height - 330, "Lenses:")
+            c.drawString(grid_left_column + 90, patient_info_start_height - 330, str(job_card_data.get('job_card', '-').get('lens', '-')))
         
+        if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Contact Lens'):
+            c.drawString(grid_left_column, patient_info_start_height - 330, "Contact Lenses:")
+            c.drawString(grid_left_column + 90, patient_info_start_height - 330, str(job_card_data.get('job_card', '-').get('contact_lens', '-')))
         # Finalize PDF
         c.showPage()
         c.save()
