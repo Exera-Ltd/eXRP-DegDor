@@ -41,7 +41,7 @@ const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = fal
                 console.log(result);
                 notification.error({
                     message: 'Error ',
-                    description: result['error']
+                    description: result['message']
                 })
             }
         } catch (error) {
@@ -132,9 +132,13 @@ const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = fal
                 <Col span={6}>
                     <Form.Item label="Category" name="category">
                         <Select placeholder="Select a category">
-                            <Option value="electronics">Electronics</Option>
-                            <Option value="clothing">Clothing</Option>
-                            {/* Add more categories as needed */}
+                            <Option value="Frames">Frames</Option>
+                            <Option value="Spray">Spray</Option>
+                            <Option value="Spare Parts">Spare Parts</Option>
+                            <Option value="Cleaning Cloth">Cleaning Cloth</Option>
+                            <Option value="Pouch">Pouch</Option>
+                            <Option value="Lenses">Lenses</Option>
+                            <Option value="Contact Lenses">Contact Lenses</Option>
                         </Select>
                     </Form.Item>
                 </Col>

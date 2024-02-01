@@ -103,7 +103,6 @@ class JobCard(models.Model):
     job_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     supplier = models.CharField(max_length=100, blank=True, null=True)
     salesman = models.CharField(max_length=100, blank=True, null=True)
-    number_of_boxes = models.IntegerField(blank=True, null=True)
     contact_lens = models.CharField(max_length=100, blank=True, null=True)
     lens = models.CharField(max_length=100, blank=True, null=True)
     base_curve = models.CharField(max_length=100, blank=True, null=True)
@@ -162,7 +161,7 @@ class Supplier(models.Model):
         return self.name
 
 class Location(models.Model):
-    storage_location = models.CharField(max_length=200)
+    storage_location = models.CharField(max_length=200, null=True, blank=True)
     # Additional fields can be added to describe the location in more detail
 
     def __str__(self):
@@ -176,8 +175,8 @@ class Product(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True)
-    date_of_purchase = models.DateField()
-    reorder_level = models.PositiveIntegerField(default=0)
+    date_of_purchase = models.DateField(null=True, blank=True)
+    reorder_level = models.PositiveIntegerField(null=True, blank=True)
     expiry_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=100)
     serial_number_or_barcode = models.CharField(max_length=200, blank=True, null=True)

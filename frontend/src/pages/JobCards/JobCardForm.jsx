@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 const { Option } = Select;
 
 const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = false, setIsReadOnly = () => { } }) => {
-    const [jobCardType, setJobCardType] = useState('contactLenses');
+    const [jobCardType, setJobCardType] = useState('Contact Lens');
     const [jobCardForm] = Form.useForm();
     const [customers, setCustomers] = useState([]);
     const [deliveryDate, setDeliveryDate] = useState(dayjs())
@@ -160,16 +160,17 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
             status: jobCardData?.status || 'Work in Progress', // Default value if status is not set
             supplierReference: jobCardData?.supplier_reference,
             estimatedDeliveryDate: dayjs(jobCardData?.estimated_delivery_date), // Format this date if necessary
+            baseCurve: jobCardData?.base_curve,
+            diameter: jobCardData?.diameter,
 
-            contactLens: jobCardData?.job_type === 'contactLenses' ? jobCardData?.contact_lens : undefined,
-            noOfBoxes: jobCardData?.job_type === 'contactLenses' ? jobCardData?.no_of_boxes : undefined,
-            baseCurve: jobCardData?.job_type === 'contactLenses' ? jobCardData?.base_curve : undefined,
-            diameter: jobCardData?.job_type === 'contactLenses' ? jobCardData?.diameter : undefined,
+            contactLens: jobCardData?.job_type === 'Contact Lens' ? jobCardData?.contact_lens : undefined,
+            noOfBoxes: jobCardData?.job_type === 'Contact Lens' ? jobCardData?.no_of_boxes : undefined,
 
-            lens: jobCardData?.job_type === 'lenses' ? jobCardData?.lens : undefined,
-            ht: jobCardData?.job_type === 'lenses' ? jobCardData?.ht : undefined,
-            frame: jobCardData?.job_type === 'lenses' ? jobCardData?.frame : undefined,
+            lens: jobCardData?.job_type === 'Lens' ? jobCardData?.lens : undefined,
+            ht: jobCardData?.job_type === 'Lens' ? jobCardData?.ht : undefined,
+            frame: jobCardData?.job_type === 'Lens' ? jobCardData?.frame : undefined,
         });
+        setJobCardType(jobCardData?.job_type);
     }, [jobCardData, jobCardForm]);
 
     return (
@@ -233,9 +234,8 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
                         rules={[{ required: true, message: 'Please select a job card type!' }]}
                     >
                         <Select placeholder="Select a job card type" onChange={handleJobCardTypeChange} disabled={isReadOnly}>
-                            <Option value="contactLenses">Contact Lenses</Option>
-                            <Option value="lenses">Lenses</Option>
-                            {/* Add other job card types as needed */}
+                            <Option value="Lens">Lens</Option>
+                            <Option value="Contact Lens">Contact Lens</Option>
                         </Select>
                     </Form.Item>
                 </Col>
@@ -260,8 +260,8 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
                 </Col>
                 <Col span={12}>
                     <Form.Item
-                        name={jobCardType === 'contactLenses' ? "contactLens" : "lens"}
-                        label={jobCardType === 'contactLenses' ? "Contact Lens" : "Lens"}
+                        name={jobCardType === 'Contact Lens' ? "contactLens" : "lens"}
+                        label={jobCardType === 'Contact Lens' ? "Contact Lens" : "Lens"}
                     >
                         <Input readOnly={isReadOnly} />
                     </Form.Item>
@@ -269,7 +269,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
             </Row>
 
             {/* Toggle the number of boxes based on job card type */}
-            {jobCardType === 'contactLenses' && (
+            {jobCardType === 'Contact Lens' && (
                 <Row gutter={24}>
                     <Col span={12}>
                         <Form.Item
@@ -312,7 +312,7 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
                 </Col>
 
                 {/* Conditionally render HT and Frame fields based on job card type */}
-                {jobCardType === 'lenses' && (
+                {jobCardType === 'Lens' && (
                     <>
                         <Col span={12}>
                             <Form.Item
