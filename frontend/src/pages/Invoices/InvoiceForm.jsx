@@ -318,6 +318,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                         <Select placeholder="Select an item" disabled={isReadOnly} style={{ width: 130 }} onChange={(value) => handleItemTypeChange(value, name)}>
                                             <Option value="Product">Product</Option>
                                             <Option value="Consultation">Consultation</Option>
+                                            <Option value="VAT">VAT</Option>
                                         </Select>
                                     </Form.Item>
 

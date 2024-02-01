@@ -1365,12 +1365,18 @@ def generate_invoice_pdf(request):
 
         c.drawImage(image_path, image_x, image_y, width=image_width,height=image_height)
         
-        c.drawString(grid_left_column, top_margin, "Invoice: ")
-        c.drawString(grid_left_column + 70, top_margin, str(invoice_data.get('invoice_number', '')))
+        c.drawString(grid_left_column, top_margin + 10, "Invoice: ")
+        c.drawString(grid_left_column + 70, top_margin + 10, str(invoice_data.get('invoice_number', '')))
         
         customer_name = f"{invoice_data['customer_details'].get('first_name', '')} {invoice_data['customer_details'].get('last_name', '')}"
-        c.drawString(grid_left_column, top_margin - 30, "Name:")
-        c.drawString(grid_left_column + 70, top_margin - 30, customer_name)
+        c.drawString(grid_left_column, top_margin - 10, "Name:")
+        c.drawString(grid_left_column + 70, top_margin - 10, customer_name)
+        customer_address = f"{invoice_data['customer_details'].get('address', '')}"
+        c.drawString(grid_left_column, top_margin - 25, "Address:")
+        c.drawString(grid_left_column + 70, top_margin - 25, customer_address)
+        customer_city = f"{invoice_data['customer_details'].get('city', '')}"
+        c.drawString(grid_left_column, top_margin - 40, "City:")
+        c.drawString(grid_left_column + 70, top_margin - 40, customer_city)
 
         #c.drawString(name_label_x, patient_info_start_height - 280, "Doctor:")
         #c.drawString(name_value_x, name_y - 280, str(invoice_data.get('prescription-issuer', '')))
