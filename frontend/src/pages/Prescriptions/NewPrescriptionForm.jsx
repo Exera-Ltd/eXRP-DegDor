@@ -282,6 +282,7 @@ const NewPrescriptionForm = ({ prescriptionData, isReadOnly = false, setIsReadOn
             <Col span={12}>
                 <Form.Item
                     label="Doctor Name"
+                    name="doctor_name"
                 >
                     <Input
                         value={user.first_name + ' ' + user.last_name}
