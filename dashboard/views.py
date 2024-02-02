@@ -22,9 +22,11 @@ import base64
 from django.core.files.base import ContentFile
 from reportlab.lib.units import inch
 from django.contrib.auth.models import User
+import pytz
 
-today_date = date.today()
-today_date_str = datetime.strftime(today_date, "%Y-%m-%d")
+timezone = pytz.timezone('Indian/Mauritius')
+today_date = datetime.now(timezone).date()
+today_date_str = today_date.strftime("%Y-%m-%d")
 
 def not_found_view(request):
     return render(request, 'notfound.html', status=404)
