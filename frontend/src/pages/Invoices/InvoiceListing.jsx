@@ -19,10 +19,12 @@ function InvoiceListing() {
     const filteredData = invoiceList.filter(item => {
         const firstName = item.customer__first_name || "";
         const lastName = item.customer__last_name || "";
+        const invoiceNumber = item.invoice_number || "";
 
         return (
             firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lastName.toLowerCase().includes(searchTerm.toLowerCase()) 
+            lastName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase())
         );
     });
 
