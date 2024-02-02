@@ -1022,10 +1022,10 @@ def generate_job_card_pdf(request):
         c.drawString(grid_left_column + 90, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 120,  "Name:")
-        c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
+        c.drawString(name_value_x, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
         
         c.drawString(name_label_x, patient_info_start_height - 150, "Address:")
-        c.drawString(name_label_x + 90, patient_info_start_height - 150, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
+        c.drawString(name_value_x, patient_info_start_height - 150, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
         
         if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Lens'):
             c.drawString(name_label_x, patient_info_start_height - 180, "R:")
