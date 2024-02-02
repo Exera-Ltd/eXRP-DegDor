@@ -148,13 +148,13 @@ class Appointment(models.Model):
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
     
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True, blank=True)
     
     def __str__(self):
         return self.name
 
 class Supplier(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, null=True, blank=True)
     # Include additional fields for the supplier as needed, like address, contact info, etc.
 
     def __str__(self):
