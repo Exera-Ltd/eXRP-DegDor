@@ -236,4 +236,6 @@ class InvoiceLineItem(models.Model):
         return f"{self.item} - {self.quantity} @ {self.unit_price}"
     
     def to_dict(self):
-        return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+        data = model_to_dict(self)
+        data['product_item_name'] = self.product.item_name if self.product else None
+        return data

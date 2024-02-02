@@ -189,7 +189,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
             // Format the line items to match the Form.List structure
             const formattedLineItems = invoiceData.lineItems.map(lineItem => ({
                 item: lineItem.item,
-                product: lineItem.product,
+                product: lineItem.product.id,
                 description: lineItem.description || '', // Use empty string if description is missing
                 quantity: lineItem.quantity,
                 unitPrice: lineItem.unit_price,
@@ -326,7 +326,7 @@ const InvoiceForm = ({ invoiceData, isReadOnly = false }) => {
                                     {invoiceForm.getFieldValue(['items', name, 'item']) === 'Product' && (
                                         <Form.Item
                                             {...restField}
-                                            name={[name, 'Product']}
+                                            name={[name, 'product']}
                                             rules={[{ required: true, message: 'Please select a product' }]}
                                         >
                                             <Select

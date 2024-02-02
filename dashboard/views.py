@@ -1234,7 +1234,7 @@ def create_invoice(request):
         
         line_items = data.get('items', [])
         for item in line_items:
-            if item['item'] == 'product':
+            if item['item'] == 'Product':
                 product = Product.objects.get(id=item['product'])
                 if product.quantity < item['quantity']:
                     raise ValueError(f"Not enough quantity for product {product.item_name}")
@@ -1283,16 +1283,29 @@ def get_all_invoices(request):
 def get_invoice(request, invoice_id):
     try:
         invoice = Invoice.objects.get(id=invoice_id)
+        line_items_data = []
+        for line_item in invoice.line_items.all():
+            # Manually construct the dictionary for each line item
+            line_item_dict = {
+                "item": line_item.item,
+                "description": line_item.description,
+                "quantity": line_item.quantity,
+                "unit_price": line_item.unit_price,
+                "product": line_item.product.to_dict() if line_item.product else None,
+            }
+            line_items_data.append(line_item_dict)
+
         invoice_data = {
             "id": invoice.id,
             "invoiceNumber": invoice.invoice_number,
             "date": invoice.date,
             "customer": invoice.customer_id,
-            "lineItems": list(invoice.line_items.values("item", "description", "quantity", "unit_price", "product"))
+            "lineItems": line_items_data,
         }
         return JsonResponse({"invoice": invoice_data})
     except Invoice.DoesNotExist:
         return JsonResponse({'message': 'Invoice not found'}, status=404)
+
 
 @require_http_methods(["PUT"])
 def update_invoice(request, invoice_id):
@@ -1334,7 +1347,7 @@ def update_invoice(request, invoice_id):
 def generate_invoice_pdf(request):
     try:
         form_data = json.loads(request.body)
-        invoice_with_line_items = Invoice.objects.prefetch_related('line_items').get(id=form_data['invoice_id'])
+        invoice_with_line_items = Invoice.objects.prefetch_related('line_items__product').get(id=form_data['invoice_id'])
         line_items_array = list(invoice_with_line_items.line_items.all())
         line_items_data = [line_item.to_dict() for line_item in line_items_array]
         invoice_data = invoice_with_line_items.to_dict()
@@ -1388,11 +1401,11 @@ def generate_invoice_pdf(request):
         c.drawString(grid_left_column + 70, name_y - 280, str(total_sum))
 
         grid_height = patient_info_start_height - 85 
-        c.grid([left_margin, left_margin + 90, left_margin + 410, left_margin + 485, left_margin + 555],
+        c.grid([left_margin, left_margin + 180, left_margin + 410, left_margin + 485, left_margin + 555],
                [grid_height, grid_height - 20])
 
-        c.drawString(left_margin + 25, grid_height - 15, "Product")
-        c.drawString(left_margin + 220, grid_height - 15, "Description")
+        c.drawString(left_margin + 60, grid_height - 15, "Product")
+        c.drawString(left_margin + 270, grid_height - 15, "Description")
         c.drawString(left_margin + 425, grid_height - 15, "Quantity")
         c.drawString(left_margin + 495, grid_height - 15, "Unit Price")
 
@@ -1468,8 +1481,8 @@ def generate_invoice_pdf(request):
             y_position = 235 - (25 * index)
             print(y_position)
 
-            c.drawString(left_margin + 25, y_position, line_item['item'])
-            c.drawString(left_margin + 220, y_position, line_item['description'])
+            c.drawString(left_margin + 40, y_position, line_item['product_item_name'])
+            c.drawString(left_margin + 250, y_position, line_item['description'])
             c.drawString(left_margin + 440, y_position, str(line_item['quantity']))
             c.drawString(left_margin + 495, y_position, f"Rs {line_item['unit_price']}")
 
