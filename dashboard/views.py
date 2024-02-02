@@ -1481,7 +1481,10 @@ def generate_invoice_pdf(request):
             y_position = 235 - (25 * index)
             print(y_position)
 
-            c.drawString(left_margin + 40, y_position, line_item['product_item_name'])
+            if(line_item['product_item_name'] is not None):
+                c.drawString(left_margin + 40, y_position, line_item['product_item_name'])
+            else:
+                c.drawString(left_margin + 40, y_position, '')
             c.drawString(left_margin + 250, y_position, line_item['description'])
             c.drawString(left_margin + 440, y_position, str(line_item['quantity']))
             c.drawString(left_margin + 495, y_position, f"Rs {line_item['unit_price']}")
