@@ -133,7 +133,7 @@ class Appointment(models.Model):
     )
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='appointments')
-    appointment_date = models.DateField()
+    appointment_date = models.DateTimeField()
     start_time = models.TimeField()
     end_time = models.TimeField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)

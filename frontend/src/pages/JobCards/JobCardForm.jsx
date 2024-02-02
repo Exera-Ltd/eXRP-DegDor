@@ -365,11 +365,9 @@ const JobCardForm = ({ jobCardData, onJobCardAdded, closeModal, isReadOnly = fal
                         Print
                     </Button>
 
-                    {user.profile.role !== 'Staff' &&
-                        <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
-                            Edit
-                        </Button>
-                    }
+                    <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
+                        Edit
+                    </Button>
                 </Row>
             }
         </Form>

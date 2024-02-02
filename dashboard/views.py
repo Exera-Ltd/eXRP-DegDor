@@ -511,12 +511,12 @@ def update_job_card(request, job_card_id):
             #job_card.estimated_delivery_date = datetime.strptime(estimated_delivery_date, '%Y-%m-%dT%H:%M:%S.%fZ').date()
             job_card.estimated_delivery_date = parse_datetime(estimated_delivery_date)
         # Update additional fields based on the type of job card
-        if job_card.job_type == 'lenses':
+        if job_card.job_type == 'Lens':
             job_card.frame = data.get('frame', job_card.frame)
             job_card.ht = data.get('ht', job_card.ht)
             job_card.lens = data.get('lens', job_card.lens)
 
-        elif job_card.job_type == 'contactLenses':
+        elif job_card.job_type == 'Contact Lens':
             job_card.no_of_boxes = data.get('noOfBoxes', job_card.no_of_boxes)
             job_card.contact_lens = data.get('contactLens', job_card.contact_lens)
 
@@ -984,10 +984,6 @@ def generate_job_card_pdf(request):
         name_label_x = left_margin
         name_value_x = left_margin + 70
         
-        c.drawString(width/3, patient_info_start_height + 30, "KLER OPTICS | Valentina Mall")
-        
-        c.drawString(name_label_x, patient_info_start_height - 120, "Job Card ID: ")
-        c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('job_card', {}).get('id', '-')))
         #c.drawString(grid_left_column, patient_info_start_height, "Prescription ID:")
         #c.drawString(grid_left_column + 100, patient_info_start_height, str(job_card_data.get('prescription', {}).get('id', '-')))
         image_path = 'static/img/logo.png'
@@ -999,6 +995,8 @@ def generate_job_card_pdf(request):
 
         c.drawImage(image_path, image_x, image_y, width=image_width,height=image_height)
         
+        c.drawString(width/3, patient_info_start_height + 30, "KLER OPTICS | Valentina Mall")
+                
         c.drawString(grid_left_column, patient_info_start_height, "Date:")
         created_date = str(job_card_data.get('job_card', {}).get('created_date', '-'))
         created_date_obj = datetime.strptime(created_date, '%Y-%m-%d')
@@ -1012,17 +1010,20 @@ def generate_job_card_pdf(request):
         print_date_str = datetime.strftime(print_date_gmt_plus_4, "%d-%m-%Y")
         c.drawString(grid_left_column + 90, patient_info_start_height - 30, print_date_str)
         
-        c.drawString(grid_left_column, patient_info_start_height - 60, "Name:")
-        c.drawString(grid_left_column + 90, patient_info_start_height - 60, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 60, "Job Card ID: ")
+        c.drawString(grid_left_column + 90, patient_info_start_height - 60, str(job_card_data.get('job_card', {}).get('id', '-')))
         
-        c.drawString(grid_left_column, patient_info_start_height - 90, "Address:")
-        c.drawString(grid_left_column + 90, patient_info_start_height - 90, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
+        c.drawString(grid_left_column, patient_info_start_height - 90, "Job Card Type:")
+        c.drawString(grid_left_column + 90, patient_info_start_height - 90, str(job_card_data.get('job_card', {}).get('job_type', '-')))
         
         c.drawString(grid_left_column, patient_info_start_height - 120, "Tel:")
         c.drawString(grid_left_column + 90, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_tel', '-')))
         
-        c.drawString(name_label_x, patient_info_start_height - 150, "Job Card Type:")
-        c.drawString(name_label_x + 90, patient_info_start_height - 150, str(job_card_data.get('job_card', {}).get('job_type', '-')))
+        c.drawString(name_label_x, patient_info_start_height - 120,  "Name:")
+        c.drawString(name_value_x + 20, patient_info_start_height - 120, str(job_card_data.get('prescription', {}).get('customer_name', '-')))
+        
+        c.drawString(name_label_x, patient_info_start_height - 150, "Address:")
+        c.drawString(name_label_x + 90, patient_info_start_height - 150, str(job_card_data.get('prescription', {}).get('customer_address', '-')))
         
         if(job_card_data.get('job_card', {}).get('job_type', '-') == 'Lens'):
             c.drawString(name_label_x, patient_info_start_height - 180, "R:")
@@ -1377,13 +1378,9 @@ def generate_invoice_pdf(request):
         customer_city = f"{invoice_data['customer_details'].get('city', '')}"
         c.drawString(grid_left_column, top_margin - 40, "City:")
         c.drawString(grid_left_column + 70, top_margin - 40, customer_city)
-
-        #c.drawString(name_label_x, patient_info_start_height - 280, "Doctor:")
-        #c.drawString(name_value_x, name_y - 280, str(invoice_data.get('prescription-issuer', '')))
         
-        print(line_items_data)
         total_sum = sum(item['unit_price'] * item['quantity'] for item in line_items_data)
-        print(total_sum)
+        
         c.drawString(grid_left_column , patient_info_start_height - 280, "Total:")
         c.drawString(grid_left_column + 40, name_y - 280, "Rs")
         c.drawString(grid_left_column + 70, name_y - 280, str(total_sum))
