@@ -1197,12 +1197,12 @@ def update_product(request, product_id):
         # Update image if it exists
         image_data = data.get('image')
         print('in1')
-        #print(image_data[0]['thumbUrl'])
-        if 'thumbUrl' in image_data[0]:
-            print('in2')
-            format, imgstr = image_data[0]['thumbUrl'].split(';base64,')
-            ext = format.split('/')[-1]
-            product.image = ContentFile(base64.b64decode(imgstr), name=f'{product.item_id}.{ext}')
+        if len(image_data) > 0:
+            if 'thumbUrl' in image_data[0]:
+                print('in2')
+                format, imgstr = image_data[0]['thumbUrl'].split(';base64,')
+                ext = format.split('/')[-1]
+                product.image = ContentFile(base64.b64decode(imgstr), name=f'{product.item_id}.{ext}')
 
         product.save()
 
