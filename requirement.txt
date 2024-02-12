@@ -10,3 +10,5 @@ python-dateutil
 xlsxwriter
 django-cors-headers
 whitenoise
+reportlab
+pytz
