@@ -24,9 +24,13 @@ from reportlab.lib.units import inch
 from django.contrib.auth.models import User
 import pytz
 
-timezone = pytz.timezone('Indian/Mauritius')
-today_date = datetime.now(timezone).date()
-today_date_str = today_date.strftime("%Y-%m-%d")
+#timezone = pytz.timezone('Indian/Mauritius')
+#today_date = datetime.now(timezone).date()
+#today_date_str = today_date.strftime("%Y-%m-%d")
+
+today_date = datetime.now()
+today_date_gmt_plus_4 = today_date + timedelta(hours=4)
+today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
 
 def not_found_view(request):
     return render(request, 'notfound.html', status=404)
@@ -332,11 +336,11 @@ def update_prescription(request, prescription_id):
 
     
 def get_all_prescriptions(request):
-	entries = (
-		Prescription.objects.select_related("")
+    entries = (
+		Prescription.objects.select_related("doctor", "customer")
             .values("id", "doctor__first_name", "doctor__last_name", "customer__first_name", "customer__last_name", "created_date", "prescription_issuer").order_by("-id","-created_date")
 	)
-	return JsonResponse({"values": list(entries)})
+    return JsonResponse({"values": list(entries)})
 
 def get_prescription(request, prescription_id):
     try:

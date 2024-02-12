@@ -37,8 +37,8 @@ class Customer(models.Model):
     nic_number = models.CharField(max_length=20, blank=True, null=True)
     profession = models.CharField(max_length=100, blank=True, null=True)
     insurance = models.CharField(max_length=50, choices=INSURANCE_CHOICES, blank=True, null=True)
-    created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
-    last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    created_date = models.DateField(blank=True)
+    last_modified_date = models.DateField(blank=True)
     
     def to_dict(self):
         """
@@ -59,8 +59,8 @@ class Prescription(models.Model):
     recommendation = models.TextField(blank=True)
     next_checkup = models.DateField(null=True, blank=True)
     vision = models.CharField(max_length=255, blank=True)
-    created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
-    last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    created_date = models.DateField(blank=True)
+    last_modified_date = models.DateField(blank=True)
     prescription_issuer = models.CharField(max_length=255, blank=True)
     
     def to_dict(self):
@@ -113,8 +113,8 @@ class JobCard(models.Model):
     supplier_reference = models.CharField(max_length=100, blank=True, null=True)
     estimated_delivery_date = models.DateTimeField(null=True, blank=True)
     no_of_boxes = models.IntegerField(null=True, blank=True)
-    created_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
-    last_modified_date = models.DateField(default=datetime.strftime(date.today(), "%Y-%m-%d"))
+    created_date = models.DateField(blank=True)
+    last_modified_date = models.DateField(blank=True)
 
     prescription = models.ForeignKey(Prescription,on_delete=models.SET_NULL,null=True,blank=True,related_name='job_cards')
 
