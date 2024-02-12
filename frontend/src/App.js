@@ -45,7 +45,7 @@ const menu = [
     ]
   }, */
   { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Staff'] },
-  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Staff'] },
+  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Staff', 'Doctor'] },
   {
     key: 'product', label: 'Products', icon: React.createElement(ContainerOutlined), path: '', roles: ['Administrator'], items: [
       { key: 'new-product', label: 'New Product', icon: React.createElement(ContainerOutlined), path: '/new-product', items: [], roles: ['Administrator'] },
