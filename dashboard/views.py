@@ -28,9 +28,9 @@ import pytz
 #today_date = datetime.now(timezone).date()
 #today_date_str = today_date.strftime("%Y-%m-%d")
 
-today_date = datetime.now()
-today_date_gmt_plus_4 = today_date + timedelta(hours=4)
-today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
+#today_date = datetime.now()
+#today_date_gmt_plus_4 = today_date + timedelta(hours=4)
+#today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
 
 def not_found_view(request):
     return render(request, 'notfound.html', status=404)
@@ -58,6 +58,10 @@ def dashboard_render (request):
 @require_http_methods(["POST"])
 def create_customer(request):    
     try:
+        today_date = datetime.now()
+        today_date_gmt_plus_4 = today_date + timedelta(hours=4)
+        today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
+        
         data = json.loads(request.body)
         
         existing_customer = Customer.objects.filter(
@@ -137,6 +141,10 @@ def get_customer(request, customer_id):
 @require_http_methods(["PUT"])
 def update_customer(request, customer_id):
     try:
+        today_date = datetime.now()
+        today_date_gmt_plus_4 = today_date + timedelta(hours=4)
+        today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
+
         data = json.loads(request.body)
         customer = Customer.objects.get(id=customer_id)
         print(data)    
@@ -181,6 +189,10 @@ def update_customer(request, customer_id):
 @require_http_methods(["POST"])
 def create_prescription(request):
     try:
+        today_date = datetime.now()
+        today_date_gmt_plus_4 = today_date + timedelta(hours=4)
+        today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
+
         data = json.loads(request.body)
         
         customer = Customer.objects.filter(id=data['customer']).first()
@@ -429,6 +441,10 @@ def get_prescriptions_by_customer(request, customer_id):
 @require_http_methods(["POST"])
 def create_job_card(request):
     try:
+        today_date = datetime.now()
+        today_date_gmt_plus_4 = today_date + timedelta(hours=4)
+        today_date_str = datetime.strftime(today_date_gmt_plus_4, "%Y-%m-%d")
+
         data = json.loads(request.body)
         
         #print(data)
