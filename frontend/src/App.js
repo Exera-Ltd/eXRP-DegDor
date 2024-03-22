@@ -123,7 +123,7 @@ const App = () => {
           display: 'flex',
         }}
       >
-        <div className="header-logo" style={{ fontSize: 24 }}><img style={{ width: 120, textAlign: 'center', mixBlendMode: 'multiply', marginTop: 2 }} src="../static/img/logo.png" alt="Kler Optics" /></div>
+        <div className="header-logo" style={{ fontSize: 24 }}><img style={{ width: 120, textAlign: 'center', mixBlendMode: 'multiply', marginTop: 2 }} src="../static/img/logo.png" alt="Home Classics" /></div>
         <div className="header-content">
           {renderNotificationIcon()}
         </div>
@@ -290,7 +290,7 @@ const App = () => {
               padding: '10px 0px'
             }}
           >
-            Kler Optics © {d.getFullYear()} - Solution Designed by <a className='footer-exera-logo' href='https://exera.mu?utm_source=kleroptics' target='_blank' rel="noreferrer">exera</a>
+            Home Classics © {d.getFullYear()} - Solution Designed by <a className='footer-exera-logo' href='https://exera.mu?utm_source=kleroptics' target='_blank' rel="noreferrer">exera</a>
           </Footer>
         </Layout>
       </Layout>

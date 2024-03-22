@@ -731,7 +731,7 @@ def generate_prescription_pdf(request):
         top_margin = height - 60
 
         #c.setFont("Helvetica-Bold", 16)
-        #c.drawString(left_margin, height - 30, "KLER VISION")
+        #c.drawString(left_margin, height - 30, "HOME CLASSICS")
 
         # Patient Information and Prescription Grid
         c.setFont("Helvetica", 12)
