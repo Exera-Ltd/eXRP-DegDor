@@ -24,43 +24,45 @@ import JobCardForm from './pages/JobCards/JobCardForm';
 import JobCardListing from './pages/JobCards/JobCardListing';
 import ProductListing from './pages/Inventory/ProductListing';
 import InvoiceListing from './pages/Invoices/InvoiceListing';
+import NewTransaction from './pages/Transactions/NewTransaction';
+import TransactionListing from './pages/Transactions/TransactionListing';
 
 const { Header, Content, Sider, Footer } = Layout;
 
 const d = new Date();
 
 const menu = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Administrator'] },
-  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Administrator', 'Doctor', 'Staff'] },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Super Admin'] },
+  { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Super Admin', 'Executive', 'Staff'] },
   {
-    key: 'prescription', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Administrator', 'Doctor', 'Staff'], items: [
-      { key: 'new-prescription', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-prescription', roles: ['Administrator', 'Doctor'] },
-      { key: 'prescriptions', label: 'Prescriptions', icon: React.createElement(MedicineBoxOutlined), path: '/prescriptions', roles: ['Administrator', 'Doctor', 'Staff'] }
+    key: 'transaction', label: 'Transactions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Super Admin', 'Executive', 'Staff'], items: [
+      { key: 'new-transaction', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-transaction', roles: ['Super Admin', 'Executive'] },
+      { key: 'transactions', label: 'Transactions', icon: React.createElement(MedicineBoxOutlined), path: '/transactions', roles: ['Super Admin', 'Executive', 'Staff'] }
     ]
   },
   /* {
-    key: 'job-card', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '', roles: ['Administrator', 'Manager', 'Staff'], items: [
-      { key: 'new-job-card', label: 'New', icon: React.createElement(PlusOutlined), path: '/job-card', roles: ['Administrator', 'Manager', 'Staff'] },
-      { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Manager', 'Staff'] }
+    key: 'job-card', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '', roles: ['Super Admin', 'Manager', 'Staff'], items: [
+      { key: 'new-job-card', label: 'New', icon: React.createElement(PlusOutlined), path: '/job-card', roles: ['Super Admin', 'Manager', 'Staff'] },
+      { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Super Admin', 'Manager', 'Staff'] }
     ]
   }, */
-  { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Administrator', 'Staff'] },
-  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Administrator', 'Staff', 'Doctor'] },
+  /* { key: 'job-cards', label: 'Job Cards', icon: React.createElement(ShoppingCartOutlined), path: '/job-cards', roles: ['Super Admin', 'Staff'] },
+  { key: 'appointments', label: 'Appointments', icon: React.createElement(CalendarOutlined), path: '/appointment', items: [], roles: ['Super Admin', 'Staff', 'Executive'] }, */
   {
-    key: 'product', label: 'Products', icon: React.createElement(ContainerOutlined), path: '', roles: ['Administrator'], items: [
-      { key: 'new-product', label: 'New Product', icon: React.createElement(ContainerOutlined), path: '/new-product', items: [], roles: ['Administrator'] },
-      { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Administrator'] },
+    key: 'product', label: 'Products', icon: React.createElement(ContainerOutlined), path: '', roles: ['Super Admin'], items: [
+      { key: 'new-product', label: 'New Product', icon: React.createElement(ContainerOutlined), path: '/new-product', items: [], roles: ['Super Admin'] },
+      { key: 'inventory', label: 'Inventory', icon: React.createElement(ContainerOutlined), path: '/inventory', items: [], roles: ['Super Admin'] },
     ]
   },
-  {
-    key: 'invoice', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '', roles: ['Administrator', 'Staff'], items: [
-      { key: 'new-invoice', label: 'New Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/new-invoice', roles: ['Administrator', 'Staff'] },
-      { key: 'invoices', label: 'Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/invoices', roles: ['Administrator', 'Staff'] }
+  /* {
+    key: 'invoice', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '', roles: ['Super Admin', 'Staff'], items: [
+      { key: 'new-invoice', label: 'New Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/new-invoice', roles: ['Super Admin', 'Staff'] },
+      { key: 'invoices', label: 'Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/invoices', roles: ['Super Admin', 'Staff'] }
     ]
-  },
-  /*{ key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
-  { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [], roles: ['Administrator', 'Manager', 'Staff'] },
-  { key: 'logs', label: 'Logs', icon: React.createElement(FileExcelOutlined), path: '/logs', items: [], roles: ['Administrator'] } */
+  }, */
+  /*{ key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Super Admin', 'Manager', 'Staff'] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [], roles: ['Super Admin', 'Manager', 'Staff'] },
+  { key: 'logs', label: 'Logs', icon: React.createElement(FileExcelOutlined), path: '/logs', items: [], roles: ['Super Admin'] } */
 ]
 
 const App = () => {
@@ -96,6 +98,8 @@ const App = () => {
   }
 
   const { user, setUser } = useUser();
+  const { userRoles, setUserRoles } = useUser([]);
+
 
   useEffect(() => {
     fetch(appUrl + 'users/get_user')
@@ -113,6 +117,22 @@ const App = () => {
       });
   }, [setUser]);
 
+  useEffect(() => {
+    fetch(appUrl + 'users/roles')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setUserRoles(data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [])
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
@@ -123,7 +143,7 @@ const App = () => {
           display: 'flex',
         }}
       >
-        <div className="header-logo" style={{ fontSize: 24 }}><img style={{ width: 120, textAlign: 'center', mixBlendMode: 'multiply', marginTop: 2 }} src="../static/img/logo.png" alt="Home Classics" /></div>
+        <div className="header-logo" style={{ fontSize: 24, height: 57 }}><img style={{ height: '100%', objectFit: 'cover', textAlign: 'center', mixBlendMode: 'multiply', marginTop: 2 }} src="../static/img/logo.png" alt="Home Classics" /></div>
         <div className="header-content">
           {renderNotificationIcon()}
         </div>
@@ -136,19 +156,21 @@ const App = () => {
             zIndex: 1
           }}
         >
-          {user?.profile && user?.first_name !== "" &&
-            <Badge.Ribbon text={user.profile.role} color="#024550">
+          {user?.profile && user?.first_name !== "" && user.profile.roles.length > 0 && (
+            <Badge.Ribbon text={user.profile.roles[0]} color="#024550">
               <div className="centered-title-div">
                 Welcome<br />{user.first_name}
               </div>
             </Badge.Ribbon>
-          }
+          )}
+
+
           <Menu mode="inline" defaultSelectedKeys={['1']} style={{ borderRight: 0 }}>
-            {menu.filter(item => !item.roles || item.roles.includes(user?.profile?.role)).map(item => {
+            {menu.filter(item => !item.roles || item.roles.includes(user?.profile?.roles[0])).map(item => {
               if (item.items && item.items.length > 0) {
                 return (
                   <Menu.SubMenu key={item.key} icon={item.icon} title={item.label}>
-                    {item.items.filter(subItem => !subItem.roles || subItem.roles.includes(user?.profile?.role)).map(subItem => (
+                    {item.items.filter(subItem => !subItem.roles || subItem.roles.includes(user?.profile?.roles[0])).map(subItem => (
                       <Menu.Item key={subItem.key}>
                         <Link to={subItem.path}>
                           {subItem.icon} {subItem.label}
@@ -266,8 +288,8 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/new-customer" element={<NewCustomer />} />
               <Route path="/customers" element={<CustomerListing />} />
-              <Route path="/new-prescription" element={<NewPrescription />} />
-              <Route path="/prescriptions" element={<PrescriptionListing />} />
+              <Route path="/new-transaction" element={<NewTransaction />} />
+              <Route path="/transactions" element={<TransactionListing />} />
               <Route path="/job-card" element={<JobCardForm />} />
               <Route path="/job-cards" element={<JobCardListing />} />
               <Route path="/appointment" element={<Calendar />} />
@@ -277,7 +299,7 @@ const App = () => {
               <Route path="/invoices" element={<InvoiceListing />} />
               <Route path="/quotations" element={<Quotation />} />
               <Route path="/reports" element={<Report />} />
-              {user?.profile?.role === 'Administrator' && (
+              {user?.profile?.roles[0] === 'Super Admin' && (
                 <>
                   <Route path="/logs" element={<Log />} />
                 </>

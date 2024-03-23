@@ -4,7 +4,8 @@ from django.contrib.auth.views import LogoutView
 from users import views
 
 user_urls = [
-	path("get_user", views.get_user)
+	path("get_user", views.get_user),
+  	path('roles', views.RoleListAPIView.as_view(), name='role-list'),
 ]
 
 urlpatterns = [

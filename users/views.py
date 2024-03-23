@@ -5,6 +5,9 @@ from django.http import JsonResponse
 from .models import UserProfile
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from rest_framework import generics
+from .models import Role
+from .serializers import RoleSerializer
 
 @login_required(login_url='/accounts/login/')
 def get_user(request):
@@ -19,8 +22,9 @@ def get_user(request):
 
     try:
         user_profile = UserProfile.objects.get(user=user)
+        user_roles = list(user_profile.roles.values_list('name', flat=True))
         user_profile_data = {
-            "role": user_profile.role,
+            "roles": user_roles,
             "region": user_profile.region,
         }
     except UserProfile.DoesNotExist:
@@ -29,3 +33,7 @@ def get_user(request):
     user_data["profile"] = user_profile_data
 
     return JsonResponse(user_data)
+
+class RoleListAPIView(generics.ListAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer

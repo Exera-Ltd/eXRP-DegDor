@@ -1,33 +1,35 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib import admin
 
-class UserProfile(models.Model):    
-    ROLE_CHOICES = (
-        ('Staff', 'Staff'),
-        ('Doctor', 'Doctor'),
-        ('Administrator', 'Administrator'),
-    )
-    
-    REGIONS = (
-        ('Flacq', 'Flacq'),
-        ('Grand Port', 'Grand Port'),
-        ('Moka', 'Moka'),
-        ('Pamplemousses', 'Pamplemousses'),
-        ('Plaines Wilhems', 'Plaines Wilhems'),
-        ('Port Louis', 'Port Louis'),
-        ('Rivière du Rempart', 'Rivière du Rempart'),
-        ('Rivière Noire', 'Rivière Noire'),
-        ('Savanne', 'Savanne'),
-        ('Rodrigues', 'Rodrigues'),
-    )
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=100, choices=ROLE_CHOICES, default='Staff')
-    region = models.CharField(max_length=100, choices=REGIONS, default='Plaines Wilhems')
-    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinates')
+class Business(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.role} - {self.region}"
+        return self.name
+
+class Role(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+        
+class Region(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    roles = models.ManyToManyField(Role)
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True)  
+    manager = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subordinates')
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {', '.join(role.name for role in self.roles.all())} - {self.region}"
 
     def get_all_subordinates(self):
         """Recursively gets all subordinates of this user."""
@@ -35,3 +37,4 @@ class UserProfile(models.Model):
         for subordinate in subordinates:
             subordinates.extend(subordinate.get_all_subordinates())
         return subordinates
+
