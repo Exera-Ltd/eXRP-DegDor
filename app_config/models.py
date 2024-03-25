@@ -1,4 +1,5 @@
 from django.db import models
+from colorfield.fields import ColorField
 
 # Create your models here.
 
@@ -10,6 +11,9 @@ class Business(models.Model):
     website = models.URLField(blank=True)
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=20, blank=True)
+    primaryColor = ColorField(default='#034157') 
+    secondaryColor = ColorField(default='#097993')
+    utmSource = models.CharField(blank=True)
 
     def __str__(self):
         return self.name

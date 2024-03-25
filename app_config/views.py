@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from app_config.models import Business
 from app_config.serializers import BusinessSerializer
-from models import Business
+from rest_framework import generics
 # Create your views here.
 
 class BusinessListAPIView(generics.ListAPIView):

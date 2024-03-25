@@ -10,6 +10,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/login/', LoginView.as_view(redirect_authenticated_user=True), name='login'),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('app_config/', include('app_config.urls')),
     path('users/', include('users.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('log/', include('log.urls')),
@@ -19,3 +20,7 @@ urlpatterns = [
 urlpatterns += [
     #re_path(r'^(?:.*)/?$', RedirectView.as_view(url='dashboard/')),
 ]
+
+admin.site.site_header = "eXRP Admin"
+admin.site.site_title = "eXRP Admin Portal"
+admin.site.index_title = "Welcome to eXRP Admin Portal"

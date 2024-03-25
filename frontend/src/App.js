@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Route, Link, Routes, Navigate } from 'react-router-dom';
 import { AccountBookOutlined, UserOutlined, MedicineBoxOutlined, CalendarOutlined, PlusOutlined, ContainerOutlined, DashboardOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, ConfigProvider, Badge } from 'antd';
@@ -99,7 +99,15 @@ const App = () => {
 
   const { user, setUser } = useUser();
   const { userRoles, setUserRoles } = useUser([]);
-
+  const [appConfig, setAppConfig] = useState(
+    {
+      "name": "",
+      "logo": "",
+      "primaryColor": "#fff",
+      "secondaryColor": "#fff",
+      "utmSource": "eXRP"
+    }
+  );
 
   useEffect(() => {
     fetch(appUrl + 'users/get_user')
@@ -133,17 +141,110 @@ const App = () => {
       });
   }, [])
 
+  useEffect(() => {
+    console.log(appConfig);
+    fetch(appUrl + 'app_config/business')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setAppConfig(data[0]);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [])
+
+  const hexToRgb = (hex, alpha) => {
+    const hexValue = hex.replace('#', '');
+    const r = parseInt(hexValue.substring(0, 2), 16);
+    const g = parseInt(hexValue.substring(2, 4), 16);
+    const b = parseInt(hexValue.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  useEffect(() => {
+    // Update the CSS rule dynamically
+    const styleElement = document.createElement('style');
+    const rgbaColor = hexToRgb(appConfig.secondaryColor, 0.3);
+    styleElement.innerHTML = `
+      a:hover {
+          color: ${appConfig.secondaryColor};
+      }
+      .ant-btn-primary {
+        background-color: ${appConfig.primaryColor};
+      }
+      .ant-btn-primary:not(:disabled):not(.ant-btn-disabled):hover {
+        background-color: ${appConfig.secondaryColor};
+      }
+      .ant-btn-primary:not(:disabled):not(.ant-btn-disabled):focus {
+        background-color: ${appConfig.primaryColor};
+      }
+      .ant-select-outlined:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector{
+        border-color: ${appConfig.secondaryColor};
+      }
+      .ant-select-focused{
+        border-color: ${appConfig.primaryColor};
+      }
+      .ant-btn-primary:active:hover {
+        background-color: ${appConfig.secondaryColor};
+      }
+      .ant-picker-outlined:hover{
+        border-color: ${appConfig.secondaryColor};
+      }
+      .ant-input-outlined:hover, .ant-input-outlined:focus{
+        border-color: ${appConfig.secondaryColor};
+      }
+      .ant-select-selection-search-input:hover, .ant-select-selection-search-input:focus{
+        border-color: ${appConfig.secondaryColor};
+      }
+
+      .ant-menu-light .ant-menu-item-selected, .ant-menu-light .ant-menu-submenu-selected >.ant-menu-submenu-title{
+        color: ${appConfig.primaryColor};
+        background-color: ${rgbaColor};
+      }
+
+      .scrollable-content::-webkit-scrollbar-thumb {
+        background-color: ${appConfig.primaryColor};
+      }
+      .scrollable-content::-webkit-scrollbar-thumb:hover {
+        background-color:  ${appConfig.secondaryColor};
+      }
+      .custom-ribbon .ant-ribbon {
+        background-color: ${appConfig.primaryColor};
+      }
+      
+      .custom-ribbon .ant-ribbon-content {
+        border-color: ${appConfig.primaryColor};
+      }
+    `;
+
+    // Remove any existing dynamically generated styles
+    const existingStyleElements = document.querySelectorAll('style[data-dynamic-style="scrollbar"]');
+    existingStyleElements.forEach(element => {
+      element.parentNode.removeChild(element);
+    });
+
+    // Add a data attribute to identify this dynamically generated style
+    styleElement.setAttribute('data-dynamic-style', 'scrollbar');
+
+    // Append the new dynamic style element to the document's head
+    document.head.appendChild(styleElement);
+  }, [appConfig]);
+
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header
-        style={{
-          backgroundImage: 'linear-gradient(to left, #024550, #4ca1af)',
-          padding: 0,
-          margin: 0,
-          display: 'flex',
-        }}
-      >
-        <div className="header-logo" style={{ fontSize: 24, height: 57 }}><img style={{ height: '100%', objectFit: 'cover', textAlign: 'center', mixBlendMode: 'multiply', marginTop: 2 }} src="../static/img/logo.png" alt="Home Classics" /></div>
+      <Header style={{
+        backgroundImage: `linear-gradient(to left, ${appConfig.primaryColor}, ${appConfig.secondaryColor})`,
+        padding: 0,
+        margin: 0,
+        display: 'flex'
+      }} >
+        <div className="header-logo" style={{ fontSize: 24, height: 57 }}><img style={{ height: '100%', objectFit: 'cover', textAlign: 'center', marginTop: 2 }} src={appConfig.logo} alt={appConfig.name} /></div>
         <div className="header-content">
           {renderNotificationIcon()}
         </div>
@@ -157,7 +258,7 @@ const App = () => {
           }}
         >
           {user?.profile && user?.first_name !== "" && user.profile.roles.length > 0 && (
-            <Badge.Ribbon text={user.profile.roles[0]} color="#024550">
+            <Badge.Ribbon text={user.profile.roles[0]} color={appConfig.primaryColor}>
               <div className="centered-title-div">
                 Welcome<br />{user.first_name}
               </div>
@@ -228,10 +329,10 @@ const App = () => {
               },
               particles: {
                 color: {
-                  value: "#024550",
+                  value: appConfig.primaryColor,
                 },
                 links: {
-                  color: "#024550",
+                  color: appConfig.primaryColor,
                   distance: 150,
                   enable: true,
                   opacity: 0.2,
@@ -312,7 +413,7 @@ const App = () => {
               padding: '10px 0px'
             }}
           >
-            Home Classics © {d.getFullYear()} - Solution Designed by <a className='footer-exera-logo' href='https://exera.mu?utm_source=kleroptics' target='_blank' rel="noreferrer">exera</a>
+            {appConfig.name} © {d.getFullYear()} - Solution Designed by <a className='footer-exera-logo' href={`https://exera.mu?utm_source=${appConfig.utmSource}`} target='_blank' rel="noreferrer">exera</a>
           </Footer>
         </Layout>
       </Layout>
