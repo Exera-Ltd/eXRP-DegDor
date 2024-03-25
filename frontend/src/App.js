@@ -151,7 +151,9 @@ const App = () => {
         return response.json();
       })
       .then(data => {
-        setAppConfig(data[0]);
+        if (data.length > 0) {
+          setAppConfig(data[0]);
+        }
       })
       .catch(error => {
         console.log(error);

@@ -25,7 +25,7 @@ def get_user(request):
         user_roles = list(user_profile.roles.values_list('name', flat=True))
         user_profile_data = {
             "roles": user_roles,
-            "region": user_profile.region,
+            "region": user_profile.region.name,
         }
     except UserProfile.DoesNotExist:
         user_profile_data = {}
