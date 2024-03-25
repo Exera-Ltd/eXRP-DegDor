@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Business, Region, Role, UserProfile
+from .models import Region, Role, UserProfile
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'roles_display', 'region', 'manager', 'business')
@@ -19,4 +19,3 @@ class UserProfileAdmin(admin.ModelAdmin):
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Region)
 admin.site.register(Role)
-admin.site.register(Business)

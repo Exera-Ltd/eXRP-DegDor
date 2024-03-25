@@ -1,13 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib import admin
 
-class Business(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.name
+from app_config.models import Business
 
 class Role(models.Model):
     name = models.CharField(max_length=100, unique=True)
