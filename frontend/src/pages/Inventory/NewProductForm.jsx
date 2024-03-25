@@ -1,14 +1,17 @@
-import React, { useEffect } from 'react';
-import { Form, Input, Button, InputNumber, DatePicker, Select, Upload, Row, Col, notification } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, Button, InputNumber, DatePicker, Select, Upload, Row, Col, notification, Checkbox } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
 import dayjs from 'dayjs';
+import TextArea from 'antd/es/input/TextArea';
 
 const { Option } = Select;
 
 const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = false, setIsReadOnly = () => { } }) => {
     const [productForm] = Form.useForm();
+    const [productBrands, setProductBrands] = useState([]);
+    const [productTypes, setProductTypes] = useState([]);
 
     const onFinish = async (values) => {
         console.log('Received values of product form: ', values);
@@ -52,31 +55,45 @@ const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = fal
         }
     };
 
-    const normFile = (e) => {
-        console.log('Upload event:', e);
-
-        if (Array.isArray(e)) {
-            return e;
-        }
-
-        // FileList from the Upload component
-        return e && e.fileList.map(file => {
-            if (file.originFileObj) {
-                // This is a file being uploaded
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    // Assign the thumbnail URL for preview
-                    file.thumbUrl = event.target.result;
-                };
-                reader.readAsDataURL(file.originFileObj);
-            }
-            return file;
-        });
-    };
-
     const disableReadOnly = () => {
         setIsReadOnly(false);
     }
+
+    useEffect(() => {
+        fetch(appUrl + 'dashboard/product_brands')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.length > 0) {
+                    setProductBrands(data);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, [])
+
+    useEffect(() => {
+        fetch(appUrl + 'dashboard/product_types')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.length > 0) {
+                    setProductTypes(data);
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    }, [])
 
     useEffect(() => {
         console.log(productData);
@@ -84,8 +101,8 @@ const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = fal
         productForm.resetFields();
         productForm.setFieldsValue({
             product_id: productData?.id,
-            itemId: productData?.item_id,
-            itemName: productData?.item_name,
+            productId: productData?.product_id,
+            productName: productData?.product_name,
             category: productData?.category,
             quantity: productData?.quantity,
             unitPrice: productData?.unit_price,
@@ -110,14 +127,9 @@ const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = fal
     return (
         <Form layout="vertical" onFinish={onFinish} form={productForm}>
             <Row gutter={16}>
-                <Col span={12}>
-                    <Form.Item label="Item ID" name="itemId" rules={[{ required: true, message: 'Please input the item ID!' }]}>
-                        <Input placeholder="Enter Item ID" />
-                    </Form.Item>
-                </Col>
-                <Col span={12}>
-                    <Form.Item label="Item Name" name="itemName" rules={[{ required: true, message: 'Please input the item name!' }]}>
-                        <Input placeholder="Enter Item Name" />
+                <Col span={8}>
+                    <Form.Item label="Product Name" name="productName" rules={[{ required: true, message: 'Please input the product name!' }]}>
+                        <Input placeholder="Enter Product Name" />
                     </Form.Item>
 
                     <Form.Item
@@ -127,84 +139,71 @@ const ProductForm = ({ productData, onProductAdded, closeModal, isReadOnly = fal
                         <Input />
                     </Form.Item>
                 </Col>
+                <Col span={8}>
+                    <Form.Item label="Product Reference" name="productReference" rules={[{ required: true, message: 'Please input the product Reference!' }]}>
+                        <Input placeholder="Enter Product Reference" />
+                    </Form.Item>
+                </Col>
+                <Col span={8}>
+                    <Form.Item label="Product Description" name="producDescription" >
+                        <TextArea rows={4} placeholder="Enter Product Description" />
+                    </Form.Item>
+                </Col>
             </Row>
             <Row gutter={16}>
                 <Col span={6}>
-                    <Form.Item label="Category" name="category">
-                        <Select placeholder="Select a category">
-                            <Option value="Frames">Frames</Option>
-                            <Option value="Spray">Spray</Option>
-                            <Option value="Spare Parts">Spare Parts</Option>
-                            <Option value="Cleaning Cloth">Cleaning Cloth</Option>
-                            <Option value="Pouch">Pouch</Option>
-                            <Option value="Lenses">Lenses</Option>
-                            <Option value="Contact Lenses">Contact Lenses</Option>
+                    <Form.Item label="Product Price" name="productPrice">
+                        <InputNumber min={0.01} step={10} style={{ width: '100%' }} />
+                    </Form.Item>
+                </Col>
+                <Col span={6}>
+                    <Form.Item label="Product Inventory" name="productInventory">
+                        <InputNumber min={1} step={1} style={{ width: '100%' }}/>
+                    </Form.Item>
+                </Col>
+                <Col span={6}>
+                    <Form.Item label="Product Quantity" name="productQuantity">
+                        <InputNumber min={1} step={1} style={{ width: '100%' }}/>
+                    </Form.Item>
+                </Col>
+                <Col span={6}>
+                    <Form.Item label="Product Type" name="productType">
+                        <Select placeholder="Select a Type">
+                            {productTypes.map(type => (
+                                <Option key={type.id} value={type.name}>
+                                    {type.name}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                </Col>
+
+            </Row>
+            <Row gutter={16}>
+                <Col span={6}>
+                    <Form.Item label="Promo Price" name="productPromoPrice">
+                        <InputNumber min={0.01} step={10} style={{ width: '100%' }}/>
+                    </Form.Item>
+                </Col>
+                <Col span={6}>
+                    <Form.Item label="Product Brand" name="productBrand">
+                        <Select placeholder="Select a Type">
+                            {productBrands.map(brand => (
+                                <Option key={brand.id} value={brand.name}>
+                                    {brand.name}
+                                </Option>
+                            ))}
                         </Select>
                     </Form.Item>
                 </Col>
                 <Col span={6}>
-                    <Form.Item label="Quantity" name="quantity">
-                        <InputNumber min={1} />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Unit Price" name="unitPrice">
-                        <InputNumber min={0.01} step={0.01} />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Location" name="location">
+                    <Form.Item label="Store Location" name="productStoreLocation">
                         <Input placeholder="Storage Location" />
                     </Form.Item>
                 </Col>
-            </Row>
-            <Row gutter={16}>
                 <Col span={6}>
-                    <Form.Item label="Supplier" name="supplier">
-                        <Input placeholder="Supplier Name" />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Date of Purchase" name="dateOfPurchase">
-                        <DatePicker format="DD-MM-YYYY" />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Reorder Level" name="reorderLevel">
-                        <InputNumber min={1} />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Expiry Date" name="expiryDate">
-                        <DatePicker format="DD-MM-YYYY" />
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row gutter={16}>
-                <Col span={6}>
-                    <Form.Item label="Status" name="status">
-                        <Select placeholder="Select a status">
-                            <Option value="available">Available</Option>
-                            <Option value="outOfStock">Out of Stock</Option>
-                            <Option value="discontinued">Discontinued</Option>
-                        </Select>
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Serial Number/Barcode" name="serialNumber">
-                        <Input placeholder="Enter Serial Number or Barcode" />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="SKU" name="sku">
-                        <Input placeholder="Enter SKU" />
-                    </Form.Item>
-                </Col>
-                <Col span={6}>
-                    <Form.Item label="Image" name="image" valuePropName="fileList" getValueFromEvent={normFile}>
-                        <Upload name="logo" listType="picture" beforeUpload={() => false}>
-                            <Button icon={<UploadOutlined />}>Click to upload</Button>
-                        </Upload>
+                    <Form.Item label="IsActive" name="isProductActive" >
+                        <Checkbox />
                     </Form.Item>
                 </Col>
             </Row>

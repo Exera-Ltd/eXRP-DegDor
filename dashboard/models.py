@@ -45,6 +45,18 @@ class Customer(models.Model):
         Returns a dictionary representation of this Customer instance.
         """
         return model_to_dict(self, fields=[field.name for field in self._meta.fields])
+    
+class ProductBrand(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+    
+class ProductType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Prescription(models.Model):
     CARE_SYSTEM_CHOICES = [

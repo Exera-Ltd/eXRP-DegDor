@@ -11,6 +11,9 @@ app_urls = [
     path("get_customer/<int:customer_id>/", views.get_customer),
     path("update_customer/<int:customer_id>/", views.update_customer, name="update_customer"),
     
+    path('product_brands', views.ProductBrandAPIView.as_view(), name='product_brand_list'),
+    path('product_types', views.ProductTypeAPIView.as_view(), name='product_type_list'),
+    
     path('create_prescription/', views.create_prescription, name='create_prescription'),
     path("get_all_prescriptions", views.get_all_prescriptions),
     path("get_prescription/<int:prescription_id>/", views.get_prescription),

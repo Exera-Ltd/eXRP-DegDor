@@ -18,7 +18,7 @@ urlpatterns = [
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += [
-    #re_path(r'^(?:.*)/?$', RedirectView.as_view(url='dashboard/')),
+    re_path(r'^(?:.*)/?$', RedirectView.as_view(url='dashboard/')),
 ]
 
 admin.site.site_header = "eXRP Admin"

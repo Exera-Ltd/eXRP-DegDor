@@ -4,8 +4,9 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from dashboard.serializers import ProductBrandSerializer, ProductTypeSerializer
 from log.models import LogEntry
-from .models import Prescription, GlassPrescription, ContactLensPrescription, LensDetails, Customer, JobCard, Appointment, Invoice, InvoiceLineItem
+from .models import Prescription, GlassPrescription, ContactLensPrescription, LensDetails, Customer, JobCard, Appointment, Invoice, InvoiceLineItem, ProductBrand, ProductType
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms.models import model_to_dict
 from django.utils.dateparse import parse_date, parse_datetime
@@ -23,6 +24,7 @@ from django.core.files.base import ContentFile
 from reportlab.lib.units import inch
 from django.contrib.auth.models import User
 import pytz
+from rest_framework import generics
 
 #timezone = pytz.timezone('Indian/Mauritius')
 #today_date = datetime.now(timezone).date()
@@ -1520,3 +1522,12 @@ def generate_invoice_pdf(request):
         return JsonResponse({'message': 'Invalid JSON data'}, status=400)
     except Exception as e:
         return JsonResponse({'message': str(e)}, status=500)
+    
+class ProductBrandAPIView(generics.ListAPIView):
+    queryset = ProductBrand.objects.all()
+    serializer_class = ProductBrandSerializer
+    
+
+class ProductTypeAPIView(generics.ListAPIView):
+    queryset = ProductType.objects.all()
+    serializer_class = ProductTypeSerializer
