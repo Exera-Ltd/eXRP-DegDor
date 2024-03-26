@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Form, Input, Select, Typography, Divider, Button, notification, InputNumber, Drawer, Modal } from 'antd';
+import { Row, Col, Form, Input, Select, Typography, Divider, Button, notification, InputNumber, Drawer, Modal, Space, DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { useUser } from '../../contexts/UserContext';
 import { appUrl } from '../../constants';
 import { getCookie } from '../../commons/cookie';
 import TransactionTable from './TransactionTable';
 import JobCardForm from '../JobCards/JobCardForm';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Paragraph } = Typography;
 const { Option } = Select;
+const { TextArea } = Input;
 
 const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
 };
 
-const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly = () => { }, setIsTransactionModalVisible = () => { } }) => {
+const NewTransactionForm = ({ orderData, isReadOnly = false, setIsReadOnly = () => { }, setIsTransactionModalVisible = () => { } }) => {
     const { user } = useUser();
     const [customers, setCustomers] = useState([]);
-    const [transactionForm] = Form.useForm();
+    const [orderForm] = Form.useForm();
     const [drawerVisible, setDrawerVisible] = useState(false);
-    const [transactionList, setTransactionList] = useState([]);
+    const [orderList, setTransactionList] = useState([]);
     const [selectedTransactionData, setSelectedTransactionData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [isJobCardModalVisible, setIsJobCardModalVisible] = useState(false);
@@ -62,7 +64,7 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
     const generatePdf = async (formData) => {
         try {
             const csrftoken = getCookie('csrftoken');
-            const response = await fetch(appUrl + `dashboard/generate_transaction_pdf`, {
+            const response = await fetch(appUrl + `dashboard/generate_order_pdf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +83,7 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
             const downloadUrl = window.URL.createObjectURL(blob);
             const downloadLink = document.createElement('a');
             downloadLink.href = downloadUrl;
-            downloadLink.setAttribute('download', `transaction_${formData.transaction_id}.pdf`); // Any filename you like
+            downloadLink.setAttribute('download', `order_${formData.order_id}.pdf`); // Any filename you like
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
@@ -100,13 +102,13 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
     };
 
     const fetchTransactionsByCustomer = (customer_id) => {
-        fetch(appUrl + `dashboard/get_transactions_by_customer/${customer_id}/`)
+        fetch(appUrl + `dashboard/get_orders_by_customer/${customer_id}/`)
             .then(response => response.json())
             .then(data => {
                 console.log(data);
                 setTransactionList(data);
             })
-            .catch(error => console.error('Error fetching transactions:', error));
+            .catch(error => console.error('Error fetching orders:', error));
     };
 
     // Toggle drawer visibility
@@ -116,7 +118,7 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
 
     // Function to handle Print button click
     const handlePrint = () => {
-        const values = transactionForm.getFieldsValue();
+        const values = orderForm.getFieldsValue();
         generatePdf(values);
     };
 
@@ -125,9 +127,9 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
 
         try {
             const csrftoken = getCookie('csrftoken');
-            const transactionId = transactionForm.getFieldValue('transaction_id');
-            const method = transactionId ? 'PUT' : 'POST';
-            const endpoint = transactionId ? `dashboard/update_transaction/${transactionId}/` : 'dashboard/create_transaction/';
+            const orderId = orderForm.getFieldValue('order_id');
+            const method = orderId ? 'PUT' : 'POST';
+            const endpoint = orderId ? `dashboard/update_order/${orderId}/` : 'dashboard/create_order/';
 
             const response = await fetch(appUrl + endpoint, {
                 method: method,
@@ -147,7 +149,7 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
                 });
                 setIsTransactionModalVisible(false);
                 setIsReadOnly(true);
-                transactionForm.resetFields();
+                orderForm.resetFields();
             } else {
                 const result = await response.json();
                 notification.error({
@@ -165,7 +167,7 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
 
     const fetchTransaction = (id) => {
         setIsLoading(true);
-        fetch(appUrl + `dashboard/get_transaction/${id}/`)
+        fetch(appUrl + `dashboard/get_order/${id}/`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -187,7 +189,7 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
 
     useEffect(() => {
         fetchCustomers();
-        transactionForm.setFieldsValue({
+        orderForm.setFieldsValue({
             doctor: user.id,
         });
     }, [user]);
@@ -197,27 +199,27 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
     useEffect(() => {
         if (checkupInterval) {
             const nextCheckupDate = dayjs().add(checkupInterval, 'months').format('YYYY-MM-DD');
-            transactionForm.setFieldsValue({ 'next-checkup-date': nextCheckupDate });
+            orderForm.setFieldsValue({ 'next-checkup-date': nextCheckupDate });
         }
-    }, [checkupInterval, transactionForm]);
+    }, [checkupInterval, orderForm]);
 
     const handleCheckupChange = (value) => {
         setCheckupInterval(value);
     };
 
-    const onTransactionClick = async (transaction_id) => {
-        console.log('transaction clicked');
-        console.log(transaction_id);
-        fetchTransaction(transaction_id)
+    const onTransactionClick = async (order_id) => {
+        console.log('order clicked');
+        console.log(order_id);
+        fetchTransaction(order_id)
     };
 
     const showJobCardModal = () => {
-        const customerId = transactionForm.getFieldValue('customer_id')
-        const transactionId = transactionForm.getFieldValue('transaction_id')
+        const customerId = orderForm.getFieldValue('customer_id')
+        const orderId = orderForm.getFieldValue('order_id')
         console.log(customerId);
-        console.log(transactionId);
+        console.log(orderId);
         if (customerId != null) {
-            let jobCardData = { 'customer': customerId, 'transaction': transactionId }
+            let jobCardData = { 'customer': customerId, 'order': orderId }
             setSelectedJobCardData(jobCardData);
             setIsJobCardModalVisible(true);
         } else {
@@ -230,42 +232,14 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
     }
 
     useEffect(() => {
-        transactionForm.resetFields();
-        transactionForm.setFieldsValue({
-            transaction_id: transactionData.transaction?.id ? transactionData.transaction?.id : null,
-            doctor_name: transactionData.transaction?.doctor_name,
-            customer: transactionData.transaction?.customer_name,
-            customer_id: transactionData.transaction?.customer_id,
-            "last-eye-test": transactionData.transaction?.last_eye_test,
-            vision: transactionData.transaction?.vision,
-            "care-system": transactionData.transaction?.care_system,
-            recommendation: transactionData.transaction?.recommendation,
-            "next-checkup-date": transactionData.transaction?.next_checkup,
-            "transaction-issuer": transactionData.transaction?.transaction_issuer,
+        orderForm.resetFields();
+        orderForm.setFieldsValue({
 
-            "glass-right-sph": transactionData.glass_transaction?.lens_detail_right.sph,
-            "glass-right-cyl": transactionData.glass_transaction?.lens_detail_right.cyl,
-            "glass-right-axis": transactionData.glass_transaction?.lens_detail_right.axis,
-            "glass-left-sph": transactionData.glass_transaction?.lens_detail_left.sph,
-            "glass-left-cyl": transactionData.glass_transaction?.lens_detail_left.cyl,
-            "glass-left-axis": transactionData.glass_transaction?.lens_detail_left.axis,
-            "glass-add": transactionData.glass_transaction?.glass_add,
-            pdr: transactionData.glass_transaction?.pdr,
-            pdl: transactionData.glass_transaction?.pdl,
-            "type-of-lenses": transactionData.glass_transaction?.type_of_lenses,
-            "type-of-contact-lenses": transactionData.contact_lens_transaction?.type_of_contact_lenses,
-            "contact-lens-add": transactionData.contact_lens_transaction?.contact_lens_add,
-            "lens-right-sph": transactionData.contact_lens_transaction?.lens_detail_right.sph,
-            "lens-right-cyl": transactionData.contact_lens_transaction?.lens_detail_right.cyl,
-            "lens-right-axis": transactionData.contact_lens_transaction?.lens_detail_right.axis,
-            "lens-left-sph": transactionData.contact_lens_transaction?.lens_detail_left.sph,
-            "lens-left-cyl": transactionData.contact_lens_transaction?.lens_detail_left.cyl,
-            "lens-left-axis": transactionData.contact_lens_transaction?.lens_detail_left.axis,
         });
-    }, [transactionData, transactionForm]);
+    }, [orderData, orderForm]);
 
     return <Form
-        form={transactionForm}
+        form={orderForm}
         layout="horizontal"
         name="new-customer"
         labelAlign="left"
@@ -277,29 +251,11 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
         onFinishFailed={onFinishFailed}
         autoComplete="off"
     >
-        <Divider orientation="left" orientationMargin="0">Details</Divider>
+        <Divider orientation="left" orientationMargin="0">Customer Details</Divider>
         <Row gutter={24}>
             <Col span={12}>
                 <Form.Item
-                    label="Doctor Name"
-                    name="doctor_name"
-                >
-                    <Input
-                        value={user.first_name + ' ' + user.last_name}
-                        disabled
-                    />
-                </Form.Item>
-
-                <Form.Item
-                    name="doctor"
-                    initialValue={user.id}
-                    hidden
-                >
-                    <Input />
-                </Form.Item>
-
-                <Form.Item
-                    name="transaction_id"
+                    name="order_id"
                     hidden
                 >
                     <Input />
@@ -339,9 +295,9 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
                 </Form.Item>
             </Col>
 
-            {(!isReadOnly && transactionList.length > 0) && (
+            {(!isReadOnly && orderList.length > 0) && (
                 <Col span={8}>
-                    <Button onClick={toggleDrawer}>View Previous Transactions</Button>
+                    <Button onClick={toggleDrawer}>View Previous Orders</Button>
                 </Col>
             )}
 
@@ -352,9 +308,9 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
                 onClose={toggleDrawer}
                 open={drawerVisible}
             >
-                <p>Previous Transactions</p>
+                <p>Previous Orders</p>
                 <TransactionTable
-                    transactionList={transactionList}
+                    orderList={orderList}
                     onTransactionClick={onTransactionClick}
                 />
             </Drawer>
@@ -371,268 +327,72 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
                 }}
 
             >
-                <NewTransactionForm transactionData={selectedTransactionData} isReadOnly={true} />
+                <NewTransactionForm orderData={selectedTransactionData} isReadOnly={true} />
             </Modal>
-
-            <Col span={8}>
-                <Form.Item
-                    label="Last Eye Test"
-                    name="last-eye-test"
-                >
-                    <Input readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Row gutter={24}>
-            <Col span={12}>
-                <Form.Item
-                    label="Vision"
-                    name="vision"
-                >
-                    <Input.TextArea readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
         </Row>
 
-        <Divider orientation="left" orientationMargin="0">Glass Transactions</Divider>
+        <Divider orientation="left" orientationMargin="0">Products</Divider>
+        <Row gutter={24}>
+            <Form.List name="items">
+                {(fields, { add, remove }) => (
+                    <>
+                        {fields.map(({ key, name }) => (
+                            <div key={key} style={{ marginBottom: 8, width: '100%', display: 'flex', alignItems: 'baseline' }}>
+                                <Col span={8} style={{ marginRight: 8 }}>
+                                    <Form.Item
+                                        {...name}
+                                        label="Product"
+                                        name={[name, 'customer']}
+                                        rules={[{ required: true, message: 'Please input customer name!' }]}
+                                        style={{ width: '100%' }}
+                                    >
+                                        <Select
+                                            showSearch
+                                            placeholder="Select a Product"
+                                            onChange={handleCustomerChange}
+                                            optionFilterProp="label"
+                                            filterOption={(input, option) =>
+                                                option.label.toLowerCase().includes(input.toLowerCase())
+                                            }
+                                            disabled={isReadOnly}
+                                            style={{ width: '100%' }}
+                                        >
+                                            {customers.map(customer => (
+                                                <Option key={customer.id} value={customer.id} label={`${customer.first_name} ${customer.last_name.toUpperCase()}`}>
+                                                    {customer.first_name} {customer.last_name.toUpperCase()}
+                                                </Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                </Col>
+                                <Col span={6}>
+                                    <Form.Item {...name} label="Product Price" name={[name, 'productPrice']} style={{ width: '100%' }}>
+                                        <InputNumber min={1} step={1} style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={6}>
+                                    <Form.Item {...name} label="Quantity" name={[name, 'productQuantity']} style={{ width: '100%' }}>
+                                        <InputNumber min={1} step={1} style={{ width: '100%' }} />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={4}>
+                                    {!isReadOnly && <MinusCircleOutlined onClick={() => remove(name)} />}
+                                </Col>
+                            </div>
+                        ))}
 
-        <Row gutter={24}>
-            <Col span={3}>
-                <Paragraph strong>Right</Paragraph>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="SPH"
-                    name="glass-right-sph"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => { if (value && !isNaN(value)) { const formattedValue = (+value).toFixed(2); return value > 0 ? `+${formattedValue}` : formattedValue; } return value; }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="CYL"
-                    name="glass-right-cyl"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} min={-Infinity} formatter={value => { if (!value || isNaN(value)) { return ''; } else { if (value < 0) { return parseFloat(value).toFixed(2); } else { return ''; } } }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="Axis"
-                    name="glass-right-axis"
-                >
-                    <InputNumber readOnly={isReadOnly} step={1} min={0} max={180} />
-                </Form.Item>
-            </Col>
+                        {!isReadOnly && (
+                            <Col span={24} style={{ textAlign: 'right' }}>
+                                <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />} style={{ width: '100%' }}>
+                                    Add Item
+                                </Button>
+                            </Col>
+                        )}
+                    </>
+                )}
+            </Form.List>
         </Row>
-        <Row gutter={24}>
-            <Col span={3}>
-                <Paragraph strong>Left</Paragraph>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="SPH"
-                    name="glass-left-sph"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => { if (value && !isNaN(value)) { const formattedValue = (+value).toFixed(2); return value > 0 ? `+${formattedValue}` : formattedValue; } return value; }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="CYL"
-                    name="glass-left-cyl"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} min={-Infinity} formatter={value => { if (!value || isNaN(value)) { return ''; } else { if (value < 0) { return parseFloat(value).toFixed(2); } else { return ''; } } }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="Axis"
-                    name="glass-left-axis"
-                >
-                    <InputNumber readOnly={isReadOnly} step={1} min={0} max={180} />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Row gutter={24}>
-            <Col span={6}>
-                <Form.Item
-                    label="PDR."
-                    name="pdr"
-                >
-                    <Input readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
-            <Col span={6}>
-                <Form.Item
-                    label="PDL."
-                    name="pdl"
-                >
-                    <Input readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
-            <Col span={6}>
-                <Form.Item
-                    label="Type of Lenses"
-                    name="type-of-lenses"
-                    hasFeedback
-                >
-                    <Select placeholder="Lenses" disabled={isReadOnly}>
-                        <Option value="Single">Single</Option>
-                        <Option value="Bi Focal">Bi Focal</Option>
-                        <Option value="Progressive">Progressive</Option>
-                    </Select>
-                </Form.Item>
-            </Col>
-            <Col span={6}>
-                <Form.Item
-                    label="Add."
-                    name="glass-add"
-                >
-                    <Input readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Divider orientation="left" orientationMargin="0">Lens Transactions</Divider>
-        <Row gutter={24}>
-            <Col span={3}>
-                <Paragraph strong>Right</Paragraph>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="SPH"
-                    name="lens-right-sph"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => { if (value && !isNaN(value)) { const formattedValue = (+value).toFixed(2); return value > 0 ? `+${formattedValue}` : formattedValue; } return value; }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="CYL"
-                    name="lens-right-cyl"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => { if (!value || isNaN(value)) { return ''; } else { if (value < 0) { return parseFloat(value).toFixed(2); } else { return ''; } } }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="Axis"
-                    name="lens-right-axis"
-                >
-                    <InputNumber readOnly={isReadOnly} step={1} min={0} max={180} />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Row gutter={24}>
-            <Col span={3}>
-                <Paragraph strong>Left</Paragraph>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="SPH"
-                    name="lens-left-sph"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => { if (value && !isNaN(value)) { const formattedValue = (+value).toFixed(2); return value > 0 ? `+${formattedValue}` : formattedValue; } return value; }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="CYL"
-                    name="lens-left-cyl"
-                >
-                    <InputNumber readOnly={isReadOnly} step={0.25} precision={2} formatter={value => { if (!value || isNaN(value)) { return ''; } else { if (value < 0) { return parseFloat(value).toFixed(2); } else { return ''; } } }} />
-                </Form.Item>
-            </Col>
-            <Col span={7}>
-                <Form.Item
-                    label="Axis"
-                    name="lens-left-axis"
-                >
-                    <InputNumber readOnly={isReadOnly} step={1} min={0} max={180} />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Row gutter={24}>
-            <Col span={12}>
-                <Form.Item
-                    label="Type of Contact Lenses"
-                    name="type-of-contact-lenses"
-                    hasFeedback
-                >
-                    <Select placeholder="Contact Lenses" disabled={isReadOnly}>
-                        <Option value="Daily">Daily</Option>
-                        <Option value="Monthly">Monthly</Option>
-                    </Select>
-                </Form.Item>
-            </Col>
-            <Col span={6}>
-                <Form.Item
-                    label="Add."
-                    name="contact-lens-add"
-                >
-                    <Input readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Divider orientation="left" orientationMargin="0">Other</Divider>
-        <Row gutter={24}>
-            <Col span={8}>
-                <Form.Item
-                    label="Care System"
-                    name="care-system"
-                    hasFeedback
-                >
-                    <Select placeholder="Care" disabled={isReadOnly}>
-                        <Option value="Permanent">Permanent</Option>
-                        <Option value="Temporary">Temporary</Option>
-                    </Select>
-                </Form.Item>
-            </Col>
-            <Col span={8}>
-                <Form.Item
-                    label="Next Checkup"
-                    name="next-checkup"
-                    hasFeedback
-                >
-                    <Select placeholder="Next Checkup" onChange={handleCheckupChange} disabled={isReadOnly}>
-                        <Option value="6">6 Months</Option>
-                        <Option value="12">1 Year</Option>
-                        <Option value="24">2 Years</Option>
-                    </Select>
-                </Form.Item>
-            </Col>
-            <Col span={8}>
-                <Form.Item
-                    label="Next Checkup Date"
-                    name="next-checkup-date"
-                    hasFeedback
-                >
-                    <Input readOnly />
-                </Form.Item>
-            </Col>
-        </Row>
-        <Row gutter={24}>
-            <Col span={12}>
-                <Form.Item
-                    label="Recommendation"
-                    name="recommendation"
-                >
-                    <Input.TextArea readOnly={isReadOnly} />
-                </Form.Item>
-            </Col>
-            <Col span={8}>
-                <Form.Item
-                    label="Transaction Issuer"
-                    name="transaction-issuer"
-                    hasFeedback
-                >
-                    <Select placeholder="Transaction Issuer" disabled={isReadOnly}>
-                        <Option value="O. Polin Optometrist">O. Polin Optometrist</Option>
-                        <Option value="Dr Nakhuda Ophthalmologist">Dr Nakhuda Ophthalmologist</Option>
-                    </Select>
-                </Form.Item>
-            </Col>
-        </Row>
+
         <Modal
             title="New/ Edit Job Card"
             open={isJobCardModalVisible}
@@ -643,15 +403,17 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
         >
             <JobCardForm jobCardData={selectedJobCardData} closeModal={closeJobCardModal} />
         </Modal>
-        {!isReadOnly &&
-            <Row style={{ justifyContent: 'center' }}>
+        {
+            !isReadOnly &&
+            <Row style={{ justifyContent: 'center', marginTop: 20 }}>
                 <Button type="primary" htmlType="submit" style={{ width: 200, height: 40 }} >
                     Save
                 </Button>
             </Row>
         }
-        {isReadOnly &&
-            <Row style={{ justifyContent: 'center' }}>
+        {
+            isReadOnly &&
+            <Row style={{ justifyContent: 'center', marginTop: 20 }}>
                 <Button type="primary" htmlType="button" style={{ width: 200, height: 40 }} onClick={handlePrint} >
                     Print
                 </Button>
@@ -661,13 +423,13 @@ const NewTransactionForm = ({ transactionData, isReadOnly = false, setIsReadOnly
                 </Button>
 
                 {user.profile.role !== 'Staff' &&
-                        <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
-                            Edit
-                        </Button>
-                    }
+                    <Button type="primary" htmlType="button" style={{ width: 200, height: 40, marginLeft: 10 }} onClick={() => disableReadOnly()}>
+                        Edit
+                    </Button>
+                }
             </Row>
         }
-    </Form>
+    </Form >
 }
 
 export default NewTransactionForm;

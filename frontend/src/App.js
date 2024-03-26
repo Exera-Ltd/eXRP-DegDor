@@ -36,9 +36,9 @@ const menu = [
   { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Super Admin'] },
   { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Super Admin', 'Executive', 'Staff'] },
   {
-    key: 'transaction', label: 'Transactions', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Super Admin', 'Executive', 'Staff'], items: [
+    key: 'transaction', label: 'Orders', icon: React.createElement(MedicineBoxOutlined), path: '', roles: ['Super Admin', 'Executive', 'Staff'], items: [
       { key: 'new-transaction', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-transaction', roles: ['Super Admin', 'Executive'] },
-      { key: 'transactions', label: 'Transactions', icon: React.createElement(MedicineBoxOutlined), path: '/transactions', roles: ['Super Admin', 'Executive', 'Staff'] }
+      { key: 'transactions', label: 'Orders', icon: React.createElement(MedicineBoxOutlined), path: '/transactions', roles: ['Super Admin', 'Executive', 'Staff'] }
     ]
   },
   /* {
@@ -187,7 +187,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    // Update the CSS rule dynamically
     const styleElement = document.createElement('style');
     const rgbaColor = hexToRgb(appConfig.secondaryColor, 0.3);
     styleElement.innerHTML = `
@@ -205,6 +204,29 @@ const App = () => {
       }
       .ant-select-outlined:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector{
         border-color: ${appConfig.secondaryColor};
+        box-shadow: 0 0 0 2px ${rgbaColor};
+        outline: 0;
+      }
+      .ant-select-focused .ant-select-outlined:not(.ant-select-disabled):not(.ant-select-customize-input):not(.ant-pagination-size-changer):hover .ant-select-selector {
+        border-color: ${appConfig.secondaryColor};
+        box-shadow: 0 0 0 2px ${rgbaColor};
+        outline: 0;
+      }
+      .ant-input-number-outlined:focus-within{
+        border-color: ${appConfig.secondaryColor};
+        box-shadow: 0 0 0 2px ${rgbaColor};
+        outline: 0;
+        background-color: #ffffff;
+      }
+      .ant-input-number-outlined:hover {
+        border-color: ${appConfig.secondaryColor};
+        background-color: #ffffff;
+      }
+      .ant-input-outlined:focus-within {
+        border-color: ${appConfig.secondaryColor};
+        box-shadow: 0 0 0 2px ${rgbaColor};
+        outline: 0;
+        background-color: #ffffff;
       }
       .ant-select-focused{
         border-color: ${appConfig.primaryColor};
@@ -221,12 +243,18 @@ const App = () => {
       .ant-select-selection-search-input:hover, .ant-select-selection-search-input:focus{
         border-color: ${appConfig.secondaryColor};
       }
-
       .ant-menu-light .ant-menu-item-selected, .ant-menu-light .ant-menu-submenu-selected >.ant-menu-submenu-title{
         color: ${appConfig.primaryColor};
         background-color: ${rgbaColor};
       }
-
+      .ant-checkbox-checked .ant-checkbox-inner{
+        background-color: ${appConfig.secondaryColor};
+        border-color: ${appConfig.secondaryColor};
+      }
+      .ant-form input[type='checkbox']:focus{
+        box-shadow: 0 0 0 2px ${rgbaColor};
+        outline: 0;
+      }
       .scrollable-content::-webkit-scrollbar-thumb {
         background-color: ${appConfig.primaryColor};
       }
@@ -236,7 +264,6 @@ const App = () => {
       .custom-ribbon .ant-ribbon {
         background-color: ${appConfig.primaryColor};
       }
-      
       .custom-ribbon .ant-ribbon-content {
         border-color: ${appConfig.primaryColor};
       }
