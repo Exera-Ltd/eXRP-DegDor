@@ -5,17 +5,17 @@
     {% load static %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Home Classics">
+    <meta name="description" content="Alfar Global">
     <meta name="author" content="Exera">
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
-    <title>Home Classics | Sign In</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.ico'%}">
+    <title>Alfar Global | Sign In</title>
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
 </head>
 
 <body oncontextmenu="return false">
     <div id="particles-js"></div>
     <div class="login-wrapper">
-        <h1 class="login-title"><img class="logo-image" src="{% static 'img/logo.png' %}" alt="HOME CLASSICS"></h1>
+        <h1 class="login-title"><img class="logo-image" src="{% static 'img/logo.png' %}" alt="Alfar Global"></h1>
         <div class="login-container">
             <form method="post" action="{% url 'login' %}" class="login-form">
                 {% csrf_token %}
@@ -32,8 +32,8 @@
         </div>
     </div>
     <footer class="footer">
-        <span>Home Classics &copy; <script>document.write(new Date().getFullYear());</script> - Solution Designed by
-             <a href="https://exera.mu?utm_source=kler_optics" target="_blank" class="footer-exera-logo"> exera</a>
+        <span>Alfar Global &copy; <script>document.write(new Date().getFullYear());</script> - Solution Designed by
+             <a href="https://exera.mu?utm_source=alfar_global" target="_blank" class="footer-exera-logo"> exera</a>
         </span>
     </footer>
 </body>
