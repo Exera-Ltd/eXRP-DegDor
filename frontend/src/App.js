@@ -26,6 +26,7 @@ import ProductListing from './pages/Inventory/ProductListing';
 import InvoiceListing from './pages/Invoices/InvoiceListing';
 import NewTransaction from './pages/Transactions/NewTransaction';
 import TransactionListing from './pages/Transactions/TransactionListing';
+import { getCookie } from './commons/cookie';
 
 const { Header, Content, Sider, Footer } = Layout;
 
@@ -91,11 +92,28 @@ const App = () => {
   const renderNotificationIcon = () => {
     const icon = React.createElement(LogoutOutlined);
     return (
-      <a href="/users/logout" style={{ fontSize: 22, color: '#fff', textDecoration: 'none' }}>
+      <a onClick={logout} style={{ fontSize: 22, color: '#fff', textDecoration: 'none' }}>
         {icon}
       </a>
     );
   }
+
+  const logout = () => {
+    const csrftoken = getCookie('csrftoken');
+    fetch(appUrl + 'users/logout/', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+    }).then(response => {
+      window.location.reload();
+    })
+      .catch(error => {
+        console.error('Error logging out:', error);
+      });
+  };
 
   const { user, setUser } = useUser();
   const { userRoles, setUserRoles } = useUser([]);
