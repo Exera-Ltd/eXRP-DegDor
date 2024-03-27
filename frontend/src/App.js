@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Route, Link, Routes, Navigate } from 'react-router-dom';
-import { AccountBookOutlined, UserOutlined, ContainerOutlined, CalendarOutlined, PlusOutlined, StockOutlined, ProductOutlined , DashboardOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { AccountBookOutlined, UserOutlined, ContainerOutlined, CalendarOutlined, PlusOutlined, StockOutlined, ProductOutlined, DashboardOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, ConfigProvider, Badge } from 'antd';
 import { loadFull } from "tsparticles";
 
@@ -22,8 +22,8 @@ import JobCardForm from './pages/JobCards/JobCardForm';
 import JobCardListing from './pages/JobCards/JobCardListing';
 import ProductListing from './pages/Products/ProductListing';
 import InvoiceListing from './pages/Invoices/InvoiceListing';
-import NewTransaction from './pages/Orders/NewTransaction';
-import TransactionListing from './pages/Orders/TransactionListing';
+import NewTransaction from './pages/Orders/NewOrder';
+import TransactionListing from './pages/Orders/OrderListing';
 import { getCookie } from './commons/cookie';
 import NewInventory from './pages/Inventory/NewInventory';
 import InventoryListing from './pages/Inventory/InventoryListing';
@@ -252,6 +252,11 @@ const App = () => {
       .ant-form input[type='checkbox']:focus{
         box-shadow: 0 0 0 2px ${rgbaColor};
         outline: 0;
+      }
+      .ant-btn-dashed:not(:disabled):not(.ant-btn-disabled):hover{
+        color: ${appConfig.secondaryColor};
+        border-color: ${appConfig.secondaryColor};
+        background: #ffffff;
       }
       .scrollable-content::-webkit-scrollbar-thumb {
         background-color: ${appConfig.primaryColor};

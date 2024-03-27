@@ -168,12 +168,12 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
             </Col>
             <Col span={8}>
                 <Form.Item
-                    label="Mobile 1"
-                    name="mobile_1"
+                    label="Phone"
+                    name="phone"
                     rules={[
                         {
                             required: true,
-                            message: 'Please input a mobile number!',
+                            message: 'Please input a phone number!',
                         },
                     ]}
                 >
@@ -182,8 +182,8 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
             </Col>
             <Col span={8}>
                 <Form.Item
-                    label="Mobile 2"
-                    name="mobile_2"
+                    label="Mobile"
+                    name="mobile"
                 >
                     <Input />
                 </Form.Item>
@@ -191,7 +191,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
         </Row>
 
         <Row gutter={24}>
-            <Col span={8}>
+            <Col span={12}>
                 <Form.Item
                     label="Address"
                     name="address"
@@ -205,7 +205,7 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                     <Input />
                 </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={12}>
                 <Form.Item
                     label="City"
                     name="city"
@@ -219,18 +219,11 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                     <Input />
                 </Form.Item>
             </Col>
-            <Col span={8}>
-                <Form.Item
-                    label="Email"
-                    name="email"
-                >
-                    <Input />
-                </Form.Item>
-            </Col>
+            
         </Row>
 
         <Row gutter={24}>
-            <Col span={8}>
+            <Col span={12}>
                 <Form.Item
                     label="NIC Number"
                     name="nic_number"
@@ -238,25 +231,12 @@ const NewCustomerForm = ({ customerData, onCustomerAdded, closeModal }) => {
                     <Input />
                 </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={12}>
                 <Form.Item
-                    label="Profession"
-                    name="profession"
+                    label="Email"
+                    name="email"
                 >
                     <Input />
-                </Form.Item>
-            </Col>
-            <Col span={8}>
-                <Form.Item
-                    label="Insurance"
-                    name="insurance"
-                    hasFeedback
-                >
-                    <Select placeholder="Insurance">
-                        <Option value="Med Scheme">Med Scheme</Option>
-                        <Option value="Swan">Swan</Option>
-                        <Option value="Mauritius Union">Mauritius Union</Option>
-                    </Select>
                 </Form.Item>
             </Col>
         </Row>
