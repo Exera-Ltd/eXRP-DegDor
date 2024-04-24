@@ -35,7 +35,7 @@ const d = new Date();
 const menu = [
   { key: 'dashboard', label: 'Dashboard', icon: React.createElement(DashboardOutlined), path: '/dashboard', roles: ['Admin'] },
   { key: 'customers', label: 'Customers', icon: React.createElement(UserOutlined), path: '/customers', roles: ['Admin', 'Executive', 'Staff'] },
-  /* {
+  {
     key: 'transaction', label: 'Orders', icon: React.createElement(ContainerOutlined), path: '', roles: ['Admin', 'Executive', 'Staff'], items: [
       { key: 'new-transaction', label: 'New', icon: React.createElement(PlusOutlined), path: '/new-transaction', roles: ['Admin', 'Executive'] },
       { key: 'transactions', label: 'Orders', icon: React.createElement(ContainerOutlined), path: '/transactions', roles: ['Admin', 'Executive', 'Staff'] }
@@ -46,7 +46,7 @@ const menu = [
       { key: 'new-product', label: 'New Product', icon: React.createElement(PlusOutlined), path: '/new-product', items: [], roles: ['Admin'] },
       { key: 'products', label: 'Products', icon: React.createElement(ProductOutlined), path: '/products', items: [], roles: ['Admin'] },
     ]
-  }, */
+  },
   {
     key: 'inventory', label: 'Inventories', icon: React.createElement(StockOutlined), path: '', roles: ['Admin'], items: [
       { key: 'new-inventory', label: 'New Inventory', icon: React.createElement(PlusOutlined), path: '/new-inventory', items: [], roles: ['Admin'] },
