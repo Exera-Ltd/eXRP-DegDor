@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Route, Link, Routes, Navigate } from 'react-router-dom';
-import { AccountBookOutlined, UserOutlined, ContainerOutlined, CalendarOutlined, PlusOutlined, StockOutlined, ProductOutlined, DashboardOutlined, LogoutOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { AccountBookOutlined, UserOutlined, ContainerOutlined, CalendarOutlined, PlusOutlined, StockOutlined, ProductOutlined, DashboardOutlined, LogoutOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme, ConfigProvider, Badge } from 'antd';
 import { loadFull } from "tsparticles";
 
@@ -53,12 +53,12 @@ const menu = [
       { key: 'inventories', label: 'Inventories', icon: React.createElement(StockOutlined), path: '/inventories', items: [], roles: ['Admin'] },
     ]
   },
-  /* {
+  {
     key: 'invoice', label: 'Invoices', icon: React.createElement(AccountBookOutlined), path: '', roles: ['Admin', 'Staff'], items: [
       { key: 'new-invoice', label: 'New Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/new-invoice', roles: ['Admin', 'Staff'] },
       { key: 'invoices', label: 'Invoices', icon: React.createElement(MedicineBoxOutlined), path: '/invoices', roles: ['Admin', 'Staff'] }
     ]
-  }, */
+  },
   /*{ key: 'quotations', label: 'Quotations', icon: React.createElement(DollarCircleOutlined), path: '/quotations', items: [], roles: ['Admin', 'Manager', 'Staff'] },
   { key: 'reports', label: 'Reports', icon: React.createElement(AreaChartOutlined), path: '/reports', items: [], roles: ['Admin', 'Manager', 'Staff'] },
   { key: 'logs', label: 'Logs', icon: React.createElement(FileExcelOutlined), path: '/logs', items: [], roles: ['Admin'] } */

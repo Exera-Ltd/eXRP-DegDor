@@ -15,7 +15,7 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('app_config/', include('app_config.urls')),
     path('log/', include('log.urls')),
-    re_path(r'^(?!dashboard/).*$', RedirectView.as_view(url='dashboard/')),
+    #re_path(r'^(?!dashboard/).*$', RedirectView.as_view(url='dashboard/')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 admin.site.site_header = "eXRP Admin"
